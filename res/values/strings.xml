@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+* $Id$
+* 
+* Copyright 2007 Steven Osborn
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+-->
+
+<resources>
+    <string name="app_name">Password Safe</string>
+    <string name="author">Steven Osborn</string>
+    <string name="version">0.1.0</string>
+    <string name="empty_safe">Safe is Empty.</string>
+    <string name="password_edit">Edit</string>
+    <string name="password_insert">Add</string>
+    <string name="password_delete">Delete</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="website">Website</string>
+    <string name="description">Description</string>
+    <string name="notes">notes</string>
+    <string name="save">Save</string>
+    <string name="invalid_password">Invalid Login</string>
+    <string name="notify_blank_pass">Password must be at least 4 characters</string>
+    <string name="notify_blank_desc">Description cannot be blank</string>
+    <string name="first_time">Please enter a password below, which will be used to keep your passwords safe.</string>
+</resources>
