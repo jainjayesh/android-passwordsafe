@@ -62,8 +62,8 @@ public class CryptoHelper {
     protected static Cipher pbeCipher;
 
     private static final byte[] salt = {
-	(byte)0xfc, (byte)0x76, (byte)0x80, (byte)0xae,
-	(byte)0xfd, (byte)0x82, (byte)0xbe, (byte)0xee,
+		(byte)0xfc, (byte)0x76, (byte)0x80, (byte)0xae,
+		(byte)0xfd, (byte)0x82, (byte)0xbe, (byte)0xee,
     };
 
     private static final int count = 20;
@@ -73,17 +73,16 @@ public class CryptoHelper {
      * @throws Exception
      */
     CryptoHelper() {
-	Security.addProvider(new BouncyCastleProvider());
-	pbeParamSpec = new PBEParameterSpec(salt,count);
-	try {
-	    keyFac = SecretKeyFactory
-	    .getInstance("PBEWithMD5And128BitAES-CBC-OpenSSL","BC");
-	} catch (NoSuchAlgorithmException e) {
-	    Log.e(TAG,e.toString());
-	} catch (NoSuchProviderException e) {
-	    Log.e(TAG,e.toString());		
-	}
-
+		Security.addProvider(new BouncyCastleProvider());
+		pbeParamSpec = new PBEParameterSpec(salt,count);
+		try {
+		    keyFac = SecretKeyFactory
+		    .getInstance("PBEWithMD5And128BitAES-CBC-OpenSSL","BC");
+		} catch (NoSuchAlgorithmException e) {
+		    Log.e(TAG,"CryptoHelper(): "+e.toString());
+		} catch (NoSuchProviderException e) {
+		    Log.e(TAG,"CryptoHelper(): "+e.toString());		
+		}
     }
 
     /**
@@ -94,30 +93,30 @@ public class CryptoHelper {
      * @throws IOException
      */
     public static byte[] md5String(String message) {
-
-	byte[] input = message.getBytes();
-
-	MessageDigest hash;
-	ByteArrayInputStream	bIn = null;
-	DigestInputStream	dIn = null;
-
-	try {
-	    hash = MessageDigest.getInstance("MD5");
-
-	    bIn = new ByteArrayInputStream(input);
-	    dIn = new DigestInputStream(bIn, hash);
-
-	    for(int i=0;i<input.length;i++) {
-		dIn.read();
-	    }
-
-	} catch (NoSuchAlgorithmException e) {
-	    Log.e(TAG,e.toString());
-	} catch (IOException e) {
-	    Log.e(TAG,e.toString());
-	}
-
-	return dIn.getMessageDigest().digest();
+	
+		byte[] input = message.getBytes();
+	
+		MessageDigest hash;
+		ByteArrayInputStream	bIn = null;
+		DigestInputStream	dIn = null;
+	
+		try {
+		    hash = MessageDigest.getInstance("MD5");
+	
+		    bIn = new ByteArrayInputStream(input);
+		    dIn = new DigestInputStream(bIn, hash);
+	
+		    for(int i=0;i<input.length;i++) {
+		    	dIn.read();
+		    }
+	
+		} catch (NoSuchAlgorithmException e) {
+		    Log.e(TAG,"md5String(): "+e.toString());
+		} catch (IOException e) {
+		    Log.e(TAG,"md5String(): "+e.toString());
+		}
+	
+		return dIn.getMessageDigest().digest();
     }
 
     /**
@@ -126,14 +125,36 @@ public class CryptoHelper {
      * @return
      */
     public static String toHexString(byte bytes[]) {
+	
+		StringBuffer retString = new StringBuffer();
+		for (int i = 0; i < bytes.length; ++i) {
+		    retString.append(Integer
+			    .toHexString(0x0100 + (bytes[i] & 0x00FF))
+			    .substring(1));
+		}
+		return retString.toString();
+    }
+    
+    public static byte[] hexStringToBytes(String hex) {
+    	
+    	byte [] bytes = new byte [hex.length() / 2];
+		int j = 0;
+		for (int i = 0; i < hex.length(); i += 2)
+		{
+			try {
+				String hexByte=hex.substring(i, i+2);
 
-	StringBuffer retString = new StringBuffer();
-	for (int i = 0; i < bytes.length; ++i) {
-	    retString.append(Integer
-		    .toHexString(0x0100 + (bytes[i] & 0x00FF))
-		    .substring(1));
-	}
-	return retString.toString();
+				Integer I = new Integer (0);
+				I = Integer.decode("0x"+hexByte);
+				int k = I.intValue ();
+				bytes[j++] = new Integer(k).byteValue();
+			} catch (NumberFormatException e)
+			{
+				Log.i(TAG,e.getLocalizedMessage());
+				return bytes;
+			}
+		}
+    	return bytes;
     }
 
     /**
@@ -143,21 +164,21 @@ public class CryptoHelper {
      * @throws Exception
      */
     public void setPassword(String pass) {
-	password = pass;
-	pbeKeySpec = new PBEKeySpec(password.toCharArray());
-	try {
-	    pbeKey = keyFac.generateSecret(pbeKeySpec);
-	    pbeCipher = Cipher
-	    .getInstance("PBEWithMD5And128BitAES-CBC-OpenSSL","BC");
-	} catch (InvalidKeySpecException e) {
-	    Log.e(TAG,e.toString());
-	} catch (NoSuchAlgorithmException e) {
-	    Log.e(TAG,e.toString());
-	} catch (NoSuchProviderException e) {
-	    Log.e(TAG,e.toString());
-	} catch (NoSuchPaddingException e) {
-	    Log.e(TAG,e.toString());
-	}
+		password = pass;
+		pbeKeySpec = new PBEKeySpec(password.toCharArray());
+		try {
+		    pbeKey = keyFac.generateSecret(pbeKeySpec);
+		    pbeCipher = Cipher
+		    .getInstance("PBEWithMD5And128BitAES-CBC-OpenSSL","BC");
+		} catch (InvalidKeySpecException e) {
+		    Log.e(TAG,"setPassword(): "+e.toString());
+		} catch (NoSuchAlgorithmException e) {
+		    Log.e(TAG,"setPassword(): "+e.toString());
+		} catch (NoSuchProviderException e) {
+		    Log.e(TAG,"setPassword(): "+e.toString());
+		} catch (NoSuchPaddingException e) {
+		    Log.e(TAG,"setPassword(): "+e.toString());
+		}
     }
 
     /**
@@ -168,26 +189,27 @@ public class CryptoHelper {
      * @throws Exception
      */
     public String encrypt(String plaintext) throws CryptoHelperException {
-	if(password == null) {
-	    String msg = "Must call setPassword before runing encrypt.";
-	    throw new CryptoHelperException(msg);
-	}
-	byte[] ciphertext = {};
-
-	try {
-	    pbeCipher.init(Cipher.ENCRYPT_MODE, pbeKey, pbeParamSpec);
-	    ciphertext = pbeCipher.doFinal(plaintext.getBytes());
-	} catch (IllegalBlockSizeException e) {
-	    Log.e(TAG,e.toString());
-	} catch (BadPaddingException e) {
-	    Log.e(TAG,e.toString());
-	} catch (InvalidKeyException e) {
-	    Log.e(TAG,e.toString());
-	} catch (InvalidAlgorithmParameterException e) {
-	    Log.e(TAG,e.toString());
-	}
-
-	return new String(ciphertext);
+		if(password == null) {
+		    String msg = "Must call setPassword before runing encrypt.";
+		    throw new CryptoHelperException(msg);
+		}
+		byte[] ciphertext = {};
+	
+		try {
+		    pbeCipher.init(Cipher.ENCRYPT_MODE, pbeKey, pbeParamSpec);
+		    ciphertext = pbeCipher.doFinal(plaintext.getBytes());
+		} catch (IllegalBlockSizeException e) {
+		    Log.e(TAG,"encrypt(): "+e.toString());
+		} catch (BadPaddingException e) {
+		    Log.e(TAG,"encrypt(): "+e.toString());
+		} catch (InvalidKeyException e) {
+		    Log.e(TAG,"encrypt(): "+e.toString());
+		} catch (InvalidAlgorithmParameterException e) {
+		    Log.e(TAG,"encrypt(): "+e.toString());
+		}
+	
+		String stringCiphertext=toHexString(ciphertext);
+		return stringCiphertext;
     }
 
     /**
@@ -198,27 +220,28 @@ public class CryptoHelper {
      * @throws Exception
      */
     public String decrypt(String ciphertext) throws CryptoHelperException {
-	if(password == null) {
-	    String msg = "Must call setPassword before runing decrypt.";
-	    throw new CryptoHelperException(msg);
-	}
-
-	byte[] plaintext = {};
-
-	try {
-	    pbeCipher.init(Cipher.DECRYPT_MODE, pbeKey, pbeParamSpec);
-	    plaintext = pbeCipher.doFinal(ciphertext.getBytes());
-	} catch (IllegalBlockSizeException e) {
-	    Log.e(TAG,e.toString());
-	} catch (BadPaddingException e) {
-	    Log.e(TAG,e.toString());
-	} catch (InvalidKeyException e) {
-	    Log.e(TAG,e.toString());
-	} catch (InvalidAlgorithmParameterException e) {
-	    Log.e(TAG,e.toString());
-	}
-
-	return new String(plaintext);
+		if(password == null) {
+		    String msg = "Must call setPassword before runing decrypt.";
+		    throw new CryptoHelperException(msg);
+		}
+	
+		byte[] byteCiphertext=hexStringToBytes(ciphertext);
+		byte[] plaintext = {};
+		
+		try {
+		    pbeCipher.init(Cipher.DECRYPT_MODE, pbeKey, pbeParamSpec);
+		    plaintext = pbeCipher.doFinal(byteCiphertext);
+		} catch (IllegalBlockSizeException e) {
+		    Log.e(TAG,"decrypt(): "+e.toString());
+		} catch (BadPaddingException e) {
+		    Log.e(TAG,"decrypt(): "+e.toString());
+		} catch (InvalidKeyException e) {
+		    Log.e(TAG,"decrypt(): "+e.toString());
+		} catch (InvalidAlgorithmParameterException e) {
+		    Log.e(TAG,"decrypt(): "+e.toString());
+		}
+	
+		return new String(plaintext);
     }
 
 }

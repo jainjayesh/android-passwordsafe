@@ -27,4 +27,5 @@ public class PassEntry extends Object {
     public String username;
     public String website;
     public String note;
+    public String plainDescription;
 }

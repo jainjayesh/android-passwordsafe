@@ -17,7 +17,6 @@
 package com.bitsetters.android.passwordsafe;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * FrontDoor Activity
@@ -36,8 +36,6 @@ import android.widget.TextView;
  */
 public class FrontDoor extends Activity {
 
-    private static final int REQUIRE_PBEKEY = 200;
-    private static final int INVALID_LOGIN = 201;
     private static String TAG = "FrontDoor";
     
     private EditText pbeKey;
@@ -83,11 +81,8 @@ public class FrontDoor extends Activity {
 		
 		// Password must be at least 4 characters
 		if(PBEKey.length() < 4) {
-		    NotificationManager nm = (NotificationManager)
-		    getSystemService(NOTIFICATION_SERVICE);
-		    nm.notifyWithText(REQUIRE_PBEKEY,
-			    getText(R.string.notify_blank_pass),
-			    NotificationManager.LENGTH_SHORT, null);
+            Toast.makeText(FrontDoor.this, R.string.notify_blank_pass,
+                    Toast.LENGTH_SHORT).show();
 		    return;
 		}
 		
@@ -100,19 +95,16 @@ public class FrontDoor extends Activity {
 		    String cryptKey = "";
 		    Log.i(TAG, "Saving Password: " + hexKey );
 		    try {
-			cryptKey = ch.encrypt(hexKey);
-			dbHelper.storePBEKey(cryptKey);
+		    	cryptKey = ch.encrypt(hexKey);
+		    	dbHelper.storePBEKey(cryptKey);
 		    } catch (CryptoHelperException e) {
-			Log.e(TAG,e.toString());
+		    	Log.e(TAG,e.toString());
 		    }
 		} else if(!checkUserPassword()) {
 		    // Check the user's password and display a 
 		    // message if it's wrong
-		    NotificationManager nm = (NotificationManager)
-		    getSystemService(NOTIFICATION_SERVICE);
-		    nm.notifyWithText(INVALID_LOGIN,
-			    getText(R.string.invalid_password),
-			    NotificationManager.LENGTH_SHORT, null);
+            Toast.makeText(FrontDoor.this, R.string.invalid_password,
+                    Toast.LENGTH_SHORT).show();
 		    return;
 		}
 		PassList.setPBEKey(PBEKey);
@@ -129,21 +121,17 @@ public class FrontDoor extends Activity {
      * @return
      */
     private boolean checkUserPassword() {
-	byte[] md5Pass = CryptoHelper.md5String(PBEKey);
-	String hexPass = CryptoHelper.toHexString(md5Pass);
-	String decryptConfirm = "";
-	try {
-	    decryptConfirm = ch.decrypt(confirmKey);
-	} catch (CryptoHelperException e) {
-	    Log.e(TAG,e.toString());
-	}
-	Log.i(TAG,"Decrypt Confirm: " + decryptConfirm);
-	Log.i(TAG,"   Hex Password: " + hexPass);
-	if(decryptConfirm.compareTo(hexPass) == 0) {
-	    Log.i(TAG,"Login Valid: TRUE");
-	    return true;
-	}
-	Log.i(TAG,"Login Valid: FALSE");
-	return false;
+		byte[] md5Pass = CryptoHelper.md5String(PBEKey);
+		String hexPass = CryptoHelper.toHexString(md5Pass);
+		String decryptConfirm = "";
+		try {
+		    decryptConfirm = ch.decrypt(confirmKey);
+		} catch (CryptoHelperException e) {
+		    Log.e(TAG,e.toString());
+		}
+		if(decryptConfirm.compareTo(hexPass) == 0) {
+		    return true;
+		}
+		return false;
     }
 }

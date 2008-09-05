@@ -25,36 +25,35 @@
 		android:layout_height="wrap_content">
 		
 		<TableRow>
-			<ImageView id="@+id/entry_icon"
+			<ImageView android:id="@+id/entry_icon"
 				android:layout_height="wrap_content"
 				android:layout_width="wrap_content"
 			/>
-			<TextView id="@+id/entry_header"
+			<TextView android:id="@+id/entry_header"
 				android:paddingBottom="10px"
 				android:paddingTop="10px"
 				android:textSize="20px" 
-				android:textAlign="center" 
 				android:layout_width="fill_parent"
 				android:layout_weight="1"
 			/>
 		</TableRow>
 	</TableLayout>
-	<TextView id="@+id/first_time"
+	<TextView android:id="@+id/first_time"
 		android:text="@string/first_time" 
 		android:paddingBottom="10px"
 		android:visibility="invisible" 
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
-	<TextView id="@+id/pass_lbl"
+	<TextView android:id="@+id/pass_lbl"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="@string/password" />
-	<EditText id="@+id/password" 
+	<EditText android:id="@+id/password" 
 		android:password="true"
 		android:autoText="false"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
-	<Button id="@+id/continue_button" 
+	<Button android:id="@+id/continue_button" 
 	  		android:text="Continue"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content" />					

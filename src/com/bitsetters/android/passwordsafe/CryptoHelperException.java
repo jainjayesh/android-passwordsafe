@@ -24,7 +24,7 @@ public class CryptoHelperException extends Exception {
     private static final long serialVersionUID = 9198874648607918125L;
 
     public CryptoHelperException(String message) {
-	super(message);
+		super(message);
     }
 
 }

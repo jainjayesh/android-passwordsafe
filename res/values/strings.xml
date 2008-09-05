@@ -21,7 +21,7 @@
 <resources>
     <string name="app_name">Password Safe</string>
     <string name="author">Steven Osborn</string>
-    <string name="version">0.1.0</string>
+    <string name="version">0.2.0</string>
     <string name="empty_safe">Safe is Empty.</string>
     <string name="password_edit">Edit</string>
     <string name="password_insert">Add</string>
@@ -32,7 +32,7 @@
     <string name="description">Description</string>
     <string name="notes">notes</string>
     <string name="save">Save</string>
-    <string name="invalid_password">Invalid Login</string>
+    <string name="invalid_password">Invalid password.  Please try again.</string>
     <string name="notify_blank_pass">Password must be at least 4 characters</string>
     <string name="notify_blank_desc">Description cannot be blank</string>
     <string name="first_time">Please enter a password below, which will be used to keep your passwords safe.</string>
