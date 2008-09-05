@@ -59,7 +59,7 @@
 					android:layout_height="wrap_content" 
 					android:autoText="false"
 					android:text="@string/password" />
-				<EditText android:id="@+id/password" 
+				<EditText android:id="@+id/password"
 				  	android:layout_width="wrap_content"
 					android:layout_height="wrap_content" 
 					android:layout_weight="1"/>
@@ -70,6 +70,7 @@
 		android:layout_height="wrap_content" 
 		android:text="@string/notes" />
 	<EditText android:id="@+id/note" android:layout_width="fill_parent"
+		android:gravity="top" 
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
 		android:scrollbars="vertical" />

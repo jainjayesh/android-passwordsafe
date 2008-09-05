@@ -42,8 +42,6 @@ import android.widget.ListView;
 public class PassList extends ListActivity {
 
     private static final String TAG = "PassList";
-//    private static final int ACTIVITY_CREATE=0;
-//    private static final int ACTIVITY_EDIT=1;
 
     // Menu Item order
     public static final int EDIT_PASSWORD_INDEX = Menu.FIRST;
@@ -92,6 +90,7 @@ public class PassList extends ListActivity {
 		if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
+		fillData();
     }
     
     @Override
@@ -133,8 +132,8 @@ public class PassList extends ListActivity {
 			items.add(row.plainDescription);
 		}
 
-		ArrayAdapter<String> entries = 
-		    new ArrayAdapter<String>(this, R.layout.pass_row, items);
+		ArrayAdapter<String> entries =
+			new ArrayAdapter<String>(this, R.layout.pass_row, R.id.entry_desc , items);
 		setListAdapter(entries);
 		
     }
@@ -143,12 +142,8 @@ public class PassList extends ListActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-	
-		//	menu.add(0,EDIT_PASSWORD_INDEX, R.string.password_edit);
-		//	menu.addSeparator(EDIT_PASSWORD_INDEX, 0);
-		
+			
 		menu.add(0,ADD_PASSWORD_INDEX, 0, R.string.password_insert);
-		//.setShortcut(arg0, arg1, arg2);
 		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete);  
 	
 		return super.onCreateOptionsMenu(menu);
@@ -181,10 +176,7 @@ public class PassList extends ListActivity {
 		    break;
 		case DEL_PASSWORD_INDEX:
 		    try {
-		    	//TODO: need to fix
-		    	/*
-			delPassword(rows.get(getSelection()).id);
-			*/
+		    	delPassword(rows.get(this.getSelectedItemPosition()).id);
 		    } catch (IndexOutOfBoundsException e) {
 				// This should only happen when there are no
 				// entries to delete.
