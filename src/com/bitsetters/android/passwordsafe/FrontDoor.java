@@ -108,6 +108,7 @@ public class FrontDoor extends Activity {
 		    return;
 		}
 		PassList.setPBEKey(PBEKey);
+		CategoryList.setPBEKey(PBEKey);
 		
 		setResult(RESULT_OK);
 		finish();

@@ -23,6 +23,7 @@ package com.bitsetters.android.passwordsafe;
 public class PassEntry extends Object {
     public String password;
     public long id;
+    public long category;
     public String description;
     public String username;
     public String website;

@@ -1,6 +1,6 @@
 /* $Id$
  * 
- * Copyright 2007 Steven Osborn
+ * Copyright 2008 Randy McEoin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,35 +29,36 @@ import android.view.View;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
- * PassList Activity
+ * CategoryList Activity
  * 
- * This is the main activity for PasswordSafe all other activities are 
- * spawned as sub-activities of this one.  The basic application 
- * skeleton was based on google's notepad example.
- * 
- * @author Steven Osborn - http://steven.bitsetters.com
+ * @author Randy McEoin
  */
-public class PassList extends ListActivity {
+public class CategoryList extends ListActivity {
 
-    private static final String TAG = "PassList";
+    private static final String TAG = "CategoryList";
 
     // Menu Item order
-    public static final int EDIT_PASSWORD_INDEX = Menu.FIRST;
-    public static final int ADD_PASSWORD_INDEX = Menu.FIRST + 1;
-    public static final int DEL_PASSWORD_INDEX = Menu.FIRST + 2;   
+    public static final int EDIT_CATEGORY_INDEX = Menu.FIRST;
+    public static final int ADD_CATEGORY_INDEX = Menu.FIRST + 1;
+    public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 2;   
 
+    public static final int REQUEST_ONCREATE = 0;
+    public static final int REQUEST_EDIT_CATEGORY = 1;
+    public static final int REQUEST_ADD_CATEGORY = 2;
+    
     public static final String KEY_ID = "id";  // Intent keys
-    public static final String KEY_CATEGORY_ID = "categoryId";  // Intent keys
 
     private CryptoHelper ch;
     private DBHelper dbHelper=null;
-    private static Long CategoryId=null;
-
+	private boolean needPrePopulateCategories=false;
+	
+    private static boolean signedIn = false;  // Has user logged in
     private static String PBEKey;	      // Password Based Encryption Key			
 
-    private List<PassEntry> rows;
+    private List<CategoryEntry> rows;
     
     /** 
      * Called when the activity is first created. 
@@ -66,18 +67,18 @@ public class PassList extends ListActivity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		
-		Log.i(TAG,"onCreate()");
-		setContentView(R.layout.pass_list);
+//		setContentView(R.layout.cat_list);
 		if (dbHelper==null) {
 			dbHelper = new DBHelper(this);
+			if (dbHelper.getPrePopulate()==true)
+			{
+				needPrePopulateCategories=true;
+			}
 		}
-		CategoryId = icicle != null ? icicle.getLong(CategoryList.KEY_ID) : null;
-		if (CategoryId == null) {
-		    Bundle extras = getIntent().getExtras();            
-		    CategoryId = extras != null ? extras.getLong(CategoryList.KEY_ID) : null;
-		}
-		Log.i(TAG,"CategoryId="+CategoryId);
-		fillData();
+		if(!signedIn) {
+		    Intent i = new Intent(this, FrontDoor.class);
+		    startActivityForResult(i,REQUEST_ONCREATE);
+		} 
     }
     
     @Override
@@ -99,11 +100,10 @@ public class PassList extends ListActivity {
     public void onStop() {
 		super.onStop();
 		
-		Log.i(TAG,"onStop()");
 //		dbHelper.close();
     }
     /**
-     * Populates the password ListView
+     * Populates the category ListView
      */
     private void fillData() {
 		// initialize crypto so that we can display readable descriptions in
@@ -115,27 +115,27 @@ public class PassList extends ListActivity {
 		ch.setPassword(PBEKey);
 	
 		List<String> items = new ArrayList<String>();
-		rows = dbHelper.fetchAllRows(CategoryId);
+		rows = dbHelper.fetchAllCategoryRows();
 
-		for (PassEntry row : rows) {
-		    String cryptDesc = row.description;
-		    row.plainDescription = "";
+		for (CategoryEntry row : rows) {
+		    String cryptDesc = row.name;
+		    row.plainName = "";
 		    try {
-				row.plainDescription = ch.decrypt(cryptDesc);
+				row.plainName = ch.decrypt(cryptDesc);
 		    } catch (CryptoHelperException e) {
 				Log.e(TAG,e.toString());
 		    }
 		}
-		Collections.sort(rows, new Comparator<PassEntry>() {
-		    public int compare(PassEntry o1, PassEntry o2) {
-		        return o1.plainDescription.compareToIgnoreCase(o2.plainDescription);
+		Collections.sort(rows, new Comparator<CategoryEntry>() {
+		    public int compare(CategoryEntry o1, CategoryEntry o2) {
+		        return o1.plainName.compareToIgnoreCase(o2.plainName);
 		    }});
-		for (PassEntry row : rows) {
-			items.add(row.plainDescription);
+		for (CategoryEntry row : rows) {
+			items.add(row.plainName);
 		}
 
 		ArrayAdapter<String> entries = 
-		    new ArrayAdapter<String>(this, R.layout.pass_row, R.id.entry_desc, items);
+		    new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
 		setListAdapter(entries);
 		
     }
@@ -143,9 +143,13 @@ public class PassList extends ListActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-
-		menu.add(0,ADD_PASSWORD_INDEX, 0, R.string.password_insert);
-		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete);  
+	
+		menu.add(0,EDIT_CATEGORY_INDEX, 0, R.string.password_edit);
+		//	menu.addSeparator(EDIT_CATEGORY_INDEX, 0);
+		
+		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_insert);
+		//.setShortcut(arg0, arg1, arg2);
+		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete);  
 	
 		return super.onCreateOptionsMenu(menu);
     }
@@ -158,30 +162,34 @@ public class PassList extends ListActivity {
 		return PBEKey;
     }
 
-    static long getCategoryId() {
-    	return CategoryId;
+    private void addCategory() {
+		Intent i = new Intent(this, CategoryEdit.class);
+		startActivityForResult(i,REQUEST_ADD_CATEGORY);
     }
 
-    private void addPassword() {
-		Intent i = new Intent(this, PassEdit.class);
-		Log.i(TAG,"before startActivity() [PassEdit]");
-	    startActivityForResult(i,2);
-		Log.i(TAG,"after startActivity() [PassEdit]");
-    }
-
-    private void delPassword(long Id) {
-		dbHelper.deletePassword(Id);
+    private void delCategory(long Id) {
+    	if (dbHelper.countPasswords(Id)>0) {
+            Toast.makeText(CategoryList.this, R.string.category_not_empty,
+                    Toast.LENGTH_SHORT).show();
+    		return;
+    	}
+		dbHelper.deleteCategory(Id);
 		fillData();
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
-		case ADD_PASSWORD_INDEX:
-		    addPassword();
+		case EDIT_CATEGORY_INDEX:
+			Intent i = new Intent(this, CategoryEdit.class);
+			i.putExtra(KEY_ID, rows.get(getSelectedItemPosition()).id);
+		    startActivityForResult(i,REQUEST_EDIT_CATEGORY);
 		    break;
-		case DEL_PASSWORD_INDEX:
+		case ADD_CATEGORY_INDEX:
+		    addCategory();
+		    break;
+		case DEL_CATEGORY_INDEX:
 		    try {
-		    	delPassword(rows.get(getSelectedItemPosition()).id);
+		    	delCategory(rows.get(getSelectedItemPosition()).id);
 		    } catch (IndexOutOfBoundsException e) {
 				// This should only happen when there are no
 				// entries to delete.
@@ -195,10 +203,8 @@ public class PassList extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 	
-		Intent i = new Intent(this, PassEdit.class);
+		Intent i = new Intent(this, PassList.class);
 		i.putExtra(KEY_ID, rows.get(position).id);
-		i.putExtra(KEY_CATEGORY_ID, CategoryId);
-		Log.i(TAG,"startActivityForResult(i,1)");
 	    startActivityForResult(i,1);
     }
 
@@ -209,8 +215,33 @@ public class PassList extends ListActivity {
     	if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
-    	Log.i(TAG,"onActivityResult("+requestCode+","+resultCode+",)");
+
+    	if ((requestCode==REQUEST_ONCREATE) && (needPrePopulateCategories==true))
+    	{
+    		needPrePopulateCategories=false;
+    		addCategory(getString(R.string.category_business));
+    		addCategory(getString(R.string.category_personal));
+    	}
     	fillData();
+    }
+
+    private void addCategory(String name) {
+		CategoryEntry entry =  new CategoryEntry();
+	
+		String namePlain = name;
+
+		try {
+			ch = new CryptoHelper();
+			if(PBEKey == null) {
+			    PBEKey = "";
+			}
+			ch.setPassword(PBEKey);
+
+		    entry.name = ch.encrypt(namePlain);
+		} catch(CryptoHelperException e) {
+		    Log.e(TAG,e.toString());
+		}
+	    dbHelper.addCategory(entry);
     }
 
 

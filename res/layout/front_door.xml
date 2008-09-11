@@ -51,6 +51,7 @@
 	<EditText android:id="@+id/password" 
 		android:password="true"
 		android:autoText="false"
+		android:singleLine="true"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
 	<Button android:id="@+id/continue_button" 

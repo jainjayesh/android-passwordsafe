@@ -120,6 +120,7 @@ public class PassEdit extends Activity {
 		String descPlain = descriptionText.getText().toString();
 
 		try {
+			entry.category = PassList.getCategoryId();
 		    entry.description = ch.encrypt(descPlain);
 		    entry.username = ch.encrypt(usernamePlain);
 		    entry.password = ch.encrypt(passwordPlain);

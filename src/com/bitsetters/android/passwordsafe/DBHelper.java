@@ -37,25 +37,39 @@ import android.util.Log;
 public class DBHelper {
 
     private static final String DATABASE_NAME = "passwordsafe";
-    private static final String DATABASE_TABLE = "passwords";
-    private static final String DATABASE_VERIFY = "verify_crypto"; 
+    private static final String TABLE_DBVERSION = "dbversion";
+    private static final String TABLE_PASSWORDS = "passwords";
+    private static final String TABLE_CATEGORIES = "categories";
+    private static final String TABLE_VERIFY = "verify_crypto"; 
+    private static final int DATABASE_VERSION = 1;
     private static String TAG = "DBHelper";
     Context myCtx;
 
-    private static final String DATABASE_CREATE =
-        "create table " + DATABASE_TABLE + " ("
+    private static final String DBVERSION_CREATE = 
+    	"create table " + TABLE_DBVERSION + " ("
+    		+ "version integer not null);";
+
+    private static final String PASSWORDS_CREATE =
+        "create table " + TABLE_PASSWORDS + " ("
     	    + "id integer primary key autoincrement, "
+    	    + "category integer not null, "
             + "password text not null, "
             + "description text not null,"
             + "username text,"
             + "website text,"
             + "note text);";
-    
+
+    private static final String CATEGORIES_CREATE =
+        "create table " + TABLE_CATEGORIES + " ("
+    	    + "id integer primary key autoincrement, "
+            + "name text not null);";
+
     private static final String VERIFY_CREATE = 
-    	"create table " + DATABASE_VERIFY + " ("
+    	"create table " + TABLE_VERIFY + " ("
     		+ "confirm text not null);";
 
     private SQLiteDatabase db;
+    private boolean needsPrePopulation=false;
 
     /**
      * 
@@ -65,22 +79,32 @@ public class DBHelper {
     	myCtx = ctx;
 		try {
 			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+
+			// Check for the existence of the DBVERSION table
+			// If it doesn't exist than create the overall data,
+			// otherwise double check the version
 			Cursor c =
 				db.query("sqlite_master", new String[] { "name" },
-						"type='table' and name='"+DATABASE_TABLE+"'", null, null, null, null);
+						"type='table' and name='"+TABLE_DBVERSION+"'", null, null, null, null);
 			int numRows = c.getCount();
 			if (numRows < 1) {
-				db.execSQL(DATABASE_CREATE);
+				CreateDatabase(db);
+			} else {
+				int version=0;
+				Cursor vc = db.query(true, TABLE_DBVERSION, new String[] {"version"},
+						null, null, null, null, null,null);
+				if(vc.getCount() > 0) {
+				    vc.moveToFirst();
+				    version=vc.getInt(0);
+				}
+				vc.close();
+				if (version!=DATABASE_VERSION) {
+					Log.e(TAG,"database version mismatch");
+				}
 			}
 			c.close();
-		
-			c = db.query("sqlite_master", new String[] { "name" },
-				"type='table' and name='"+DATABASE_VERIFY+"'", null, null, null, null);
-			numRows = c.getCount();
-			if (numRows < 1) {
-				db.execSQL(VERIFY_CREATE);
-			}
-			c.close();
+			
+
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
@@ -90,6 +114,29 @@ public class DBHelper {
 		}
     }
 
+    private void CreateDatabase(SQLiteDatabase db)
+    {
+		try {
+			db.execSQL(DBVERSION_CREATE);
+			ContentValues args = new ContentValues();
+			args.put("version", DATABASE_VERSION);
+			db.insert(TABLE_DBVERSION, null, args);
+
+			db.execSQL(CATEGORIES_CREATE);
+			needsPrePopulation=true;
+			
+			db.execSQL(PASSWORDS_CREATE);
+			db.execSQL(VERIFY_CREATE);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} 
+    }
+    
+    public boolean getPrePopulate()
+    {
+    	return needsPrePopulation;
+    }
     /**
      * Close database connection
      */
@@ -106,129 +153,13 @@ public class DBHelper {
 
     /**
      * 
-     * @param entry
-     */
-    public void addPassword(PassEntry entry) {
-        ContentValues initialValues = new ContentValues();
-    	initialValues.put("password", entry.password);
-        initialValues.put("description", entry.description);
-        initialValues.put("username",entry.username);
-        initialValues.put("website", entry.website);
-        initialValues.put("note", entry.note);
-
-        try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
-	        db.insert(DATABASE_TABLE, null, initialValues);
-		} catch (SQLException e)
-		{
-			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
-		}
-    }
-
-    /**
-     * 
-     * @param Id
-     */
-    public void deletePassword(long Id) {
-        try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
-			db.delete(DATABASE_TABLE, "id=" + Id, null);
-		} catch (SQLException e)
-		{
-			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
-		}
-    }
-
-    /**
-     * 
-     * @return
-     */
-    public List<PassEntry> fetchAllRows(){
-        ArrayList<PassEntry> ret = new ArrayList<PassEntry>();
-        try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
-	        Cursor c =
-	            db.query(DATABASE_TABLE, new String[] {
-	                "id", "password", "description", "username", "website", "note"},
-	                null, null, null, null, null);
-	        int numRows = c.getCount();
-	        c.moveToFirst();
-	        for (int i = 0; i < numRows; ++i) {
-	            PassEntry row = new PassEntry();
-	            row.id = c.getLong(0);
-	            
-	            row.password = c.getString(1);
-	            row.description = c.getString(2);
-	            row.username = c.getString(3);
-	            row.website = c.getString(4);
-	            row.note = c.getString(5);
-	            
-	            ret.add(row);
-	            c.moveToNext();
-	        }
-	        c.close();
-		} catch (SQLException e)
-		{
-			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
-		}
-        return ret;
-    }
-
-    /**
-     * 
-     * @param Id
-     * @return
-     */
-    public PassEntry fetchPassword(long Id) {
-        PassEntry row = new PassEntry();
-        try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
-	        Cursor c =
-	            db.query(true, DATABASE_TABLE, new String[] {
-	                "id", "password", "description", "username", "website",
-	                "note"}, "id=" + Id, null, null, null, null, null);
-	        if (c.getCount() > 0) {
-	            c.moveToFirst();
-	            row.id = c.getLong(0);
-	
-	            row.password = c.getString(1);
-	            row.description = c.getString(2);
-	            row.username = c.getString(3);
-	            row.website = c.getString(4);
-	            row.note = c.getString(5);
-	        } else {
-	            row.id = -1;
-	            row.description = row.password = null;
-	        }
-	        c.close();
-		} catch (SQLException e)
-		{
-			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
-		}
-        return row;
-    }
-
-    /**
-     * 
      * @return
      */
     public String fetchPBEKey() {
     	String key="";
         try {
 			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
-			Cursor c = db.query(true, DATABASE_VERIFY, new String[] {"confirm"},
+			Cursor c = db.query(true, TABLE_VERIFY, new String[] {"confirm"},
 				null, null, null, null, null,null);
 			if(c.getCount() > 0) {
 			    c.moveToFirst();
@@ -253,9 +184,9 @@ public class DBHelper {
 		ContentValues args = new ContentValues();
         try {
 			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
-			db.delete(DATABASE_VERIFY, "1=1", null);
+			db.delete(TABLE_VERIFY, "1=1", null);
 			args.put("confirm", PBEKey);
-			db.insert(DATABASE_VERIFY, null, args);
+			db.insert(TABLE_VERIFY, null, args);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
@@ -264,23 +195,122 @@ public class DBHelper {
 			db.close();
 		}
     }
-    
+
+//////////Category Functions ////////////////
+
+    /**
+     * 
+     * @param entry
+     */
+    public void addCategory(CategoryEntry entry) {
+        ContentValues initialValues = new ContentValues();
+    	initialValues.put("name", entry.name);
+
+        try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+	        db.insert(TABLE_CATEGORIES, null, initialValues);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+    }
+
+    /**
+     * 
+     * @param Id
+     */
+    public void deleteCategory(long Id) {
+        try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+			db.delete(TABLE_CATEGORIES, "id=" + Id, null);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public List<CategoryEntry> fetchAllCategoryRows(){
+        ArrayList<CategoryEntry> ret = new ArrayList<CategoryEntry>();
+        try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+	        Cursor c =
+	            db.query(TABLE_CATEGORIES, new String[] {
+	                "id", "name"},
+	                null, null, null, null, null);
+	        int numRows = c.getCount();
+	        c.moveToFirst();
+	        for (int i = 0; i < numRows; ++i) {
+	            CategoryEntry row = new CategoryEntry();
+	            row.id = c.getLong(0);
+	            row.name = c.getString(1);
+	            ret.add(row);
+	            c.moveToNext();
+	        }
+	        c.close();
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+        return ret;
+    }
+
+    /**
+     * 
+     * @param Id
+     * @return
+     */
+    public CategoryEntry fetchCategory(long Id) {
+        CategoryEntry row = new CategoryEntry();
+        try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+	        Cursor c =
+	            db.query(true, TABLE_CATEGORIES, new String[] {
+	                "id", "name"}, "id=" + Id, null, null, null, null, null);
+	        if (c.getCount() > 0) {
+	            c.moveToFirst();
+	            row.id = c.getLong(0);
+	
+	            row.name = c.getString(1);
+	        } else {
+	            row.id = -1;
+	            row.name = null;
+	        }
+	        c.close();
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+        return row;
+    }
+
     /**
      * 
      * @param Id
      * @param entry
      */
-    public void updatePassword(long Id, PassEntry entry) {
+    public void updateCategory(long Id, CategoryEntry entry) {
         ContentValues args = new ContentValues();
-        args.put("description", entry.description);
-        args.put("username", entry.username);
-        args.put("password", entry.password);
-        args.put("website", entry.website);
-        args.put("note", entry.note);
+        args.put("name", entry.name);
         
         try {
 			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
-			db.update(DATABASE_TABLE, args, "id=" + Id, null);
+			db.update(TABLE_CATEGORIES, args, "id=" + Id, null);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
@@ -289,6 +319,182 @@ public class DBHelper {
 			db.close();
 		}
     }
-}
 
+
+////////// Password Functions ////////////////
+	
+	
+	/**
+	 * 
+	 * @param entry
+	 */
+	public void addPassword(PassEntry entry) {
+	    ContentValues initialValues = new ContentValues();
+		initialValues.put("category", entry.category);
+		initialValues.put("password", entry.password);
+	    initialValues.put("description", entry.description);
+	    initialValues.put("username",entry.username);
+	    initialValues.put("website", entry.website);
+	    initialValues.put("note", entry.note);
+	
+	    try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+	        db.insert(TABLE_PASSWORDS, null, initialValues);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param Id
+	 */
+	public void deletePassword(long Id) {
+	    try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+			db.delete(TABLE_PASSWORDS, "id=" + Id, null);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+	}
+
+	/**
+	 * 
+	 * @param categoryId
+	 */
+	public int countPasswords(long categoryId) {
+		int count=0;
+	    try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+	        Cursor c = db.query(TABLE_PASSWORDS, new String[] {
+	                "count(*)"},
+	                "category="+categoryId, null, null, null, null);
+	        c.moveToFirst();
+	        count=c.getInt(0);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+		Log.i(TAG,"count="+count);
+		return count;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public List<PassEntry> fetchAllRows(Long CategoryId){
+	    ArrayList<PassEntry> ret = new ArrayList<PassEntry>();
+	    try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+	        Cursor c;
+	        if (CategoryId==0)
+	        {
+		        c = db.query(TABLE_PASSWORDS, new String[] {
+	                "id", "password", "description", "username", "website", "note"},
+	                null, null, null, null, null);
+	        } else {
+		        c = db.query(TABLE_PASSWORDS, new String[] {
+		                "id", "password", "description", "username", "website", "note"},
+		                "category="+CategoryId, null, null, null, null);
+	        }
+	        int numRows = c.getCount();
+	        c.moveToFirst();
+	        for (int i = 0; i < numRows; ++i) {
+	            PassEntry row = new PassEntry();
+	            row.id = c.getLong(0);
+	            
+	            row.password = c.getString(1);
+	            row.description = c.getString(2);
+	            row.username = c.getString(3);
+	            row.website = c.getString(4);
+	            row.note = c.getString(5);
+	            
+	            ret.add(row);
+	            c.moveToNext();
+	        }
+	        c.close();
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+	    return ret;
+	}
+	
+	/**
+	 * 
+	 * @param Id
+	 * @return
+	 */
+	public PassEntry fetchPassword(long Id) {
+	    PassEntry row = new PassEntry();
+	    try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+	        Cursor c =
+	            db.query(true, TABLE_PASSWORDS, new String[] {
+	                "id", "password", "description", "username", "website",
+	                "note"}, "id=" + Id, null, null, null, null, null);
+	        if (c.getCount() > 0) {
+	            c.moveToFirst();
+	            row.id = c.getLong(0);
+	
+	            row.password = c.getString(1);
+	            row.description = c.getString(2);
+	            row.username = c.getString(3);
+	            row.website = c.getString(4);
+	            row.note = c.getString(5);
+	        } else {
+	            row.id = -1;
+	            row.description = row.password = null;
+	        }
+	        c.close();
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+	    return row;
+	}
+	
+	/**
+	 * 
+	 * @param Id
+	 * @param entry
+	 */
+	public void updatePassword(long Id, PassEntry entry) {
+	    ContentValues args = new ContentValues();
+	    args.put("description", entry.description);
+	    args.put("username", entry.username);
+	    args.put("password", entry.password);
+	    args.put("website", entry.website);
+	    args.put("note", entry.note);
+	    
+	    try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+			db.update(TABLE_PASSWORDS, args, "id=" + Id, null);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}
+	}
+}
 

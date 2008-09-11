@@ -21,8 +21,8 @@
 <resources>
     <string name="app_name">Password Safe</string>
     <string name="author">Steven Osborn</string>
-    <string name="version">0.2.1</string>
-    <string name="empty_safe">Safe is Empty.</string>
+    <string name="version">0.2.2</string>
+    <string name="empty_safe">Category is Empty.</string>
     <string name="password_edit">Edit</string>
     <string name="password_insert">Add</string>
     <string name="password_delete">Delete</string>
@@ -30,10 +30,16 @@
     <string name="username">Username</string>
     <string name="website">Website</string>
     <string name="description">Description</string>
-    <string name="notes">notes</string>
+    <string name="notes">Notes</string>
     <string name="save">Save</string>
     <string name="invalid_password">Invalid password.  Please try again.</string>
     <string name="notify_blank_pass">Password must be at least 4 characters</string>
     <string name="notify_blank_desc">Description cannot be blank</string>
+    <string name="notify_blank_name">Name cannot be blank</string>
     <string name="first_time">Please enter a password below, which will be used to keep your passwords safe.</string>
+    <string name="categories">Categories</string>
+    <string name="category_business">Business</string>
+    <string name="category_personal">Personal</string>
+    <string name="name">Name</string>
+    <string name="category_not_empty">Category is not empty.   You must delete the passwords first.</string>
 </resources>
