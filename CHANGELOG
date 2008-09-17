@@ -2,3 +2,4 @@
 0.2.0 [Sept 4, 2008] - Updated to work with Android 0.9 thanks to Randy McEoin
 0.2.1 [Sept 5, 2008] - Fixed delete, fixed bug where new entries wouldn't show
  up immediately. 
+0.2.2 [Sept 16, 2008] - Added categories and export to CSV.

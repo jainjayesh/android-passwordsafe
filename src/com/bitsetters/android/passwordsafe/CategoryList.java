@@ -16,9 +16,12 @@
  */
 package com.bitsetters.android.passwordsafe;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -43,11 +46,14 @@ public class CategoryList extends ListActivity {
     // Menu Item order
     public static final int EDIT_CATEGORY_INDEX = Menu.FIRST;
     public static final int ADD_CATEGORY_INDEX = Menu.FIRST + 1;
-    public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 2;   
+    public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 2;
+    public static final int EXPORT_INDEX = Menu.FIRST + 3;
 
     public static final int REQUEST_ONCREATE = 0;
     public static final int REQUEST_EDIT_CATEGORY = 1;
     public static final int REQUEST_ADD_CATEGORY = 2;
+    
+    private static final String EXPORT_FILENAME = "/sdcard/passwordsafe.csv";
     
     public static final String KEY_ID = "id";  // Intent keys
 
@@ -150,6 +156,7 @@ public class CategoryList extends ListActivity {
 		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_insert);
 		//.setShortcut(arg0, arg1, arg2);
 		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete);  
+		menu.add(0, EXPORT_INDEX, 0, R.string.export_database);  
 	
 		return super.onCreateOptionsMenu(menu);
     }
@@ -196,6 +203,9 @@ public class CategoryList extends ListActivity {
 				Log.w(TAG,e.toString());
 		    }
 		    break;
+		case EXPORT_INDEX:
+			exportDatabase();
+			break;
 		}
 		return super.onOptionsItemSelected(item);
     }
@@ -243,6 +253,106 @@ public class CategoryList extends ListActivity {
 		}
 	    dbHelper.addCategory(entry);
     }
+    
+	public boolean exportDatabase(){
+		try {
+			FileWriter f = new FileWriter(EXPORT_FILENAME);
 
+			f.write( CSVify(getString(R.string.category)) + "," +
+					CSVify(getString(R.string.description)) + "," + 
+					CSVify(getString(R.string.website)) + "," +
+					CSVify(getString(R.string.username)) + "," +
+					CSVify(getString(R.string.password)) + "," +
+					CSVify(getString(R.string.notes))
+		    		);
+		    f.write("\n");
+
+			
+			ch = new CryptoHelper();
+			if(PBEKey == null) {
+			    PBEKey = "";
+			}
+			ch.setPassword(PBEKey);
+		
+			HashMap<Long, String> categories = new HashMap<Long, String>();
+			
+			List<CategoryEntry> crows;
+			crows = dbHelper.fetchAllCategoryRows();
+		
+			for (CategoryEntry row : crows) {
+			    String cryptDesc = row.name;
+			    row.plainName = "";
+			    try {
+					row.plainName = ch.decrypt(cryptDesc);
+					categories.put(row.id, row.plainName);
+			    } catch (CryptoHelperException e) {
+					Log.e(TAG,e.toString());
+		            Toast.makeText(CategoryList.this, R.string.cannot_decrypt_category,
+		                    Toast.LENGTH_SHORT).show();
+		            return false;
+			    }
+			}
+		
+			List<PassEntry> rows;
+			rows = dbHelper.fetchAllRows(new Long(0));
+		
+			for (PassEntry row : rows) {
+			    String cryptDesc = row.description;
+			    String cryptWebsite = row.website;
+			    String cryptUsername = row.username;
+			    String cryptPassword = row.password;
+			    String cryptNote = row.note;
+			    row.plainDescription = "";
+			    row.plainWebsite = "";
+			    row.plainUsername = "";
+			    row.plainPassword = "";
+			    row.plainNote = "";
+			    try {
+					row.plainDescription = ch.decrypt(cryptDesc);
+					row.plainWebsite     = ch.decrypt(cryptWebsite);
+					row.plainUsername    = ch.decrypt(cryptUsername);
+					row.plainPassword    = ch.decrypt(cryptPassword);
+					row.plainNote        = ch.decrypt(cryptNote);
+			    } catch (CryptoHelperException e) {
+					Log.e(TAG,e.toString());
+		            Toast.makeText(CategoryList.this, R.string.cannot_decrypt_password,
+		                    Toast.LENGTH_SHORT).show();
+		            return false;
+			    }
+			    f.write(CSVify(categories.get(row.category)) + "," +
+			    		CSVify(row.plainDescription) + "," + 
+			    		CSVify(row.plainWebsite) + "," +
+			    		CSVify(row.plainUsername) + "," +
+			    		CSVify(row.plainPassword) + "," +
+			    		CSVify(row.plainNote)
+			    		);
+			    f.write("\n");
+			}
+			f.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+	        Toast.makeText(CategoryList.this, R.string.export_file_error,
+	                Toast.LENGTH_SHORT).show();
+			return false;
+		}
+        Toast.makeText(CategoryList.this, R.string.export_success,
+                Toast.LENGTH_LONG).show();
+		return true;
+	}
+
+	public String CSVify(String in)
+	{
+		if (in == null)
+			return "";
+		
+		String out=in;
+		
+		if (in.contains(",") || in.contains("\""))
+		{
+			in.replaceAll("\"", "\"\"");
+			out = "\"" + in + "\"";
+		}
+		return out;
+	}
 
 }

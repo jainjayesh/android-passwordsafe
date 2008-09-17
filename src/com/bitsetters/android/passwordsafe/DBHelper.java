@@ -40,7 +40,7 @@ public class DBHelper {
     private static final String TABLE_DBVERSION = "dbversion";
     private static final String TABLE_PASSWORDS = "passwords";
     private static final String TABLE_CATEGORIES = "categories";
-    private static final String TABLE_VERIFY = "verify_crypto"; 
+    private static final String TABLE_VERIFY = "verify_crypto";
     private static final int DATABASE_VERSION = 1;
     private static String TAG = "DBHelper";
     Context myCtx;
@@ -402,11 +402,11 @@ public class DBHelper {
 	        if (CategoryId==0)
 	        {
 		        c = db.query(TABLE_PASSWORDS, new String[] {
-	                "id", "password", "description", "username", "website", "note"},
+	                "id", "password", "description", "username", "website", "note", "category"},
 	                null, null, null, null, null);
 	        } else {
 		        c = db.query(TABLE_PASSWORDS, new String[] {
-		                "id", "password", "description", "username", "website", "note"},
+		                "id", "password", "description", "username", "website", "note", "category"},
 		                "category="+CategoryId, null, null, null, null);
 	        }
 	        int numRows = c.getCount();
@@ -420,6 +420,8 @@ public class DBHelper {
 	            row.username = c.getString(3);
 	            row.website = c.getString(4);
 	            row.note = c.getString(5);
+	            
+	            row.category = c.getLong(6);
 	            
 	            ret.add(row);
 	            c.moveToNext();
@@ -447,7 +449,7 @@ public class DBHelper {
 	        Cursor c =
 	            db.query(true, TABLE_PASSWORDS, new String[] {
 	                "id", "password", "description", "username", "website",
-	                "note"}, "id=" + Id, null, null, null, null, null);
+	                "note", "category"}, "id=" + Id, null, null, null, null, null);
 	        if (c.getCount() > 0) {
 	            c.moveToFirst();
 	            row.id = c.getLong(0);
@@ -457,6 +459,8 @@ public class DBHelper {
 	            row.username = c.getString(3);
 	            row.website = c.getString(4);
 	            row.note = c.getString(5);
+	            
+	            row.category = c.getLong(6);
 	        } else {
 	            row.id = -1;
 	            row.description = row.password = null;
@@ -496,5 +500,6 @@ public class DBHelper {
 			db.close();
 		}
 	}
+
 }
 

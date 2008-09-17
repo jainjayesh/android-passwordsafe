@@ -24,9 +24,14 @@ public class PassEntry extends Object {
     public String password;
     public long id;
     public long category;
+    public String categoryName;
     public String description;
     public String username;
     public String website;
     public String note;
+    public String plainPassword;
     public String plainDescription;
+    public String plainUsername;
+    public String plainWebsite;
+    public String plainNote;
 }
