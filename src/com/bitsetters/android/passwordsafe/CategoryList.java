@@ -16,14 +16,21 @@
  */
 package com.bitsetters.android.passwordsafe;
 
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -48,16 +55,19 @@ public class CategoryList extends ListActivity {
     public static final int ADD_CATEGORY_INDEX = Menu.FIRST + 1;
     public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 2;
     public static final int EXPORT_INDEX = Menu.FIRST + 3;
+    public static final int IMPORT_INDEX = Menu.FIRST + 4;
 
     public static final int REQUEST_ONCREATE = 0;
     public static final int REQUEST_EDIT_CATEGORY = 1;
     public static final int REQUEST_ADD_CATEGORY = 2;
-    
+
+    public static final int MAX_CATEGORIES = 256;
+
     private static final String EXPORT_FILENAME = "/sdcard/passwordsafe.csv";
     
     public static final String KEY_ID = "id";  // Intent keys
 
-    private CryptoHelper ch;
+    private CryptoHelper ch=null;
     private DBHelper dbHelper=null;
 	private boolean needPrePopulateCategories=false;
 	
@@ -156,7 +166,8 @@ public class CategoryList extends ListActivity {
 		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_insert);
 		//.setShortcut(arg0, arg1, arg2);
 		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete);  
-		menu.add(0, EXPORT_INDEX, 0, R.string.export_database);  
+		menu.add(0, EXPORT_INDEX, 0, R.string.export_database);
+		menu.add(0, IMPORT_INDEX, 0, R.string.import_database);
 	
 		return super.onCreateOptionsMenu(menu);
     }
@@ -206,6 +217,9 @@ public class CategoryList extends ListActivity {
 		case EXPORT_INDEX:
 			exportDatabase();
 			break;
+		case IMPORT_INDEX:
+			importDatabase();
+			break;
 		}
 		return super.onOptionsItemSelected(item);
     }
@@ -236,6 +250,8 @@ public class CategoryList extends ListActivity {
     }
 
     private void addCategory(String name) {
+    	Log.i(TAG,"addCategory("+name+")");
+    	if ((name==null) || (name=="")) return;
 		CategoryEntry entry =  new CategoryEntry();
 	
 		String namePlain = name;
@@ -355,4 +371,177 @@ public class CategoryList extends ListActivity {
 		return out;
 	}
 
+	public void eraseDatabase(){
+		//TODO: need to flesh it out
+		Log.i(TAG,"eraseDatabase");
+	}
+	
+	public void importDatabase(){
+		Dialog about = new AlertDialog.Builder(this)
+			.setIcon(R.drawable.passicon)
+			.setTitle(R.string.dialog_import_title)
+			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					eraseDatabase();
+					importDatabaseStep2();
+				}
+			})
+			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					importDatabaseStep2();
+				}
+			}) 
+			.setMessage(R.string.dialog_import_msg)
+			.create();
+		about.show();
+	}
+	
+	private void importDatabaseStep2(){
+		try {
+			CSVReader reader = new CSVReader(new FileReader(EXPORT_FILENAME));
+		    String [] nextLine;
+		    nextLine = reader.readNext();
+		    if (nextLine==null) {
+		        Toast.makeText(CategoryList.this, R.string.import_error_first_line,
+		                Toast.LENGTH_SHORT).show();
+		        return;
+		    }
+		    if (nextLine.length != 6){
+		        Toast.makeText(CategoryList.this, R.string.import_error_first_line,
+		                Toast.LENGTH_SHORT).show();
+		        return;
+		    }
+		    if ((nextLine[0].compareToIgnoreCase(getString(R.string.category)) != 0) ||
+			    (nextLine[1].compareToIgnoreCase(getString(R.string.description)) != 0) ||
+			    (nextLine[2].compareToIgnoreCase(getString(R.string.website)) != 0) ||
+			    (nextLine[3].compareToIgnoreCase(getString(R.string.username)) != 0) ||
+			    (nextLine[4].compareToIgnoreCase(getString(R.string.password)) != 0) ||
+			    (nextLine[5].compareToIgnoreCase(getString(R.string.notes)) != 0))
+		    {
+			    Log.i(TAG,"one of the headers doesn't match");
+		        Toast.makeText(CategoryList.this, R.string.import_error_first_line,
+		                Toast.LENGTH_SHORT).show();
+		        return;
+		    }
+		    
+		    HashMap<String, Long> categoryToId=getCategoryToId();
+		    //
+		    // take a pass through the CSV and collect the Categories
+		    //
+			HashMap<String,Long> categoriesFound = new HashMap<String,Long>();
+		    int categoryCount=0;
+		    while ((nextLine = reader.readNext()) != null) {
+		        // nextLine[] is an array of values from the line
+		        Log.i(TAG,nextLine[0] + nextLine[1] + "etc...");
+		        if ((nextLine==null) || (nextLine[0]=="")){
+		        	continue;	// skip blank categories
+		        }
+		        if (categoryToId.containsKey(nextLine[0])){
+		        	continue;	// don't recreate existing categories
+		        }
+		        categoryCount++;
+	        	Long passwordsInCategory= new Long(1);
+		        if (categoriesFound.containsKey(nextLine[0])) {
+		        	passwordsInCategory+=categoriesFound.get(nextLine[0]);
+		        }
+	        	categoriesFound.put(nextLine[0], passwordsInCategory);
+		        if (categoryCount>MAX_CATEGORIES){
+			        Toast.makeText(CategoryList.this, R.string.import_too_many_categories,
+			                Toast.LENGTH_SHORT).show();
+			        return;
+		        }
+		    }
+		    if (categoryCount==0)
+		    {
+		        Toast.makeText(CategoryList.this, R.string.import_no_categories,
+		                Toast.LENGTH_SHORT).show();
+		        return;
+		    }
+		    Set<String> categorySet = categoriesFound.keySet();
+		    Iterator<String> i=categorySet.iterator();
+		    while (i.hasNext()){
+	    		addCategory(i.next());
+		    }
+		    reader.close();
+
+		    categoryToId=getCategoryToId();	// re-read the categories to get id's of new categories
+		    //
+		    // read the whole file again to import the actual fields
+		    //
+			reader = new CSVReader(new FileReader(EXPORT_FILENAME));
+		    nextLine = reader.readNext();
+		    int newEntries=0;
+		    while ((nextLine = reader.readNext()) != null) {
+		        // nextLine[] is an array of values from the line
+		        Log.i(TAG,nextLine[0] + nextLine[1] + "etc...");
+			    if (nextLine.length != 6){
+			    	continue;	// skip if not enough fields
+			    }
+		        if ((nextLine==null) || (nextLine[0]=="")){
+		        	continue;	// skip blank categories
+		        }
+		        String description=nextLine[1];
+		        if ((description==null) || (description=="")){
+		        	continue;
+		        }
+
+		        PassEntry entry=new PassEntry();
+				try {
+					entry.category = categoryToId.get(nextLine[0]);
+				    entry.description = ch.encrypt(description);
+				    entry.website = ch.encrypt(nextLine[2]);
+				    entry.username = ch.encrypt(nextLine[3]);
+				    entry.password = ch.encrypt(nextLine[4]);
+				    entry.note = ch.encrypt(nextLine[5]);
+				} catch(CryptoHelperException e) {
+				    Log.e(TAG,e.toString());
+				    continue;
+				}
+			    dbHelper.addPassword(entry);
+		        newEntries++;
+		    }
+			reader.close();
+
+			if (newEntries==0)
+		    {
+		        Toast.makeText(CategoryList.this, R.string.import_no_entries,
+		                Toast.LENGTH_SHORT).show();
+		        return;
+		    }else{
+				Toast.makeText(this, "Added "+newEntries+" entries",
+						Toast.LENGTH_SHORT).show();
+				fillData();
+		    }
+		} catch (IOException e) {
+			e.printStackTrace();
+	        Toast.makeText(CategoryList.this, R.string.import_file_error,
+	                Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	public HashMap<String, Long> getCategoryToId()
+	{
+		if (ch == null){
+			ch = new CryptoHelper();
+		}
+		if(PBEKey == null) {
+		    PBEKey = "";
+		}
+		ch.setPassword(PBEKey);
+	
+		HashMap<String,Long> categories = new HashMap<String,Long>();
+		rows = dbHelper.fetchAllCategoryRows();
+
+		for (CategoryEntry row : rows) {
+		    String cryptDesc = row.name;
+		    row.plainName = "";
+		    try {
+				row.plainName = ch.decrypt(cryptDesc);
+				categories.put(row.plainName, row.id);
+		    } catch (CryptoHelperException e) {
+				Log.e(TAG,e.toString());
+		    }
+		}
+		return categories;
+	}
 }
