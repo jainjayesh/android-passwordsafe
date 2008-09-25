@@ -59,10 +59,16 @@ public class DBHelper {
             + "website text,"
             + "note text);";
 
+    private static final String PASSWORDS_DROP =
+    	"drop table " + TABLE_PASSWORDS + ";";
+
     private static final String CATEGORIES_CREATE =
         "create table " + TABLE_CATEGORIES + " ("
     	    + "id integer primary key autoincrement, "
             + "name text not null);";
+
+    private static final String CATEGORIES_DROP =
+    	"drop table " + TABLE_CATEGORIES + ";";
 
     private static final String VERIFY_CREATE = 
     	"create table " + TABLE_VERIFY + " ("
@@ -131,6 +137,24 @@ public class DBHelper {
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
 		} 
+    }
+    
+    public void deleteDatabase()
+    {
+        try {
+			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
+			db.execSQL(PASSWORDS_DROP);
+			db.execSQL(PASSWORDS_CREATE);
+
+			db.execSQL(CATEGORIES_DROP);
+			db.execSQL(CATEGORIES_CREATE);
+        } catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally 
+		{
+			db.close();
+		}    	
     }
     
     public boolean getPrePopulate()

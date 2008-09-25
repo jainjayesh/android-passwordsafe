@@ -59,4 +59,8 @@
 	<string name="import_no_categories">No categories found.</string>
 	<string name="import_no_entries">No entries found in CSV.</string>
 	<string name="import_too_many_categories">Too many categories.</string>
+	<string name="dialog_delete_database_title">Delete Database</string>
+	<string name="dialog_delete_database_msg">Are you really sure you want to delete the database?  This cannot be undone.</string>
+	<string name="added">Added</string>
+	<string name="entries">entries</string>
 </resources>

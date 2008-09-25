@@ -371,19 +371,37 @@ public class CategoryList extends ListActivity {
 		return out;
 	}
 
-	public void eraseDatabase(){
-		//TODO: need to flesh it out
-		Log.i(TAG,"eraseDatabase");
+	private void deleteDatabaseNow(){
+		dbHelper.deleteDatabase();
 	}
-	
+
+	public void deleteDatabase4Import(){
+		Log.i(TAG,"deleteDatabase4Import");
+		Dialog about = new AlertDialog.Builder(this)
+			.setIcon(R.drawable.passicon)
+			.setTitle(R.string.dialog_delete_database_title)
+			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					deleteDatabaseNow();
+					importDatabaseStep2();
+				}
+			})
+			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+				}
+			}) 
+			.setMessage(R.string.dialog_delete_database_msg)
+			.create();
+		about.show();
+	}
+		
 	public void importDatabase(){
 		Dialog about = new AlertDialog.Builder(this)
 			.setIcon(R.drawable.passicon)
 			.setTitle(R.string.dialog_import_title)
 			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					eraseDatabase();
-					importDatabaseStep2();
+					deleteDatabase4Import();
 				}
 			})
 			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -418,21 +436,20 @@ public class CategoryList extends ListActivity {
 			    (nextLine[4].compareToIgnoreCase(getString(R.string.password)) != 0) ||
 			    (nextLine[5].compareToIgnoreCase(getString(R.string.notes)) != 0))
 		    {
-			    Log.i(TAG,"one of the headers doesn't match");
 		        Toast.makeText(CategoryList.this, R.string.import_error_first_line,
 		                Toast.LENGTH_SHORT).show();
 		        return;
 		    }
+		    Log.i(TAG,"first line is valid");
 		    
 		    HashMap<String, Long> categoryToId=getCategoryToId();
 		    //
-		    // take a pass through the CSV and collect the Categories
+		    // take a pass through the CSV and collect any new Categories
 		    //
 			HashMap<String,Long> categoriesFound = new HashMap<String,Long>();
 		    int categoryCount=0;
 		    while ((nextLine = reader.readNext()) != null) {
 		        // nextLine[] is an array of values from the line
-		        Log.i(TAG,nextLine[0] + nextLine[1] + "etc...");
 		        if ((nextLine==null) || (nextLine[0]=="")){
 		        	continue;	// skip blank categories
 		        }
@@ -451,16 +468,13 @@ public class CategoryList extends ListActivity {
 			        return;
 		        }
 		    }
-		    if (categoryCount==0)
+		    if (categoryCount!=0)
 		    {
-		        Toast.makeText(CategoryList.this, R.string.import_no_categories,
-		                Toast.LENGTH_SHORT).show();
-		        return;
-		    }
-		    Set<String> categorySet = categoriesFound.keySet();
-		    Iterator<String> i=categorySet.iterator();
-		    while (i.hasNext()){
-	    		addCategory(i.next());
+			    Set<String> categorySet = categoriesFound.keySet();
+			    Iterator<String> i=categorySet.iterator();
+			    while (i.hasNext()){
+		    		addCategory(i.next());
+			    }
 		    }
 		    reader.close();
 
@@ -473,7 +487,6 @@ public class CategoryList extends ListActivity {
 		    int newEntries=0;
 		    while ((nextLine = reader.readNext()) != null) {
 		        // nextLine[] is an array of values from the line
-		        Log.i(TAG,nextLine[0] + nextLine[1] + "etc...");
 			    if (nextLine.length != 6){
 			    	continue;	// skip if not enough fields
 			    }
@@ -508,7 +521,8 @@ public class CategoryList extends ListActivity {
 		                Toast.LENGTH_SHORT).show();
 		        return;
 		    }else{
-				Toast.makeText(this, "Added "+newEntries+" entries",
+				Toast.makeText(this, getString(R.string.added)+ " "+ newEntries +
+						" "+ getString(R.string.entries),
 						Toast.LENGTH_SHORT).show();
 				fillData();
 		    }

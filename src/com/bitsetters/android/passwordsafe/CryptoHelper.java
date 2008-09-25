@@ -24,7 +24,6 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.BadPaddingException;
@@ -36,7 +35,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+//import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import android.util.Log;
 
@@ -73,7 +72,6 @@ public class CryptoHelper {
      * @throws Exception
      */
     CryptoHelper() {
-		Security.addProvider(new BouncyCastleProvider());
 		pbeParamSpec = new PBEParameterSpec(salt,count);
 		try {
 		    keyFac = SecretKeyFactory
