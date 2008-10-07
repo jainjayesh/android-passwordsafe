@@ -283,17 +283,16 @@ public class CategoryList extends ListActivity {
     
 	public boolean exportDatabase(){
 		try {
-			FileWriter f = new FileWriter(EXPORT_FILENAME);
+			CSVWriter writer = new CSVWriter(new FileWriter(EXPORT_FILENAME), ',');
 
-			f.write( CSVify(getString(R.string.category)) + "," +
-					CSVify(getString(R.string.description)) + "," + 
-					CSVify(getString(R.string.website)) + "," +
-					CSVify(getString(R.string.username)) + "," +
-					CSVify(getString(R.string.password)) + "," +
-					CSVify(getString(R.string.notes))
-		    		);
-		    f.write("\n");
-
+			String[] header = { getString(R.string.category),
+					getString(R.string.description), 
+					getString(R.string.website),
+					getString(R.string.username),
+					getString(R.string.password),
+					getString(R.string.notes)
+			};
+			writer.writeNext(header);
 			
 			ch = new CryptoHelper();
 			if(PBEKey == null) {
@@ -346,16 +345,16 @@ public class CategoryList extends ListActivity {
 		                    Toast.LENGTH_SHORT).show();
 		            return false;
 			    }
-			    f.write(CSVify(categories.get(row.category)) + "," +
-			    		CSVify(row.plainDescription) + "," + 
-			    		CSVify(row.plainWebsite) + "," +
-			    		CSVify(row.plainUsername) + "," +
-			    		CSVify(row.plainPassword) + "," +
-			    		CSVify(row.plainNote)
-			    		);
-			    f.write("\n");
+			    String[] rowEntries = { categories.get(row.category),
+			    		row.plainDescription,
+			    		row.plainWebsite,
+			    		row.plainUsername,
+			    		row.plainPassword,
+			    		row.plainNote
+			    };
+			    writer.writeNext(rowEntries);
 			}
-			f.close();
+			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 	        Toast.makeText(CategoryList.this, R.string.export_file_error,
@@ -365,21 +364,6 @@ public class CategoryList extends ListActivity {
         Toast.makeText(CategoryList.this, R.string.export_success,
                 Toast.LENGTH_LONG).show();
 		return true;
-	}
-
-	public String CSVify(String in)
-	{
-		if (in == null)
-			return "";
-		
-		String out=in;
-		
-		if (in.contains(",") || in.contains("\""))
-		{
-			in.replaceAll("\"", "\"\"");
-			out = "\"" + in + "\"";
-		}
-		return out;
 	}
 
 	private void deleteDatabaseNow(){
