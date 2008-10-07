@@ -48,6 +48,9 @@ public class PassList extends ListActivity {
     public static final int ADD_PASSWORD_INDEX = Menu.FIRST + 1;
     public static final int DEL_PASSWORD_INDEX = Menu.FIRST + 2;   
 
+    public static final int REQUEST_EDIT_PASSWORD = 1;
+    public static final int REQUEST_ADD_PASSWORD = 2;
+
     public static final String KEY_ID = "id";  // Intent keys
     public static final String KEY_CATEGORY_ID = "categoryId";  // Intent keys
 
@@ -83,8 +86,10 @@ public class PassList extends ListActivity {
     @Override
     protected void onPause() {
 		super.onPause();
-		dbHelper.close();
-		dbHelper = null;
+		if (dbHelper != null) {
+			dbHelper.close();
+			dbHelper = null;
+		}
     }
 
     @Override
@@ -100,7 +105,10 @@ public class PassList extends ListActivity {
 		super.onStop();
 		
 		Log.i(TAG,"onStop()");
-//		dbHelper.close();
+		if (dbHelper != null) {
+			dbHelper.close();
+			dbHelper=null;
+		}
     }
     /**
      * Populates the password ListView
@@ -144,8 +152,10 @@ public class PassList extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
-		menu.add(0,ADD_PASSWORD_INDEX, 0, R.string.password_insert);
-		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete);  
+		menu.add(0,ADD_PASSWORD_INDEX, 0, R.string.password_insert)
+			.setIcon(android.R.drawable.ic_menu_add);
+		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete)
+			.setIcon(android.R.drawable.ic_menu_delete);
 	
 		return super.onCreateOptionsMenu(menu);
     }
@@ -164,9 +174,7 @@ public class PassList extends ListActivity {
 
     private void addPassword() {
 		Intent i = new Intent(this, PassEdit.class);
-		Log.i(TAG,"before startActivity() [PassEdit]");
-	    startActivityForResult(i,2);
-		Log.i(TAG,"after startActivity() [PassEdit]");
+	    startActivityForResult(i,REQUEST_ADD_PASSWORD);
     }
 
     private void delPassword(long Id) {
@@ -199,7 +207,7 @@ public class PassList extends ListActivity {
 		i.putExtra(KEY_ID, rows.get(position).id);
 		i.putExtra(KEY_CATEGORY_ID, CategoryId);
 		Log.i(TAG,"startActivityForResult(i,1)");
-	    startActivityForResult(i,1);
+	    startActivityForResult(i,REQUEST_EDIT_PASSWORD);
     }
 
     @Override
@@ -209,7 +217,7 @@ public class PassList extends ListActivity {
     	if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
-    	Log.i(TAG,"onActivityResult("+requestCode+","+resultCode+",)");
+    	Log.d(TAG,"onActivityResult("+requestCode+","+resultCode+",)");
     	fillData();
     }
 

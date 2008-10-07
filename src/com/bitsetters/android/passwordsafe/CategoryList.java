@@ -83,7 +83,7 @@ public class CategoryList extends ListActivity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		
-//		setContentView(R.layout.cat_list);
+		Log.d(TAG,"onCreate()");
 		if (dbHelper==null) {
 			dbHelper = new DBHelper(this);
 			if (dbHelper.getPrePopulate()==true)
@@ -100,6 +100,8 @@ public class CategoryList extends ListActivity {
     @Override
     protected void onPause() {
 		super.onPause();
+		
+		Log.d(TAG,"onPause()");
 		dbHelper.close();
 		dbHelper = null;
     }
@@ -107,6 +109,8 @@ public class CategoryList extends ListActivity {
     @Override
     protected void onResume() {
 		super.onResume();
+
+		Log.d(TAG,"onResume()");
 		if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
@@ -115,7 +119,8 @@ public class CategoryList extends ListActivity {
     @Override
     public void onStop() {
 		super.onStop();
-		
+
+		Log.d(TAG,"onStop()");
 //		dbHelper.close();
     }
     /**
@@ -160,14 +165,20 @@ public class CategoryList extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 	
-		menu.add(0,EDIT_CATEGORY_INDEX, 0, R.string.password_edit);
-		//	menu.addSeparator(EDIT_CATEGORY_INDEX, 0);
-		
-		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_insert);
-		//.setShortcut(arg0, arg1, arg2);
-		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete);  
-		menu.add(0, EXPORT_INDEX, 0, R.string.export_database);
-		menu.add(0, IMPORT_INDEX, 0, R.string.import_database);
+		menu.add(0,EDIT_CATEGORY_INDEX, 0, R.string.password_edit)
+			.setIcon(android.R.drawable.ic_menu_edit)
+			.setShortcut('0', 'e');
+		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_insert)
+			.setIcon(android.R.drawable.ic_menu_add)
+			.setShortcut('1', 'i');
+		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete)  
+			.setIcon(android.R.drawable.ic_menu_delete)
+			.setShortcut('2', 'd');
+
+		menu.add(0, EXPORT_INDEX, 0, R.string.export_database)
+			.setIcon(android.R.drawable.ic_menu_upload);
+		menu.add(0, IMPORT_INDEX, 0, R.string.import_database)
+			.setIcon(android.R.drawable.ic_input_get);
 	
 		return super.onCreateOptionsMenu(menu);
     }
