@@ -44,7 +44,7 @@ import android.util.Log;
  * 
  * Basic crypto class that uses Bouncy Castle Provider to
  * encrypt/decrypt data using PBE (Password Based Encryption) via
- * 256Bit AES. I'm fairly new to both Crypto and Java so if you 
+ * 128Bit AES. I'm fairly new to both Crypto and Java so if you 
  * notice I've done something terribly wrong here please let me
  * know.
  *

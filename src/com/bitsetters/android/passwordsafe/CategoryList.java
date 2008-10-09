@@ -226,8 +226,11 @@ public class CategoryList extends ListActivity {
 			break;
 		case EDIT_CATEGORY_INDEX:
 			Intent i = new Intent(this, CategoryEdit.class);
-			i.putExtra(KEY_ID, rows.get(getSelectedItemPosition()).id);
-		    startActivityForResult(i,REQUEST_EDIT_CATEGORY);
+			int sel = getSelectedItemPosition();
+			if (sel > -1) {
+				i.putExtra(KEY_ID, rows.get(sel).id);
+				startActivityForResult(i,REQUEST_EDIT_CATEGORY);
+			}
 		    break;
 		case ADD_CATEGORY_INDEX:
 		    addCategory();
