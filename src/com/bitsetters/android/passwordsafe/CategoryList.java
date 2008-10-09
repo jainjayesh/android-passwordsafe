@@ -51,11 +51,12 @@ public class CategoryList extends ListActivity {
     private static final String TAG = "CategoryList";
 
     // Menu Item order
-    public static final int EDIT_CATEGORY_INDEX = Menu.FIRST;
-    public static final int ADD_CATEGORY_INDEX = Menu.FIRST + 1;
-    public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 2;
-    public static final int EXPORT_INDEX = Menu.FIRST + 3;
-    public static final int IMPORT_INDEX = Menu.FIRST + 4;
+    public static final int LOCK_CATEGORY_INDEX = Menu.FIRST;
+    public static final int EDIT_CATEGORY_INDEX = Menu.FIRST + 1;
+    public static final int ADD_CATEGORY_INDEX = Menu.FIRST + 2;
+    public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 3;
+    public static final int EXPORT_INDEX = Menu.FIRST + 4;
+    public static final int IMPORT_INDEX = Menu.FIRST + 5;
 
     public static final int REQUEST_ONCREATE = 0;
     public static final int REQUEST_EDIT_CATEGORY = 1;
@@ -94,7 +95,9 @@ public class CategoryList extends ListActivity {
 		if(!signedIn) {
 		    Intent i = new Intent(this, FrontDoor.class);
 		    startActivityForResult(i,REQUEST_ONCREATE);
-		} 
+		} else {
+			fillData();
+		}
     }
     
     @Override
@@ -109,6 +112,11 @@ public class CategoryList extends ListActivity {
     @Override
     protected void onResume() {
 		super.onResume();
+
+		if(!signedIn) {
+		    Intent i = new Intent(this, FrontDoor.class);
+		    startActivityForResult(i,REQUEST_ONCREATE);
+		}
 
 		Log.d(TAG,"onResume()");
 		if (dbHelper == null) {
@@ -165,15 +173,18 @@ public class CategoryList extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 	
+		menu.add(0,LOCK_CATEGORY_INDEX, 0, R.string.password_lock)
+			.setIcon(android.R.drawable.ic_lock_lock)
+			.setShortcut('0', 'l');
 		menu.add(0,EDIT_CATEGORY_INDEX, 0, R.string.password_edit)
 			.setIcon(android.R.drawable.ic_menu_edit)
-			.setShortcut('0', 'e');
+			.setShortcut('1', 'e');
 		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_insert)
 			.setIcon(android.R.drawable.ic_menu_add)
-			.setShortcut('1', 'i');
+			.setShortcut('2', 'i');
 		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete)  
 			.setIcon(android.R.drawable.ic_menu_delete)
-			.setShortcut('2', 'd');
+			.setShortcut('3', 'd');
 
 		menu.add(0, EXPORT_INDEX, 0, R.string.export_database)
 			.setIcon(android.R.drawable.ic_menu_upload);
@@ -208,6 +219,11 @@ public class CategoryList extends ListActivity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
+		case LOCK_CATEGORY_INDEX:
+			signedIn=false;
+		    Intent frontdoor = new Intent(this, FrontDoor.class);
+		    startActivityForResult(frontdoor,REQUEST_ONCREATE);
+			break;
 		case EDIT_CATEGORY_INDEX:
 			Intent i = new Intent(this, CategoryEdit.class);
 			i.putExtra(KEY_ID, rows.get(getSelectedItemPosition()).id);
@@ -251,13 +267,20 @@ public class CategoryList extends ListActivity {
 		    dbHelper = new DBHelper(this);
 		}
 
-    	if ((requestCode==REQUEST_ONCREATE) && (needPrePopulateCategories==true))
-    	{
-    		needPrePopulateCategories=false;
-    		addCategory(getString(R.string.category_business));
-    		addCategory(getString(R.string.category_personal));
+    	if (requestCode==REQUEST_ONCREATE) {
+    		if (resultCode==RESULT_OK) {
+    			signedIn=true;
+    		}
+    		if (needPrePopulateCategories==true)
+	    	{
+	    		needPrePopulateCategories=false;
+	    		addCategory(getString(R.string.category_business));
+	    		addCategory(getString(R.string.category_personal));
+	    	}
     	}
-    	fillData();
+    	if (signedIn) {
+    		fillData();
+    	}
     }
 
     private void addCategory(String name) {

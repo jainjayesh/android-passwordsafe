@@ -80,6 +80,9 @@ public class PassList extends ListActivity {
 		    CategoryId = extras != null ? extras.getLong(CategoryList.KEY_ID) : null;
 		}
 		Log.i(TAG,"CategoryId="+CategoryId);
+		if (CategoryId<1) {
+			finish();	// no valid category less than one
+		}
 		fillData();
     }
     
