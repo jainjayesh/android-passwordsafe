@@ -92,12 +92,24 @@ public class CategoryList extends ListActivity {
 				needPrePopulateCategories=true;
 			}
 		}
+    }
+
+    @Override
+    protected void onResume() {
+		super.onResume();
+
+		Log.d(TAG,"onResume()");
+		if (dbHelper == null) {
+		    dbHelper = new DBHelper(this);
+		}
+
 		if(!signedIn) {
 		    Intent i = new Intent(this, FrontDoor.class);
 		    startActivityForResult(i,REQUEST_ONCREATE);
 		} else {
 			fillData();
 		}
+
     }
     
     @Override
@@ -109,21 +121,6 @@ public class CategoryList extends ListActivity {
 		dbHelper = null;
     }
 
-    @Override
-    protected void onResume() {
-		super.onResume();
-
-		if(!signedIn) {
-		    Intent i = new Intent(this, FrontDoor.class);
-		    startActivityForResult(i,REQUEST_ONCREATE);
-		}
-
-		Log.d(TAG,"onResume()");
-		if (dbHelper == null) {
-		    dbHelper = new DBHelper(this);
-		}
-    }
-    
     @Override
     public void onStop() {
 		super.onStop();
@@ -237,7 +234,10 @@ public class CategoryList extends ListActivity {
 		    break;
 		case DEL_CATEGORY_INDEX:
 		    try {
-		    	delCategory(rows.get(getSelectedItemPosition()).id);
+				int delPosition = getSelectedItemPosition();
+				if (delPosition > -1) {
+					delCategory(rows.get(delPosition).id);
+				}
 		    } catch (IndexOutOfBoundsException e) {
 				// This should only happen when there are no
 				// entries to delete.
