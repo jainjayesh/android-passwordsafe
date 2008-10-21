@@ -128,10 +128,19 @@ public class CategoryList extends ListActivity {
 		Log.d(TAG,"onStop()");
 //		dbHelper.close();
     }
+    
+    @Override
+    public void onDestroy() {
+		super.onDestroy();
+
+		Log.d(TAG,"onDestroy()");
+    }
+
     /**
      * Populates the category ListView
      */
     private void fillData() {
+    	Log.d(TAG,"fillData()");
 		// initialize crypto so that we can display readable descriptions in
 		// the list view
 		ch = new CryptoHelper();

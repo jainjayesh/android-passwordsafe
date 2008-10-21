@@ -91,7 +91,9 @@ public class PassEdit extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
-		outState.putLong(PassList.KEY_ID, RowId);
+    	if (RowId != null) {
+    		outState.putLong(PassList.KEY_ID, RowId);
+    	}
     }
 
     @Override

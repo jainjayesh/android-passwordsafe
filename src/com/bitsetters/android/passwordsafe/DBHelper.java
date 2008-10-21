@@ -41,7 +41,7 @@ public class DBHelper {
     private static final String TABLE_PASSWORDS = "passwords";
     private static final String TABLE_CATEGORIES = "categories";
     private static final String TABLE_VERIFY = "verify_crypto";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static String TAG = "DBHelper";
     Context myCtx;
 
@@ -54,10 +54,11 @@ public class DBHelper {
     	    + "id integer primary key autoincrement, "
     	    + "category integer not null, "
             + "password text not null, "
-            + "description text not null,"
-            + "username text,"
-            + "website text,"
-            + "note text);";
+            + "description text not null, "
+            + "username text, "
+            + "website text, "
+            + "note text, "
+            + "lastdatetimeedit text);";
 
     private static final String PASSWORDS_DROP =
     	"drop table " + TABLE_PASSWORDS + ";";
@@ -65,7 +66,8 @@ public class DBHelper {
     private static final String CATEGORIES_CREATE =
         "create table " + TABLE_CATEGORIES + " ("
     	    + "id integer primary key autoincrement, "
-            + "name text not null);";
+            + "name text not null, "
+            + "lastdatetimeedit text);";
 
     private static final String CATEGORIES_DROP =
     	"drop table " + TABLE_CATEGORIES + ";";
