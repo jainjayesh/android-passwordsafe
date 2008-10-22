@@ -146,7 +146,8 @@ public class PassList extends ListActivity {
 		}
 
 		ArrayAdapter<String> entries = 
-		    new ArrayAdapter<String>(this, R.layout.pass_row, R.id.entry_desc, items);
+//		    new ArrayAdapter<String>(this, R.layout.pass_row, R.id.entry_desc, items);
+		    new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
 		setListAdapter(entries);
 		
     }

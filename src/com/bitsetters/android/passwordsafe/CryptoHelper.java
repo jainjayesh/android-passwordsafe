@@ -56,6 +56,9 @@ public class CryptoHelper {
     protected static PBEKeySpec pbeKeySpec;
     protected static PBEParameterSpec pbeParamSpec;
     protected static SecretKeyFactory keyFac;
+    protected static String algorithm = "PBEWithMD5And128BitAES-CBC-OpenSSL";
+//  protected static String algorithm = "PBEWithSHA1And128BitAES-CBC-BC";  // slower
+//	protected static String algorithm = "PBEWithSHA1And256BitAES-CBC-BC";  // even slower
     protected static String password = null;          
     protected static SecretKey pbeKey;
     protected static Cipher pbeCipher;
@@ -75,7 +78,7 @@ public class CryptoHelper {
 		pbeParamSpec = new PBEParameterSpec(salt,count);
 		try {
 		    keyFac = SecretKeyFactory
-		    .getInstance("PBEWithMD5And128BitAES-CBC-OpenSSL","BC");
+		    .getInstance(algorithm,"BC");
 		} catch (NoSuchAlgorithmException e) {
 		    Log.e(TAG,"CryptoHelper(): "+e.toString());
 		} catch (NoSuchProviderException e) {
@@ -167,7 +170,7 @@ public class CryptoHelper {
 		try {
 		    pbeKey = keyFac.generateSecret(pbeKeySpec);
 		    pbeCipher = Cipher
-		    .getInstance("PBEWithMD5And128BitAES-CBC-OpenSSL","BC");
+		    .getInstance(algorithm,"BC");
 		} catch (InvalidKeySpecException e) {
 		    Log.e(TAG,"setPassword(): "+e.toString());
 		} catch (NoSuchAlgorithmException e) {

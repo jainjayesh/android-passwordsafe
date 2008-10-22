@@ -21,7 +21,7 @@
 <resources>
     <string name="app_name">Password Safe</string>
     <string name="author">Steven Osborn</string>
-    <string name="version">0.2.2</string>
+    <string name="version">0.2.3</string>
     <string name="empty_safe">Category is Empty.</string>
     <string name="password_lock">Lock</string>
     <string name="password_edit">Edit</string>
