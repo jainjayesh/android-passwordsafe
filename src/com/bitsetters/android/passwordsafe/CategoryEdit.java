@@ -48,6 +48,10 @@ public class CategoryEdit extends Activity {
 			dbHelper = new DBHelper(this);
 		}
 		
+		String title = getResources().getString(R.string.app_name) + " - " +
+		getResources().getString(R.string.edit_entry);
+		setTitle(title);
+		
 		setContentView(R.layout.cat_edit);
 	
 		nameText = (EditText) findViewById(R.id.name);

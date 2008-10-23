@@ -46,6 +46,10 @@ public class PassEdit extends Activity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 	
+		String title = getResources().getString(R.string.app_name) + " - " +
+		getResources().getString(R.string.edit_entry);
+		setTitle(title);
+		
 		ch = new CryptoHelper();
 		ch.setPassword(PassList.getPBEKey());
 

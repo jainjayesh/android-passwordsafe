@@ -84,6 +84,11 @@ public class CategoryList extends ListActivity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		
+		setContentView(R.layout.cat_list);
+		String title = getResources().getString(R.string.app_name) + " - " +
+			getResources().getString(R.string.categories);
+		setTitle(title);
+		
 		Log.d(TAG,"onCreate()");
 		if (dbHelper==null) {
 			dbHelper = new DBHelper(this);

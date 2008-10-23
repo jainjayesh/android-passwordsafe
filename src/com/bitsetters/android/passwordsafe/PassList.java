@@ -71,6 +71,12 @@ public class PassList extends ListActivity {
 		
 		Log.i(TAG,"onCreate()");
 		setContentView(R.layout.pass_list);
+		
+		String title = getResources().getString(R.string.app_name) + " - " +
+		getResources().getString(R.string.passwords);
+		setTitle(title);
+
+		
 		if (dbHelper==null) {
 			dbHelper = new DBHelper(this);
 		}

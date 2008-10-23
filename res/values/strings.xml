@@ -22,12 +22,14 @@
     <string name="app_name">Password Safe</string>
     <string name="author">Steven Osborn</string>
     <string name="version">0.2.3</string>
-    <string name="empty_safe">Category is Empty.</string>
+    <string name="empty_safe">No Passwords present for this category.</string>
+    <string name="empty_category">No categories present.  Please add one via Menu->Add</string>
     <string name="password_lock">Lock</string>
     <string name="password_edit">Edit</string>
     <string name="password_insert">Add</string>
     <string name="password_delete">Delete</string>
     <string name="password">Password</string>
+    <string name="passwords">Passwords</string>
     <string name="username">Username</string>
     <string name="website">Website</string>
     <string name="description">Description</string>
@@ -64,4 +66,5 @@
 	<string name="dialog_delete_database_msg">Are you really sure you want to delete the database?  This cannot be undone.</string>
 	<string name="added">Added</string>
 	<string name="entries">entries</string>
+	<string name="edit_entry">Edit Entry</string>
 </resources>
