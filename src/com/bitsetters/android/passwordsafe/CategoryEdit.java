@@ -82,7 +82,9 @@ public class CategoryEdit extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
-		outState.putLong(CategoryList.KEY_ID, RowId);
+    	if (RowId != null) {
+    		outState.putLong(CategoryList.KEY_ID, RowId);
+    	}
     }
 
     @Override
