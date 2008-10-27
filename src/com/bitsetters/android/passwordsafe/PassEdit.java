@@ -113,6 +113,10 @@ public class PassEdit extends Activity {
 		if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
+		if (CategoryList.isSignedIn()==false) {
+			saveState();
+			finish();
+		}
 		populateFields();
     }
 

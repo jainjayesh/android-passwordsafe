@@ -104,6 +104,9 @@ public class PassList extends ListActivity {
     @Override
     protected void onResume() {
 		super.onResume();
+		if (CategoryList.isSignedIn()==false) {
+			finish();
+		}
 		if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}

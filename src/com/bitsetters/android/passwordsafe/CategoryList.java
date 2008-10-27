@@ -26,12 +26,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -77,6 +79,15 @@ public class CategoryList extends ListActivity {
 
     private List<CategoryEntry> rows;
     
+    BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                Log.d(TAG,"caught ACTION_SCREEN_OFF");
+                signedIn=false;
+            }
+        }
+    };
+
     /** 
      * Called when the activity is first created. 
      */
@@ -97,6 +108,9 @@ public class CategoryList extends ListActivity {
 				needPrePopulateCategories=true;
 			}
 		}
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(mIntentReceiver, filter);
     }
 
     @Override
@@ -114,7 +128,6 @@ public class CategoryList extends ListActivity {
 		} else {
 			fillData();
 		}
-
     }
     
     @Override
@@ -141,6 +154,23 @@ public class CategoryList extends ListActivity {
 		Log.d(TAG,"onDestroy()");
     }
 
+    /**
+     * Returns the current status of signedIn. 
+     * 
+     * @return	True if signed in
+     */
+    public static boolean isSignedIn() {
+    	return signedIn;
+    }
+    /**
+     * Sets signedIn status to false.
+     * 
+     * @see com.bitsetters.android.passwordsafe.CategoryList#isSignedIn
+     */
+    public static void setSignedOut() {
+    	Log.d(TAG,"setSignedOut()");
+    	signedIn=false;
+    }
     /**
      * Populates the category ListView
      */
