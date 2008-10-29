@@ -192,7 +192,7 @@ public class PassEdit extends Activity {
 			break;
 		case DEL_PASSWORD_INDEX:
 		    try {
-		    	if (RowId>0) {
+		    	if ((RowId != null) && (RowId>0)) {
 		    		delPassword(RowId);
 		    	}
 		    } catch (IndexOutOfBoundsException e) {
