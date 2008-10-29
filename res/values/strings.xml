@@ -20,8 +20,8 @@
 
 <resources>
     <string name="app_name">Password Safe</string>
-    <string name="author">Steven Osborn</string>
-    <string name="version">0.2.3</string>
+    <string name="author">Steven Osborn and Randy McEoin</string>
+    <string name="version">0.2.4</string>
     <string name="empty_safe">No Passwords present for this category.</string>
     <string name="empty_category">No categories present.  Please add one via Menu->Add</string>
     <string name="password_lock">Lock</string>

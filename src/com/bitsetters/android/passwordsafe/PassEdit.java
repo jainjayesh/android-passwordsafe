@@ -19,6 +19,8 @@ package com.bitsetters.android.passwordsafe;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,6 +33,9 @@ import android.widget.Toast;
  * @author Randy McEoin
  */
 public class PassEdit extends Activity {
+
+    public static final int SAVE_PASSWORD_INDEX = Menu.FIRST;   
+    public static final int DEL_PASSWORD_INDEX = Menu.FIRST + 1;   
 
     private EditText descriptionText;
     private EditText passwordText;
@@ -84,9 +89,7 @@ public class PassEdit extends Activity {
 		                    Toast.LENGTH_SHORT).show();
 				    return;
 				}
-				saveState();
-				setResult(RESULT_OK);
-				finish();
+				savePassword();
 		    }
 		});
     }
@@ -146,6 +149,60 @@ public class PassEdit extends Activity {
 		} else {
 		    dbHelper.updatePassword(RowId, entry);
 		}
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+
+		menu.add(0, SAVE_PASSWORD_INDEX, 0, R.string.save)
+		.setIcon(android.R.drawable.ic_menu_save);
+		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete)
+			.setIcon(android.R.drawable.ic_menu_delete);
+	
+		return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Save the password entry and finish the activity.
+     */
+    private void savePassword() {
+		saveState();
+		setResult(RESULT_OK);
+		finish();
+    }
+    /**
+     * Delete the password entry from the database given the row id within the database.
+     * 
+     * @param Id
+     */
+    private void delPassword(long Id) {
+		dbHelper.deletePassword(Id);
+		setResult(RESULT_OK);
+		finish();
+    }
+
+    /**
+     * Handler for when a MenuItem is selected from the Activity.
+     */
+    public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		case SAVE_PASSWORD_INDEX:
+			savePassword();
+			break;
+		case DEL_PASSWORD_INDEX:
+		    try {
+		    	if (RowId>0) {
+		    		delPassword(RowId);
+		    	}
+		    } catch (IndexOutOfBoundsException e) {
+				// This should only happen when there are no
+				// entries to delete.
+				Log.w(TAG,e.toString());
+		    }
+		    break;
+		}
+		return super.onOptionsItemSelected(item);
     }
 
     private void populateFields() { 

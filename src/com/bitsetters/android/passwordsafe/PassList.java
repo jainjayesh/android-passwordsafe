@@ -69,7 +69,6 @@ public class PassList extends ListActivity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		
-		Log.i(TAG,"onCreate()");
 		setContentView(R.layout.pass_list);
 		
 		String title = getResources().getString(R.string.app_name) + " - " +
@@ -85,7 +84,6 @@ public class PassList extends ListActivity {
 		    Bundle extras = getIntent().getExtras();            
 		    CategoryId = extras != null ? extras.getLong(CategoryList.KEY_ID) : null;
 		}
-		Log.i(TAG,"CategoryId="+CategoryId);
 		if (CategoryId<1) {
 			finish();	// no valid category less than one
 		}
@@ -116,7 +114,6 @@ public class PassList extends ListActivity {
     public void onStop() {
 		super.onStop();
 		
-		Log.i(TAG,"onStop()");
 		if (dbHelper != null) {
 			dbHelper.close();
 			dbHelper=null;
@@ -219,7 +216,6 @@ public class PassList extends ListActivity {
 		Intent i = new Intent(this, PassEdit.class);
 		i.putExtra(KEY_ID, rows.get(position).id);
 		i.putExtra(KEY_CATEGORY_ID, CategoryId);
-		Log.i(TAG,"startActivityForResult(i,1)");
 	    startActivityForResult(i,REQUEST_EDIT_PASSWORD);
     }
 
@@ -230,7 +226,6 @@ public class PassList extends ListActivity {
     	if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
-    	Log.d(TAG,"onActivityResult("+requestCode+","+resultCode+",)");
     	fillData();
     }
 
