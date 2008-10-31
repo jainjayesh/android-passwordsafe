@@ -17,7 +17,10 @@
 package com.bitsetters.android.passwordsafe;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.ClipboardManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -71,6 +74,7 @@ public class PassEdit extends Activity {
 		websiteText = (EditText) findViewById(R.id.website);
 	
 		Button confirmButton = (Button) findViewById(R.id.save);
+		Button goButton = (Button) findViewById(R.id.go);
 	
 		RowId = icicle != null ? icicle.getLong(PassList.KEY_ID) : null;
 		if (RowId == null) {
@@ -79,6 +83,19 @@ public class PassEdit extends Activity {
 		}
 	
 		populateFields();
+		
+		goButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View arg0) {
+				
+				ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+				cb.setText(passwordText.getText().toString());
+				
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				Uri u = Uri.parse(websiteText.getText().toString());
+				i.setData(u);
+				startActivity(i); 
+			}
+		});
 	
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 		    public void onClick(View arg0) {

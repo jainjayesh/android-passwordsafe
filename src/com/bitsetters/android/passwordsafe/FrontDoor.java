@@ -17,6 +17,7 @@
 package com.bitsetters.android.passwordsafe;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -109,8 +110,9 @@ public class FrontDoor extends Activity {
 		}
 		PassList.setPBEKey(PBEKey);
 		CategoryList.setPBEKey(PBEKey);
-		
-		setResult(RESULT_OK);
+
+		Intent i = new Intent(getApplicationContext(), CategoryList.class);
+		startActivity(i);
 		finish();
 	    }
 

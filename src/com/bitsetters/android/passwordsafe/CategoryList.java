@@ -47,6 +47,7 @@ import android.widget.Toast;
  * CategoryList Activity
  * 
  * @author Randy McEoin
+ * @author Steven Osborn - http://steven.bitsetters.com
  */
 public class CategoryList extends ListActivity {
 
@@ -75,7 +76,6 @@ public class CategoryList extends ListActivity {
     private DBHelper dbHelper=null;
 	private boolean needPrePopulateCategories=false;
 	
-    private static boolean signedIn = false;  // Has user logged in
     private static String PBEKey;	      // Password Based Encryption Key			
 
     private List<CategoryEntry> rows;
@@ -84,7 +84,7 @@ public class CategoryList extends ListActivity {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 Log.d(TAG,"caught ACTION_SCREEN_OFF");
-                signedIn=false;
+                PBEKey=null;
             }
         }
     };
@@ -123,12 +123,7 @@ public class CategoryList extends ListActivity {
 		    dbHelper = new DBHelper(this);
 		}
 
-		if(!signedIn) {
-		    Intent i = new Intent(this, FrontDoor.class);
-		    startActivityForResult(i,REQUEST_ONCREATE);
-		} else {
-			fillData();
-		}
+		fillData();
     }
     
     @Override
@@ -161,7 +156,10 @@ public class CategoryList extends ListActivity {
      * @return	True if signed in
      */
     public static boolean isSignedIn() {
-    	return signedIn;
+    	if (PBEKey != null) {
+    		return true;
+    	}
+    	return false;
     }
     /**
      * Sets signedIn status to false.
@@ -170,7 +168,7 @@ public class CategoryList extends ListActivity {
      */
     public static void setSignedOut() {
     	Log.d(TAG,"setSignedOut()");
-    	signedIn=false;
+    	PBEKey=null;
     }
     /**
      * Populates the category ListView
@@ -266,7 +264,7 @@ public class CategoryList extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 		case LOCK_CATEGORY_INDEX:
-			signedIn=false;
+			PBEKey=null;
 		    Intent frontdoor = new Intent(this, FrontDoor.class);
 		    startActivityForResult(frontdoor,REQUEST_ONCREATE);
 			break;
@@ -324,9 +322,6 @@ public class CategoryList extends ListActivity {
 		}
 
     	if (requestCode==REQUEST_ONCREATE) {
-    		if (resultCode==RESULT_OK) {
-    			signedIn=true;
-    		}
     		if (needPrePopulateCategories==true)
 	    	{
 	    		needPrePopulateCategories=false;
@@ -334,9 +329,8 @@ public class CategoryList extends ListActivity {
 	    		addCategory(getString(R.string.category_personal));
 	    	}
     	}
-    	if (signedIn) {
-    		fillData();
-    	}
+    	
+    	fillData();
     }
 
     private void addCategory(String name) {

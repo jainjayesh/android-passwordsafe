@@ -20,7 +20,7 @@
 
 <resources>
     <string name="app_name">Password Safe</string>
-    <string name="author">Steven Osborn and Randy McEoin</string>
+    <string name="authors">Steven Osborn, Randy McEoin</string>
     <string name="version">0.2.4</string>
     <string name="empty_safe">No Passwords present for this category.</string>
     <string name="empty_category">No categories present.  Please add one via Menu->Add</string>
@@ -72,4 +72,5 @@
 	<string name="edit_entry">Edit Entry</string>
 	<string name="help">Help</string>
 	<string name="close">Close</string>
+	<string name="go">Go</string>
 </resources>
