@@ -70,4 +70,6 @@
 	<string name="added">Added</string>
 	<string name="entries">entries</string>
 	<string name="edit_entry">Edit Entry</string>
+	<string name="help">Help</string>
+	<string name="close">Close</string>
 </resources>

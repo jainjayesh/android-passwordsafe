@@ -1,0 +1,88 @@
+<html>
+<head>
+<style  TYPE="text/css">
+<!--
+body {
+  background: black;
+  color: white; } 
+--> 
+</style>
+</head>
+<body>
+<h1>Help</h1>
+
+<h2>Categories</h2>
+
+<p>Categories are used to contain passwords.   You might have one for Work and 
+ one for Personal.  This helps keep your passwords organized.</p>
+
+<p>Begin by adding one via the Menu.   After you've created one, you can touch it
+ to open that category.   Once a category is selected you may then create password entries.</p>
+
+
+<h2>Passwords</h2>
+
+<p>After first selecting a category, you may Edit, Add or Delete password entries
+ from the Password List activity.</p>
+
+<p>Password entries consist of the following fields:<p>
+
+<dl>
+<dt>Description</dt>
+<dd>Description is a required field.   This is what is shown in the password list.</dd>
+
+<dt>Website</dt>
+<dd>If appropriate, provide the full URL to the website associated with this entry.</dd>
+
+<dt>Username</dt>
+<dd>Username for the password, if appropriate.</dd>
+
+<dt>Password</dt>
+<dd>Finally the password itself.</dd>
+
+<dt>Notes</dt>
+<dd>Miscellaneous notes about this entry.  You may type as much as you want, the field
+ will expand to accommodate.</dd>
+</dl>
+ 
+<h2>Security Concerns</h2>
+ 
+<p>Password Safe was written to safely store your passwords so that nobody can see
+  them other than you.
+  The password you use to unlock Password Safe is used to encrypt the data.
+  Data is stored within a SQLite database within your phone.   That database stays
+  local.  It does not get transferred to the Internet.   In fact, the application
+  doesn't have the security privileges to even access the Internet.</p>
+  
+<p>Because Password Safe cannot access the Internet, the data is not backed up.
+  In order to backup, you will need to export to a CSV and store that file
+  in some other secure fashion.</p>
+
+<h3>Locking</h3>
+
+<p>Any of the following actions will cause Password Safe to lock:</p>
+
+<ul>
+  <li>The screen turns off.  This is a default behavior of the phone and is controlled
+   in the phone's Settings -&gt; Sound &amp; display -> Screen timeout.   
+   The default timeout is 1 minute.
+   After 1 minute the phone will go to sleep.   When this happens, Password Safe will 
+   lock itself.</li>
+  <li>You select <i>Lock</i> from the Menu on the Categories screen.</li>
+  <li>Android only allows six active applications.  Once you launch the seventh,
+   the oldest used application will be killed.  If Password Safe is killed, than
+   the next time you launch it, it will be locked.</li>
+</ul>
+
+<p>Really, the easiest way to lock is to just hit the power button on the phone briefly and
+ turn off the screen.</p>
+
+<h2>More Information</h2>
+
+<p>For further information about this application, please visit the
+  <a href="http://code.google.com/p/android-passwordsafe">Android Password Safe</a>
+  project web page at
+  <a href="http://code.google.com/p/android-passwordsafe">http://code.google.com/p/android-passwordsafe</a>.</p>
+ 
+</body>
+</html>

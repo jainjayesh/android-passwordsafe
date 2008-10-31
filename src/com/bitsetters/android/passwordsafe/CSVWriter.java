@@ -1,3 +1,6 @@
+/* $Id$
+ */
+
 package com.bitsetters.android.passwordsafe;
 
 /**

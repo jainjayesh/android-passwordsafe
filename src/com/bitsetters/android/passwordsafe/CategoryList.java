@@ -57,9 +57,10 @@ public class CategoryList extends ListActivity {
     public static final int EDIT_CATEGORY_INDEX = Menu.FIRST + 1;
     public static final int ADD_CATEGORY_INDEX = Menu.FIRST + 2;
     public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 3;
-    public static final int EXPORT_INDEX = Menu.FIRST + 4;
-    public static final int IMPORT_INDEX = Menu.FIRST + 5;
-
+    public static final int HELP_INDEX = Menu.FIRST + 4;
+    public static final int EXPORT_INDEX = Menu.FIRST + 5;
+    public static final int IMPORT_INDEX = Menu.FIRST + 6;
+    
     public static final int REQUEST_ONCREATE = 0;
     public static final int REQUEST_EDIT_CATEGORY = 1;
     public static final int REQUEST_ADD_CATEGORY = 2;
@@ -227,10 +228,14 @@ public class CategoryList extends ListActivity {
 			.setIcon(android.R.drawable.ic_menu_delete)
 			.setShortcut('3', 'd');
 
+		menu.add(0, HELP_INDEX, 0, R.string.help)
+			.setIcon(android.R.drawable.ic_menu_help);
+
 		menu.add(0, EXPORT_INDEX, 0, R.string.export_database)
 			.setIcon(android.R.drawable.ic_menu_upload);
 		menu.add(0, IMPORT_INDEX, 0, R.string.import_database)
 			.setIcon(android.R.drawable.ic_input_get);
+
 	
 		return super.onCreateOptionsMenu(menu);
     }
@@ -288,6 +293,10 @@ public class CategoryList extends ListActivity {
 				Log.w(TAG,e.toString());
 		    }
 		    break;
+		case HELP_INDEX:
+		    Intent help = new Intent(this, Help.class);
+		    startActivityForResult(help,0);
+			break;
 		case EXPORT_INDEX:
 			exportDatabase();
 			break;
