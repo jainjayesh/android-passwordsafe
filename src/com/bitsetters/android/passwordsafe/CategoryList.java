@@ -146,7 +146,7 @@ public class CategoryList extends ListActivity {
     @Override
     public void onDestroy() {
 		super.onDestroy();
-
+		unregisterReceiver(mIntentReceiver);
 		Log.d(TAG,"onDestroy()");
     }
 
