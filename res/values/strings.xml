@@ -50,10 +50,10 @@
 	<string name="cannot_decrypt_password">Cannot decrypt password</string>
 	<string name="error_export">Error exporting database</string>
 	<string name="export_database">Export Database</string>
-	<string name="export_success">Export successful.   Warning!   The file is not encrypted.</string>
-	<string name="export_file_error">Unable to create export file on SDCARD.  You might try inserting one.</string>
+	<string name="export_success">Export to 'passwordsafe.csv' successful.   Warning!   The file is not encrypted.</string>
+	<string name="export_file_error">Unable to create export file 'passwordsafe.csv' on SDCARD.  You might try disconnecting USB from computer.</string>
 	<string name="import_database">Import Database</string>
-	<string name="import_file_error">Unable to import file from SDCARD.  You might try inserting one.</string>
+	<string name="import_file_error">Unable to import file 'passwordsafe.csv' from SDCARD.  You might try disconnecting USB from computer.</string>
 	<string name="import_error_first_line">First line is missing fields.</string>
 	<string name="dialog_import_title">Import</string>
 	<string name="dialog_import_msg">Do you want to replace the database?</string>
@@ -62,6 +62,9 @@
 	<string name="import_no_categories">No categories found.</string>
 	<string name="import_no_entries">No entries found in CSV.</string>
 	<string name="import_too_many_categories">Too many categories.</string>
+	<string name="import_not_enough_fields">Not enough fields</string>
+	<string name="import_blank_category">Blank category</string>
+	<string name="import_blank_description">Blank description</string>
 	<string name="dialog_delete_database_title">Delete Database</string>
 	<string name="dialog_delete_database_msg">Are you really sure you want to delete the database?  This cannot be undone.</string>
 	<string name="added">Added</string>

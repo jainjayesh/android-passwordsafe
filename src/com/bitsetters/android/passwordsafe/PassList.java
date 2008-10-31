@@ -69,6 +69,7 @@ public class PassList extends ListActivity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		
+//		Log.d(TAG,"onCreate()");
 		setContentView(R.layout.pass_list);
 		
 		String title = getResources().getString(R.string.app_name) + " - " +
@@ -93,6 +94,8 @@ public class PassList extends ListActivity {
     @Override
     protected void onPause() {
 		super.onPause();
+		
+//		Log.d(TAG,"onPause()");
 		if (dbHelper != null) {
 			dbHelper.close();
 			dbHelper = null;
@@ -102,6 +105,9 @@ public class PassList extends ListActivity {
     @Override
     protected void onResume() {
 		super.onResume();
+		
+//		Log.d(TAG,"onResume()");
+
 		if (CategoryList.isSignedIn()==false) {
 			finish();
 		}
@@ -114,6 +120,7 @@ public class PassList extends ListActivity {
     public void onStop() {
 		super.onStop();
 		
+//		Log.d(TAG,"onStop()");
 		if (dbHelper != null) {
 			dbHelper.close();
 			dbHelper=null;

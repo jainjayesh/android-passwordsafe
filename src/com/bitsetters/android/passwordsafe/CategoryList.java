@@ -441,7 +441,7 @@ public class CategoryList extends ListActivity {
 	}
 
 	public void deleteDatabase4Import(){
-		Log.i(TAG,"deleteDatabase4Import");
+//		Log.i(TAG,"deleteDatabase4Import");
 		Dialog about = new AlertDialog.Builder(this)
 			.setIcon(R.drawable.passicon)
 			.setTitle(R.string.dialog_delete_database_title)
@@ -481,7 +481,8 @@ public class CategoryList extends ListActivity {
 	
 	private void importDatabaseStep2(){
 		try {
-			CSVReader reader = new CSVReader(new FileReader(EXPORT_FILENAME));
+			final int recordLength=6;
+			CSVReader reader= new CSVReader(new FileReader(EXPORT_FILENAME));
 		    String [] nextLine;
 		    nextLine = reader.readNext();
 		    if (nextLine==null) {
@@ -489,7 +490,7 @@ public class CategoryList extends ListActivity {
 		                Toast.LENGTH_SHORT).show();
 		        return;
 		    }
-		    if (nextLine.length != 6){
+		    if (nextLine.length != recordLength){
 		        Toast.makeText(CategoryList.this, R.string.import_error_first_line,
 		                Toast.LENGTH_SHORT).show();
 		        return;
@@ -505,7 +506,7 @@ public class CategoryList extends ListActivity {
 		                Toast.LENGTH_SHORT).show();
 		        return;
 		    }
-		    Log.i(TAG,"first line is valid");
+//		    Log.i(TAG,"first line is valid");
 		    
 		    HashMap<String, Long> categoryToId=getCategoryToId();
 		    //
@@ -550,19 +551,55 @@ public class CategoryList extends ListActivity {
 			reader = new CSVReader(new FileReader(EXPORT_FILENAME));
 		    nextLine = reader.readNext();
 		    int newEntries=0;
+		    int lineNumber=0;
+		    String lineErrors="";
+		    int lineErrorsCount=0;
+		    final int maxLineErrors=10;
 		    while ((nextLine = reader.readNext()) != null) {
+		    	lineNumber++;
+//		    	Log.d(TAG,"lineNumber="+lineNumber);
+		    	
 		        // nextLine[] is an array of values from the line
-			    if (nextLine.length != 6){
+			    if (nextLine.length < 2){
+			    	if (lineErrorsCount < maxLineErrors) {
+				    	lineErrors += "line "+lineNumber+": "+
+				    		getString(R.string.import_not_enough_fields)+"\n";
+			    		lineErrorsCount++;
+			    	}
 			    	continue;	// skip if not enough fields
 			    }
+			    if (nextLine.length < recordLength){
+			    	// if the fields after category and description are missing, 
+			    	// just fill them in
+			    	String [] replacement=new String[recordLength];
+			    	for (int i=0;i<nextLine.length; i++) {
+			    		// copy over the fields we did get
+			    		replacement[i]=nextLine[i];
+			    	}
+			    	for (int i=nextLine.length; i<recordLength; i++) {
+			    		// flesh out the rest of the fields
+			    		replacement[i]="";
+			    	}
+			    	nextLine=replacement;
+			    }
 		        if ((nextLine==null) || (nextLine[0]=="")){
+			    	if (lineErrorsCount < maxLineErrors) {
+				    	lineErrors += "line "+lineNumber+": "+
+				    		getString(R.string.import_blank_category)+"\n";
+			    		lineErrorsCount++;
+			    	}
 		        	continue;	// skip blank categories
 		        }
 		        String description=nextLine[1];
 		        if ((description==null) || (description=="")){
+			    	if (lineErrorsCount < maxLineErrors) {
+				    	lineErrors += "line "+lineNumber+": "+
+				    		getString(R.string.import_blank_description)+"\n";
+			    		lineErrorsCount++;
+			    	}
 		        	continue;
 		        }
-
+		        
 		        PassEntry entry=new PassEntry();
 				try {
 					entry.category = categoryToId.get(nextLine[0]);
@@ -579,6 +616,9 @@ public class CategoryList extends ListActivity {
 		        newEntries++;
 		    }
 			reader.close();
+			if (lineErrors != "") {
+				Log.d(TAG,lineErrors);
+			}
 
 			if (newEntries==0)
 		    {
@@ -594,7 +634,7 @@ public class CategoryList extends ListActivity {
 		} catch (IOException e) {
 			e.printStackTrace();
 	        Toast.makeText(CategoryList.this, R.string.import_file_error,
-	                Toast.LENGTH_SHORT).show();
+	                Toast.LENGTH_LONG).show();
 		}
 	}
 
