@@ -221,9 +221,9 @@ public class CategoryList extends ListActivity {
 		menu.add(0,EDIT_CATEGORY_INDEX, 0, R.string.password_edit)
 			.setIcon(android.R.drawable.ic_menu_edit)
 			.setShortcut('1', 'e');
-		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_insert)
+		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_add)
 			.setIcon(android.R.drawable.ic_menu_add)
-			.setShortcut('2', 'i');
+			.setShortcut('2', 'a');
 		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete)  
 			.setIcon(android.R.drawable.ic_menu_delete)
 			.setShortcut('3', 'd');
@@ -295,7 +295,7 @@ public class CategoryList extends ListActivity {
 		    break;
 		case HELP_INDEX:
 		    Intent help = new Intent(this, Help.class);
-		    startActivityForResult(help,0);
+		    startActivity(help);
 			break;
 		case EXPORT_INDEX:
 			exportDatabase();

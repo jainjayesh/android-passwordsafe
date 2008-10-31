@@ -26,7 +26,7 @@
     <string name="empty_category">No categories present.  Please add one via Menu->Add</string>
     <string name="password_lock">Lock</string>
     <string name="password_edit">Edit</string>
-    <string name="password_insert">Add</string>
+    <string name="password_add">Add</string>
     <string name="password_delete">Delete</string>
     <string name="password">Password</string>
     <string name="passwords">Passwords</string>

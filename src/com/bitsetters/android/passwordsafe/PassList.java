@@ -169,10 +169,12 @@ public class PassList extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
-		menu.add(0,ADD_PASSWORD_INDEX, 0, R.string.password_insert)
-			.setIcon(android.R.drawable.ic_menu_add);
+		menu.add(0,ADD_PASSWORD_INDEX, 0, R.string.password_add)
+			.setIcon(android.R.drawable.ic_menu_add)
+			.setShortcut('2', 'a');
 		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete)
-			.setIcon(android.R.drawable.ic_menu_delete);
+			.setIcon(android.R.drawable.ic_menu_delete)
+			.setShortcut('3', 'd');
 	
 		return super.onCreateOptionsMenu(menu);
     }

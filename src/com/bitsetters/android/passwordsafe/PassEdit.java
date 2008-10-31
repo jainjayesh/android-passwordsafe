@@ -156,9 +156,11 @@ public class PassEdit extends Activity {
 		super.onCreateOptionsMenu(menu);
 
 		menu.add(0, SAVE_PASSWORD_INDEX, 0, R.string.save)
-		.setIcon(android.R.drawable.ic_menu_save);
+			.setIcon(android.R.drawable.ic_menu_save)
+			.setShortcut('1', 's');
 		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete)
-			.setIcon(android.R.drawable.ic_menu_delete);
+			.setIcon(android.R.drawable.ic_menu_delete)
+			.setShortcut('3', 'd');
 	
 		return super.onCreateOptionsMenu(menu);
     }

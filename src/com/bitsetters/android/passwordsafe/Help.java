@@ -84,7 +84,7 @@ public class Help extends Activity {
 	
 		menu.add(0,CLOSE_HELP_INDEX, 0, R.string.close)
 			.setIcon(android.R.drawable.ic_menu_close_clear_cancel)
-			.setShortcut('0', 'l');
+			.setShortcut('0', 'w');
 		
 		return super.onCreateOptionsMenu(menu);
     }
