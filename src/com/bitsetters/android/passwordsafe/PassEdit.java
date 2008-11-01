@@ -87,6 +87,8 @@ public class PassEdit extends Activity {
 		goButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
 				
+				Toast.makeText(PassEdit.this, "Copying Password Clipboard", Toast.LENGTH_SHORT).show();
+				
 				ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 				cb.setText(passwordText.getText().toString());
 				
