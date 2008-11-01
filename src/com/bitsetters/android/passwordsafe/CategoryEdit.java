@@ -139,5 +139,4 @@ public class CategoryEdit extends Activity {
 		    }            
 		}
     }
-
 }

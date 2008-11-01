@@ -37,104 +37,105 @@ import android.widget.Toast;
  */
 public class FrontDoor extends Activity {
 
-    private static String TAG = "FrontDoor";
-    
-    private EditText pbeKey;
-    private DBHelper dbHelper;
-    private TextView IntroText;
-    private String PBEKey;
-    private String confirmKey; 
-    private CryptoHelper ch;
-    private boolean firstTime = false;
-    
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle icicle) {
-	super.onCreate(icicle);
-	dbHelper = new DBHelper(this);
-	ch = new CryptoHelper();
+	private static String TAG = "FrontDoor";
 
-	//Setup layout
-	setContentView(R.layout.front_door);
-	ImageView icon = (ImageView) findViewById(R.id.entry_icon);
-	icon.setImageResource(R.drawable.passicon);
-	TextView header = (TextView) findViewById(R.id.entry_header);
-	String version = getString(R.string.version);
-	String appName = getString(R.string.app_name);
-	String head = appName + " " + version + "\n";
-	header.setText(head);
+	private EditText pbeKey;
+	private DBHelper dbHelper;
+	private TextView IntroText;
+	private String PBEKey;
+	private String confirmKey;
+	private CryptoHelper ch;
+	private boolean firstTime = false;
 
-	pbeKey = (EditText) findViewById(R.id.password);
-	IntroText = (TextView) findViewById(R.id.first_time);
-	confirmKey = dbHelper.fetchPBEKey();
-	if(confirmKey.length() == 0) {
-	    firstTime = true;
-	    IntroText.setVisibility(View.VISIBLE);
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
+		dbHelper = new DBHelper(this);
+		ch = new CryptoHelper();
+
+		// Setup layout
+		setContentView(R.layout.front_door);
+		ImageView icon = (ImageView) findViewById(R.id.entry_icon);
+		icon.setImageResource(R.drawable.passicon);
+		TextView header = (TextView) findViewById(R.id.entry_header);
+		String version = getString(R.string.version);
+		String appName = getString(R.string.app_name);
+		String head = appName + " " + version + "\n";
+		header.setText(head);
+
+		pbeKey = (EditText) findViewById(R.id.password);
+		IntroText = (TextView) findViewById(R.id.first_time);
+		confirmKey = dbHelper.fetchPBEKey();
+		if (confirmKey.length() == 0) {
+			firstTime = true;
+			IntroText.setVisibility(View.VISIBLE);
+		}
+
+		Button continueButton = (Button) findViewById(R.id.continue_button);
+
+		continueButton.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View arg0) {
+				PBEKey = pbeKey.getText().toString();
+				ch.setPassword(PBEKey);
+
+				// Password must be at least 4 characters
+				if (PBEKey.length() < 4) {
+					Toast.makeText(FrontDoor.this, R.string.notify_blank_pass,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
+
+				// If it's the user's first time to enter a password,
+				// we have to store it in the database. We are going to
+				// store an encrypted hash of the password.
+				if (firstTime) {
+					byte[] md5Key = CryptoHelper.md5String(PBEKey);
+					String hexKey = CryptoHelper.toHexString(md5Key);
+					String cryptKey = "";
+					Log.i(TAG, "Saving Password: " + hexKey);
+					try {
+						cryptKey = ch.encrypt(hexKey);
+						dbHelper.storePBEKey(cryptKey);
+					} catch (CryptoHelperException e) {
+						Log.e(TAG, e.toString());
+					}
+				} else if (!checkUserPassword()) {
+					// Check the user's password and display a
+					// message if it's wrong
+					Toast.makeText(FrontDoor.this, R.string.invalid_password,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
+				PassList.setPBEKey(PBEKey);
+				CategoryList.setPBEKey(PBEKey);
+
+				Intent i = new Intent(getApplicationContext(),
+						CategoryList.class);
+				startActivity(i);
+				finish();
+			}
+
+		});
 	}
 
-	Button continueButton = (Button) findViewById(R.id.continue_button);
-
-	continueButton.setOnClickListener(new View.OnClickListener() {
-
-	    public void onClick(View arg0) {
-		PBEKey = pbeKey.getText().toString();
-		ch.setPassword(PBEKey);
-		
-		// Password must be at least 4 characters
-		if(PBEKey.length() < 4) {
-            Toast.makeText(FrontDoor.this, R.string.notify_blank_pass,
-                    Toast.LENGTH_SHORT).show();
-		    return;
-		}
-		
-		// If it's the user's first time to enter a password,
-		// we have to store it in the database.  We are going to 
-		// store an encrypted hash of the password.
-		if(firstTime) {
-		    byte[] md5Key = CryptoHelper.md5String(PBEKey);
-		    String hexKey = CryptoHelper.toHexString(md5Key);
-		    String cryptKey = "";
-		    Log.i(TAG, "Saving Password: " + hexKey );
-		    try {
-		    	cryptKey = ch.encrypt(hexKey);
-		    	dbHelper.storePBEKey(cryptKey);
-		    } catch (CryptoHelperException e) {
-		    	Log.e(TAG,e.toString());
-		    }
-		} else if(!checkUserPassword()) {
-		    // Check the user's password and display a 
-		    // message if it's wrong
-            Toast.makeText(FrontDoor.this, R.string.invalid_password,
-                    Toast.LENGTH_SHORT).show();
-		    return;
-		}
-		PassList.setPBEKey(PBEKey);
-		CategoryList.setPBEKey(PBEKey);
-
-		Intent i = new Intent(getApplicationContext(), CategoryList.class);
-		startActivity(i);
-		finish();
-	    }
-
-	});
-    }
-    
-    /**
-     * 
-     * @return
-     */
-    private boolean checkUserPassword() {
+	/**
+	 * 
+	 * @return
+	 */
+	private boolean checkUserPassword() {
 		byte[] md5Pass = CryptoHelper.md5String(PBEKey);
 		String hexPass = CryptoHelper.toHexString(md5Pass);
 		String decryptConfirm = "";
 		try {
-		    decryptConfirm = ch.decrypt(confirmKey);
+			decryptConfirm = ch.decrypt(confirmKey);
 		} catch (CryptoHelperException e) {
-		    Log.e(TAG,e.toString());
+			Log.e(TAG, e.toString());
 		}
-		if(decryptConfirm.compareTo(hexPass) == 0) {
-		    return true;
+		if (decryptConfirm.compareTo(hexPass) == 0) {
+			return true;
 		}
 		return false;
-    }
+	}
 }

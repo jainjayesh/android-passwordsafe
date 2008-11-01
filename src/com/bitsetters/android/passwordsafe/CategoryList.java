@@ -96,6 +96,12 @@ public class CategoryList extends ListActivity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		
+		if (!isSignedIn()) {
+			Intent frontdoor = new Intent(this, FrontDoor.class);
+			startActivity(frontdoor);		
+			finish();
+    	}
+		
 		setContentView(R.layout.cat_list);
 		String title = getResources().getString(R.string.app_name) + " - " +
 			getResources().getString(R.string.categories);
@@ -109,6 +115,7 @@ public class CategoryList extends ListActivity {
 				needPrePopulateCategories=true;
 			}
 		}
+		
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(mIntentReceiver, filter);
@@ -161,6 +168,8 @@ public class CategoryList extends ListActivity {
     	}
     	return false;
     }
+    
+    
     /**
      * Sets signedIn status to false.
      * 
@@ -266,7 +275,8 @@ public class CategoryList extends ListActivity {
 		case LOCK_CATEGORY_INDEX:
 			PBEKey=null;
 		    Intent frontdoor = new Intent(this, FrontDoor.class);
-		    startActivityForResult(frontdoor,REQUEST_ONCREATE);
+		    startActivity(frontdoor);
+		    finish();
 			break;
 		case EDIT_CATEGORY_INDEX:
 			Intent i = new Intent(this, CategoryEdit.class);
