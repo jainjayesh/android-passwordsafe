@@ -41,8 +41,9 @@ import android.view.View.OnFocusChangeListener;
  */
 public class PassGen extends Activity {
 	
-	public static String replace_pass = null;
 	public static final int CHANGE_ENTRY_RESULT = 2;
+	public static final String NEW_PASS_KEY="new_pass";
+	
 	EditText pass_view;
 	EditText pass_len;
 	CheckBox pass_upper;
@@ -56,20 +57,17 @@ public class PassGen extends Activity {
 	Button cancel;
 
 	private final OnClickListener update_click = new OnClickListener() {
-		@Override
 		public void onClick(View v) {
 			genPassword();
 		}
 	};
 	private final OnCheckedChangeListener update_checked = new OnCheckedChangeListener() {
-		@Override
 		public void onCheckedChanged(CompoundButton buttonView,
 				boolean isChecked) {
 			genPassword();
 		}
 	};
 	private final OnKeyListener update_key = new OnKeyListener() {
-		@Override
 		public boolean onKey(View v, int keyCode, KeyEvent event) {
 			genPassword();
 			return false;
@@ -77,21 +75,18 @@ public class PassGen extends Activity {
 		
 	};
 	private final OnFocusChangeListener update_focus = new OnFocusChangeListener() {
-		@Override
 		public void onFocusChange(View v, boolean hasFocus) {
 			genPassword();
 		}
 	};
 	
 	private final OnClickListener cancel_listener = new OnClickListener() {
-		@Override
 		public void onClick(View v) {
 			finish();
 		}
 	};
 	
 	private final OnClickListener copy_clip_listener = new OnClickListener() {
-		@Override
 		public void onClick(View v) {
 			ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			cb.setText(pass_view.getText().toString());
@@ -100,9 +95,10 @@ public class PassGen extends Activity {
 	};
 	
 	private final OnClickListener copy_entry_listener = new OnClickListener() {
-		@Override
 		public void onClick(View v) {
-			PassGen.replace_pass = pass_view.getText().toString();
+			Bundle b = new Bundle();
+			b.putString(NEW_PASS_KEY, pass_view.getText().toString());
+			getIntent().putExtras(b);
 			setResult(CHANGE_ENTRY_RESULT);
 			finish();
 		}

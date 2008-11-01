@@ -3,4 +3,7 @@
 0.2.1 [Sept 5, 2008] - Fixed delete, fixed bug where new entries wouldn't show
  up immediately. 
 0.2.2 [Sept 16, 2008] - Added categories and export to CSV.
-0.2.3 [Oct 21, 2008] - Assorted bug fixes.  Bumped database to version 2. Initial Market Version.
+0.2.3 [Oct 21, 2008] - Assorted bug fixes.  Bumped database to version 2. 
+ Initial Market Version.
+0.3.0 [Nov 2, 2008] - Improved Import/Export, Help Screen, Password Generator,
+ Fixed issue where initial screen ate back button

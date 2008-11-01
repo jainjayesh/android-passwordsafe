@@ -16,6 +16,9 @@
  */
 package com.bitsetters.android.passwordsafe;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -233,14 +236,18 @@ public class PassEdit extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+		
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent i) {
 		super.onActivityResult(requestCode, resultCode, i);
-		Log.d(TAG, String.valueOf(requestCode));
-		Log.d(TAG, String.valueOf(resultCode));
+		Bundle extras = i.getExtras();
+
 		if (requestCode == REQUEST_GEN_PASS) {
 			if(resultCode == PassGen.CHANGE_ENTRY_RESULT) {
-				passwordText.setText(PassGen.replace_pass);
+				String new_pass = "";
+				new_pass =  extras.getString(PassGen.NEW_PASS_KEY);
+				
+				passwordText.setText(new_pass);
 			}
 		}
 	}
