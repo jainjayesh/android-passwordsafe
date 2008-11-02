@@ -159,12 +159,23 @@ public class PassList extends ListActivity {
 		}
 
 		ArrayAdapter<String> entries = 
-//		    new ArrayAdapter<String>(this, R.layout.pass_row, R.id.entry_desc, items);
 		    new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
 		setListAdapter(entries);
 		
     }
 
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+		MenuItem mi = menu.findItem(DEL_PASSWORD_INDEX);
+    	if (getSelectedItemPosition() > -1) {
+    		mi.setEnabled(true);
+    	} else {
+    		mi.setEnabled(false);
+    	}
+    	return super.onMenuOpened(featureId, menu);
+    }
+    
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);

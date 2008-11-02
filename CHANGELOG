@@ -1,4 +1,4 @@
-0.1.0 [Nov 20, 2007] - Initial release for of PasswordSafe
+0.1.0 [Nov 20, 2007] - Initial release of Password Safe
 0.2.0 [Sept 4, 2008] - Updated to work with Android 0.9 thanks to Randy McEoin
 0.2.1 [Sept 5, 2008] - Fixed delete, fixed bug where new entries wouldn't show
  up immediately. 
@@ -7,3 +7,4 @@
  Initial Market Version.
 0.3.0 [Nov 2, 2008] - Improved Import/Export, Help Screen, Password Generator,
  Fixed issue where initial screen ate back button
+ Fixed issue with passwords/categories not being saved after orientation change

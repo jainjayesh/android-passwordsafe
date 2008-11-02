@@ -96,10 +96,8 @@ public class PassGen extends Activity {
 	
 	private final OnClickListener copy_entry_listener = new OnClickListener() {
 		public void onClick(View v) {
-			Bundle b = new Bundle();
-			b.putString(NEW_PASS_KEY, pass_view.getText().toString());
-			getIntent().putExtras(b);
-			setResult(CHANGE_ENTRY_RESULT);
+			getIntent().putExtra(PassGen.NEW_PASS_KEY, pass_view.getText().toString());
+			setResult(CHANGE_ENTRY_RESULT, getIntent());
 			finish();
 		}
 	};

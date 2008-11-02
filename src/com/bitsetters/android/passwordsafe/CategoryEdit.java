@@ -40,7 +40,8 @@ public class CategoryEdit extends Activity {
 
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-	
+		Log.d(TAG, "onCreate");
+		
 		ch = new CryptoHelper();
 		ch.setPassword(PassList.getPBEKey());
 
@@ -88,12 +89,15 @@ public class CategoryEdit extends Activity {
     	super.onSaveInstanceState(outState);
     	if (RowId != null) {
     		outState.putLong(CategoryList.KEY_ID, RowId);
+    	} else {
+    		outState.putLong(CategoryList.KEY_ID, -1);
     	}
     }
 
     @Override
     protected void onPause() {
 		super.onPause();
+		Log.d(TAG, "onPause");
 		dbHelper.close();
 		dbHelper = null;
     }
@@ -101,6 +105,7 @@ public class CategoryEdit extends Activity {
     @Override
     protected void onResume() {
 		super.onResume();
+		Log.d(TAG, "onResume");
 		if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
@@ -108,10 +113,12 @@ public class CategoryEdit extends Activity {
     }
 
     private void saveState() {
+    	Log.d(TAG, "saveState");
 		CategoryEntry entry =  new CategoryEntry();
 	
 		String namePlain = nameText.getText().toString();
-
+		Log.d(TAG, "name: " + namePlain);
+		
 		try {
 		    entry.name = ch.encrypt(namePlain);
 		} catch(CryptoHelperException e) {
@@ -119,14 +126,21 @@ public class CategoryEdit extends Activity {
 		}
 	
 	
-		if(RowId == null) {
+		if(RowId == null || RowId == -1) {
+			Log.d(TAG, "addCategory");
 		    dbHelper.addCategory(entry);
 		} else {
+			Log.d(TAG, "updateCategory");
+			Log.d(TAG, "RowId: " + String.valueOf(RowId));
 		    dbHelper.updateCategory(RowId, entry);
 		}
     }
 
-    private void populateFields() { 
+    /**
+     * 
+     */
+    private void populateFields() {
+    	Log.d(TAG, "populateFields");
 		if (RowId != null) {
 		    CategoryEntry row = dbHelper.fetchCategory(RowId);
 		    if (row.id > -1) {

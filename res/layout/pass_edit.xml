@@ -47,7 +47,8 @@
 					android:text="@string/website" />
 				<EditText android:id="@+id/website"
 				    android:layout_width="wrap_content"
-					android:layout_height="wrap_content" 
+					android:layout_height="wrap_content"
+					android:singleLine="true" 
 					android:layout_weight="1"/>
 				<Button android:id="@+id/go" 
 	  					android:text="@string/go"

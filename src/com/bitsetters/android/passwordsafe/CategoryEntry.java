@@ -18,7 +18,6 @@ package com.bitsetters.android.passwordsafe;
 
 /**
  * @author Randy McEoin
- *
  */
 public class CategoryEntry extends Object {
     public long id;

@@ -16,8 +16,6 @@
  */
 package com.bitsetters.android.passwordsafe;
 
-import java.util.Iterator;
-import java.util.Set;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -54,7 +52,8 @@ public class PassEdit extends Activity {
 	private Long RowId;
 	private DBHelper dbHelper = null;
 	private CryptoHelper ch;
-
+	private boolean pass_gen_ret = false;
+	
 	private static String TAG = "PassEdit";
 
 	public void onCreate(Bundle icicle) {
@@ -125,6 +124,8 @@ public class PassEdit extends Activity {
 		super.onSaveInstanceState(outState);
 		if (RowId != null) {
 			outState.putLong(PassList.KEY_ID, RowId);
+		} else {
+			outState.putLong(PassList.KEY_ID, -1);
 		}
 	}
 
@@ -168,7 +169,7 @@ public class PassEdit extends Activity {
 			Log.e(TAG, e.toString());
 		}
 
-		if (RowId == null) {
+		if (RowId == null || RowId == -1) {
 			dbHelper.addPassword(entry);
 		} else {
 			dbHelper.updatePassword(RowId, entry);
@@ -235,24 +236,32 @@ public class PassEdit extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
 		
+	/**
+	 * 
+	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent i) {
 		super.onActivityResult(requestCode, resultCode, i);
-		Bundle extras = i.getExtras();
 
 		if (requestCode == REQUEST_GEN_PASS) {
 			if(resultCode == PassGen.CHANGE_ENTRY_RESULT) {
-				String new_pass = "";
-				new_pass =  extras.getString(PassGen.NEW_PASS_KEY);
-				
+				String new_pass = i.getStringExtra(PassGen.NEW_PASS_KEY);
+				Log.d(TAG,new_pass);
 				passwordText.setText(new_pass);
+				pass_gen_ret = true;
 			}
 		}
 	}
 
+	/**
+	 * 
+	 */
 	private void populateFields() {
+		if(pass_gen_ret == true){
+			pass_gen_ret = false;
+			return;
+		}
 		if (RowId != null) {
 			PassEntry row = dbHelper.fetchPassword(RowId);
 			if (row.id > -1) {
@@ -273,5 +282,4 @@ public class PassEdit extends Activity {
 			}
 		}
 	}
-
 }

@@ -226,6 +226,17 @@ public class CategoryList extends ListActivity {
     }
 
     @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+		    	MenuItem mi = menu.findItem(DEL_CATEGORY_INDEX);
+    	if (getSelectedItemPosition() > -1) {
+    		mi.setEnabled(true);
+    	} else {
+    		mi.setEnabled(false);
+    	}
+    	return super.onMenuOpened(featureId, menu);
+    }
+    
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 	
@@ -238,10 +249,12 @@ public class CategoryList extends ListActivity {
 		menu.add(0,ADD_CATEGORY_INDEX, 0, R.string.password_add)
 			.setIcon(android.R.drawable.ic_menu_add)
 			.setShortcut('2', 'a');
+
 		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete)  
 			.setIcon(android.R.drawable.ic_menu_delete)
-			.setShortcut('3', 'd');
-
+			.setShortcut('3', 'd')
+			.setEnabled(false);
+		
 		menu.add(0, HELP_INDEX, 0, R.string.help)
 			.setIcon(android.R.drawable.ic_menu_help);
 
