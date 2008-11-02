@@ -95,7 +95,9 @@ public class CategoryList extends ListActivity {
     @Override
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		
+
+		Log.d(TAG,"onCreate()");
+
 		if (!isSignedIn()) {
 			Intent frontdoor = new Intent(this, FrontDoor.class);
 			startActivity(frontdoor);		
@@ -107,7 +109,6 @@ public class CategoryList extends ListActivity {
 			getResources().getString(R.string.categories);
 		setTitle(title);
 		
-		Log.d(TAG,"onCreate()");
 		if (dbHelper==null) {
 			dbHelper = new DBHelper(this);
 			if (dbHelper.getPrePopulate()==true)
@@ -119,6 +120,8 @@ public class CategoryList extends ListActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(mIntentReceiver, filter);
+
+		fillData();
     }
 
     @Override
@@ -130,7 +133,11 @@ public class CategoryList extends ListActivity {
 		    dbHelper = new DBHelper(this);
 		}
 
-		fillData();
+		if (!isSignedIn()) {
+			Intent frontdoor = new Intent(this, FrontDoor.class);
+			startActivity(frontdoor);		
+			finish();
+    	}
     }
     
     @Override
@@ -340,7 +347,9 @@ public class CategoryList extends ListActivity {
 	    	}
     	}
     	
-    	fillData();
+    	if (resultCode == RESULT_OK) {
+    		fillData();
+    	}
     }
 
     private void addCategory(String name) {

@@ -235,7 +235,9 @@ public class PassList extends ListActivity {
     	if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
-    	fillData();
+    	if (resultCode==RESULT_OK) {
+    		fillData();
+    	}
     }
 
 
