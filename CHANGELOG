@@ -5,6 +5,9 @@
 0.2.2 [Sept 16, 2008] - Added categories and export to CSV.
 0.2.3 [Oct 21, 2008] - Assorted bug fixes.  Bumped database to version 2. 
  Initial Market Version.
-0.3.0 [Nov 2, 2008] - Improved Import/Export, Help Screen, Password Generator,
- Fixed issue where initial screen ate back button
- Fixed issue with passwords/categories not being saved after orientation change
+0.3.0 [Nov 2, 2008] - Improved Import/Export, Help Screen, 
+ [I7] Password Generator,
+ [I10] Fixed issue where initial screen ate back button
+ [I13] Fixed issue with passwords/categories not being saved after orientation change
+ Made Delete menu option disabled on list views if there is no item selected
+ Launching browser from password edit screen copies password to clip board
