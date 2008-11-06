@@ -20,7 +20,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -206,6 +210,42 @@ public class PassList extends ListActivity {
 		Intent i = new Intent(this, PassEdit.class);
 	    startActivityForResult(i,REQUEST_ADD_PASSWORD);
     }
+	/**
+	 * Prompt the user with a dialog asking them if they really want
+	 * to delete the password.
+	 */
+	public void deletePassword(){
+		Dialog about = new AlertDialog.Builder(this)
+			.setIcon(R.drawable.passicon)
+			.setTitle(R.string.dialog_delete_password_title)
+			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					deletePassword2();
+				}
+			})
+			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					// do nothing
+				}
+			}) 
+			.setMessage(R.string.dialog_delete_password_msg)
+			.create();
+		about.show();
+	}
+	
+	/**
+	 * Follow up for the Delete Password dialog.  If we have a RowId then
+	 * delete the password, otherwise just finish this Activity.
+	 */
+	public void deletePassword2(){
+	    try {
+	    	delPassword(rows.get(getSelectedItemPosition()).id);
+	    } catch (IndexOutOfBoundsException e) {
+			// This should only happen when there are no
+			// entries to delete.
+			Log.w(TAG,e.toString());
+	    }
+	}
 
     private void delPassword(long Id) {
 		dbHelper.deletePassword(Id);
@@ -218,13 +258,7 @@ public class PassList extends ListActivity {
 		    addPassword();
 		    break;
 		case DEL_PASSWORD_INDEX:
-		    try {
-		    	delPassword(rows.get(getSelectedItemPosition()).id);
-		    } catch (IndexOutOfBoundsException e) {
-				// This should only happen when there are no
-				// entries to delete.
-				Log.w(TAG,e.toString());
-		    }
+			deletePassword();
 		    break;
 		}
 		return super.onOptionsItemSelected(item);

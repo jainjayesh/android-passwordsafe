@@ -18,6 +18,9 @@ package com.bitsetters.android.passwordsafe;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -200,6 +203,42 @@ public class PassEdit extends Activity {
 	}
 
 	/**
+	 * Prompt the user with a dialog asking them if they really want
+	 * to delete the password.
+	 */
+	public void deletePassword(){
+		Dialog about = new AlertDialog.Builder(this)
+			.setIcon(R.drawable.passicon)
+			.setTitle(R.string.dialog_delete_password_title)
+			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					deletePassword2();
+				}
+			})
+			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					// do nothing
+				}
+			}) 
+			.setMessage(R.string.dialog_delete_password_msg)
+			.create();
+		about.show();
+	}
+	
+	/**
+	 * Follow up for the Delete Password dialog.  If we have a RowId then
+	 * delete the password, otherwise just finish this Activity.
+	 */
+	public void deletePassword2(){
+		if ((RowId != null) && (RowId > 0)) {
+			delPassword(RowId);
+		} else {
+			// user specified to delete a new entry
+			// so simply exit out
+			finish();
+		}
+	}
+	/**
 	 * Delete the password entry from the database given the row id within the
 	 * database.
 	 * 
@@ -220,15 +259,7 @@ public class PassEdit extends Activity {
 			savePassword();
 			break;
 		case DEL_PASSWORD_INDEX:
-			try {
-				if ((RowId != null) && (RowId > 0)) {
-					delPassword(RowId);
-				}
-			} catch (IndexOutOfBoundsException e) {
-				// This should only happen when there are no
-				// entries to delete.
-				Log.w(TAG, e.toString());
-			}
+			deletePassword();
 			break;
 		case GEN_PASSWORD_INDEX:
 			Intent i = new Intent(getApplicationContext(), PassGen.class);

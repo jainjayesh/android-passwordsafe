@@ -73,4 +73,6 @@
 	<string name="help">Help</string>
 	<string name="close">Close</string>
 	<string name="go">Go</string>
+	<string name="dialog_delete_password_title">Delete Password</string>
+	<string name="dialog_delete_password_msg">Are you sure you want to delete this password?</string>
 </resources>
