@@ -29,12 +29,15 @@ import java.util.Set;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -51,6 +54,7 @@ import android.widget.Toast;
  */
 public class CategoryList extends ListActivity {
 
+	private static boolean debug = true;
     private static final String TAG = "CategoryList";
 
     // Menu Item order
@@ -66,6 +70,13 @@ public class CategoryList extends ListActivity {
     public static final int REQUEST_EDIT_CATEGORY = 1;
     public static final int REQUEST_ADD_CATEGORY = 2;
 
+    protected static final int MSG_IMPORT = 0x101; 
+    protected static final int MSG_FILLDATA = MSG_IMPORT + 1; 
+    
+    ProgressDialog mImportProgress;
+
+    private static final int IMPORT_PROGRESS_KEY = 0;
+
     public static final int MAX_CATEGORIES = 256;
 
     private static final String EXPORT_FILENAME = "/sdcard/passwordsafe.csv";
@@ -76,6 +87,11 @@ public class CategoryList extends ListActivity {
     private DBHelper dbHelper=null;
 	private boolean needPrePopulateCategories=false;
 	
+	private String importMessage="";
+	private int importedEntries=0;
+	private Thread importThread=null;
+	private boolean importDeletedDatabase=false;
+	
     private static String PBEKey;	      // Password Based Encryption Key			
 
     private List<CategoryEntry> rows;
@@ -83,12 +99,33 @@ public class CategoryList extends ListActivity {
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                Log.d(TAG,"caught ACTION_SCREEN_OFF");
+                if (debug) Log.d(TAG,"caught ACTION_SCREEN_OFF");
                 PBEKey=null;
             }
         }
     };
 
+    Handler myViewUpdateHandler = new Handler(){
+        // @Override
+        public void handleMessage(Message msg) {
+             switch (msg.what) {
+                  case CategoryList.MSG_IMPORT:
+	                  	if (importMessage != "") {
+	                		Toast.makeText(CategoryList.this, importMessage,
+	    		                Toast.LENGTH_LONG).show();
+	                	}
+	      				if ((importedEntries!=0) || (importDeletedDatabase))
+	    				{
+	                        fillData();
+	    				}
+      					break;
+                  case CategoryList.MSG_FILLDATA:
+                       fillData();
+                       break;
+             }
+             super.handleMessage(msg);
+        }
+   }; 
     /** 
      * Called when the activity is first created. 
      */
@@ -96,7 +133,7 @@ public class CategoryList extends ListActivity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
-		Log.d(TAG,"onCreate()");
+		if (debug) Log.d(TAG,"onCreate()");
 
 		if (!isSignedIn()) {
 			Intent frontdoor = new Intent(this, FrontDoor.class);
@@ -108,7 +145,7 @@ public class CategoryList extends ListActivity {
 		String title = getResources().getString(R.string.app_name) + " - " +
 			getResources().getString(R.string.categories);
 		setTitle(title);
-		
+
 		if (dbHelper==null) {
 			dbHelper = new DBHelper(this);
 			if (dbHelper.getPrePopulate()==true)
@@ -128,7 +165,7 @@ public class CategoryList extends ListActivity {
     protected void onResume() {
 		super.onResume();
 
-		Log.d(TAG,"onResume()");
+		if (debug) Log.d(TAG,"onResume()");
 		if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
 		}
@@ -144,7 +181,15 @@ public class CategoryList extends ListActivity {
     protected void onPause() {
 		super.onPause();
 		
-		Log.d(TAG,"onPause()");
+		if (debug) Log.d(TAG,"onPause()");
+		
+		if ((importThread != null) && (importThread.isAlive())) {
+			if (debug) Log.d(TAG,"wait for thread");
+//			importThread.interrupt();
+			int maxWaitToDie=500000;
+			try { importThread.join(maxWaitToDie); } 
+			catch(InterruptedException e){} //  ignore 
+		}
 		dbHelper.close();
 		dbHelper = null;
     }
@@ -153,7 +198,7 @@ public class CategoryList extends ListActivity {
     public void onStop() {
 		super.onStop();
 
-		Log.d(TAG,"onStop()");
+		if (debug) Log.d(TAG,"onStop()");
 //		dbHelper.close();
     }
     
@@ -161,7 +206,21 @@ public class CategoryList extends ListActivity {
     public void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(mIntentReceiver);
-		Log.d(TAG,"onDestroy()");
+		if (debug) Log.d(TAG,"onDestroy()");
+    }
+    
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case IMPORT_PROGRESS_KEY: {
+                ProgressDialog dialog = new ProgressDialog(this);
+                dialog.setMessage("Please wait while importing...");
+                dialog.setIndeterminate(false);
+                dialog.setCancelable(false);
+                return dialog;
+            }
+        }
+        return null;
     }
 
     /**
@@ -183,14 +242,14 @@ public class CategoryList extends ListActivity {
      * @see com.bitsetters.android.passwordsafe.CategoryList#isSignedIn
      */
     public static void setSignedOut() {
-    	Log.d(TAG,"setSignedOut()");
+    	if (debug) Log.d(TAG,"setSignedOut()");
     	PBEKey=null;
     }
     /**
      * Populates the category ListView
      */
     private void fillData() {
-    	Log.d(TAG,"fillData()");
+    	if (debug) Log.d(TAG,"fillData()");
 		// initialize crypto so that we can display readable descriptions in
 		// the list view
 		ch = new CryptoHelper();
@@ -200,6 +259,9 @@ public class CategoryList extends ListActivity {
 		ch.setPassword(PBEKey);
 	
 		List<String> items = new ArrayList<String>();
+		if (dbHelper==null) {
+			return;
+		}
 		rows = dbHelper.fetchAllCategoryRows();
 
 		for (CategoryEntry row : rows) {
@@ -366,7 +428,7 @@ public class CategoryList extends ListActivity {
     }
 
     private void addCategory(String name) {
-    	Log.i(TAG,"addCategory("+name+")");
+    	if (debug) Log.d(TAG,"addCategory("+name+")");
     	if ((name==null) || (name=="")) return;
 		CategoryEntry entry =  new CategoryEntry();
 	
@@ -483,7 +545,8 @@ public class CategoryList extends ListActivity {
 			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					deleteDatabaseNow();
-					importDatabaseStep2();
+					importDeletedDatabase=true;
+					importDatabaseThreadStart();
 				}
 			})
 			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -506,28 +569,56 @@ public class CategoryList extends ListActivity {
 			})
 			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					importDatabaseStep2();
+					importDeletedDatabase=false;
+					importDatabaseThreadStart();
 				}
 			}) 
 			.setMessage(R.string.dialog_import_msg)
 			.create();
 		about.show();
 	}
+
+	/**
+	 * Start a separate thread to import the database.   By running
+	 * the import in a thread it allows the main UI thread to return
+	 * and permit the updating of the progress dialog.
+	 */
+	private void importDatabaseThreadStart(){
+		showDialog(IMPORT_PROGRESS_KEY);
+		importThread = new Thread(new Runnable() {
+			public void run() {
+				importDatabaseFromCSV();
+				dismissDialog(IMPORT_PROGRESS_KEY);
+				
+				Message m = new Message();
+				m.what = CategoryList.MSG_IMPORT;
+				CategoryList.this.myViewUpdateHandler.sendMessage(m); 
+
+				if (debug) Log.d(TAG,"thread end");
+				}
+			});
+		importThread.start();
+	}
 	
-	private void importDatabaseStep2(){
+	/**
+	 * While running inside a thread, read from a CSV and import
+	 * into the database.
+	 */
+	private void importDatabaseFromCSV(){
 		try {
+			importMessage="";
+			importedEntries=0;
+			
 			final int recordLength=6;
 			CSVReader reader= new CSVReader(new FileReader(EXPORT_FILENAME));
 		    String [] nextLine;
 		    nextLine = reader.readNext();
 		    if (nextLine==null) {
-		        Toast.makeText(CategoryList.this, R.string.import_error_first_line,
-		                Toast.LENGTH_SHORT).show();
+		    	importMessage=getString(R.string.import_error_first_line);
 		        return;
 		    }
 		    if (nextLine.length != recordLength){
-		        Toast.makeText(CategoryList.this, R.string.import_error_first_line,
-		                Toast.LENGTH_SHORT).show();
+		    	importMessage=getString(R.string.import_error_first_line);
 		        return;
 		    }
 		    if ((nextLine[0].compareToIgnoreCase(getString(R.string.category)) != 0) ||
@@ -537,8 +628,7 @@ public class CategoryList extends ListActivity {
 			    (nextLine[4].compareToIgnoreCase(getString(R.string.password)) != 0) ||
 			    (nextLine[5].compareToIgnoreCase(getString(R.string.notes)) != 0))
 		    {
-		        Toast.makeText(CategoryList.this, R.string.import_error_first_line,
-		                Toast.LENGTH_SHORT).show();
+		    	importMessage=getString(R.string.import_error_first_line);
 		        return;
 		    }
 //		    Log.i(TAG,"first line is valid");
@@ -550,6 +640,9 @@ public class CategoryList extends ListActivity {
 			HashMap<String,Long> categoriesFound = new HashMap<String,Long>();
 		    int categoryCount=0;
 		    while ((nextLine = reader.readNext()) != null) {
+		    	if (importThread.isInterrupted()) {
+		    		return;
+		    	}
 		        // nextLine[] is an array of values from the line
 		        if ((nextLine==null) || (nextLine[0]=="")){
 		        	continue;	// skip blank categories
@@ -564,8 +657,7 @@ public class CategoryList extends ListActivity {
 		        }
 	        	categoriesFound.put(nextLine[0], passwordsInCategory);
 		        if (categoryCount>MAX_CATEGORIES){
-			        Toast.makeText(CategoryList.this, R.string.import_too_many_categories,
-			                Toast.LENGTH_SHORT).show();
+		        	importMessage=getString(R.string.import_too_many_categories);
 			        return;
 		        }
 		    }
@@ -593,6 +685,10 @@ public class CategoryList extends ListActivity {
 		    while ((nextLine = reader.readNext()) != null) {
 		    	lineNumber++;
 //		    	Log.d(TAG,"lineNumber="+lineNumber);
+		    	
+		    	if (importThread.isInterrupted()) {
+		    		return;
+		    	}
 		    	
 		        // nextLine[] is an array of values from the line
 			    if (nextLine.length < 2){
@@ -652,24 +748,21 @@ public class CategoryList extends ListActivity {
 		    }
 			reader.close();
 			if (lineErrors != "") {
-				Log.d(TAG,lineErrors);
+				if (debug) Log.d(TAG,lineErrors);
 			}
 
+			importedEntries=newEntries;
 			if (newEntries==0)
 		    {
-		        Toast.makeText(CategoryList.this, R.string.import_no_entries,
-		                Toast.LENGTH_SHORT).show();
+		        importMessage=getString(R.string.import_no_entries);
 		        return;
 		    }else{
-				Toast.makeText(this, getString(R.string.added)+ " "+ newEntries +
-						" "+ getString(R.string.entries),
-						Toast.LENGTH_SHORT).show();
-				fillData();
+		    	importMessage=getString(R.string.added)+ " "+ newEntries +
+		    		" "+ getString(R.string.entries);
 		    }
 		} catch (IOException e) {
 			e.printStackTrace();
-	        Toast.makeText(CategoryList.this, R.string.import_file_error,
-	                Toast.LENGTH_LONG).show();
+			importMessage=getString(R.string.import_file_error);
 		}
 	}
 

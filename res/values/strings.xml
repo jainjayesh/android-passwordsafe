@@ -65,6 +65,7 @@
 	<string name="import_not_enough_fields">Not enough fields</string>
 	<string name="import_blank_category">Blank category</string>
 	<string name="import_blank_description">Blank description</string>
+	<string name="import_progress_msg">Please wait while importing..."</string>
 	<string name="dialog_delete_database_title">Delete Database</string>
 	<string name="dialog_delete_database_msg">Are you really sure you want to delete the database?  This cannot be undone.</string>
 	<string name="added">Added</string>
