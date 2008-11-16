@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -95,6 +97,10 @@ public class FrontDoor extends Activity {
 				if (PBEKey.length() < 4) {
 					Toast.makeText(FrontDoor.this, R.string.notify_blank_pass,
 							Toast.LENGTH_SHORT).show();
+				    Animation shake = AnimationUtils
+			        .loadAnimation(FrontDoor.this, R.anim.shake);
+			        
+			        findViewById(R.id.password).startAnimation(shake);
 					return;
 				}
 
@@ -127,6 +133,10 @@ public class FrontDoor extends Activity {
 					// message if it's wrong
 					Toast.makeText(FrontDoor.this, R.string.invalid_password,
 							Toast.LENGTH_SHORT).show();
+			        Animation shake = AnimationUtils
+			        .loadAnimation(FrontDoor.this, R.anim.shake);
+			        
+			        findViewById(R.id.password).startAnimation(shake);
 					return;
 				}
 				PassList.setPBEKey(PBEKey);
