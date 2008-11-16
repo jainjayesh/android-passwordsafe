@@ -65,6 +65,7 @@ public class CategoryList extends ListActivity {
     public static final int HELP_INDEX = Menu.FIRST + 4;
     public static final int EXPORT_INDEX = Menu.FIRST + 5;
     public static final int IMPORT_INDEX = Menu.FIRST + 6;
+    public static final int CHANGE_PASS_INDEX = Menu.FIRST + 7;
     
     public static final int REQUEST_ONCREATE = 0;
     public static final int REQUEST_EDIT_CATEGORY = 1;
@@ -325,6 +326,8 @@ public class CategoryList extends ListActivity {
 		menu.add(0, IMPORT_INDEX, 0, R.string.import_database)
 			.setIcon(android.R.drawable.ic_input_get);
 
+		menu.add(0, CHANGE_PASS_INDEX, 0, R.string.change_password)
+			.setIcon(android.R.drawable.ic_menu_manage);
 	
 		return super.onCreateOptionsMenu(menu);
     }
@@ -392,6 +395,10 @@ public class CategoryList extends ListActivity {
 			break;
 		case IMPORT_INDEX:
 			importDatabase();
+			break;
+		case CHANGE_PASS_INDEX:
+			Intent changePass = new Intent(this, ChangePass.class);
+			startActivity(changePass);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -650,6 +657,7 @@ public class CategoryList extends ListActivity {
 		        if (categoryToId.containsKey(nextLine[0])){
 		        	continue;	// don't recreate existing categories
 		        }
+		        if (debug) Log.d(TAG,"found category ("+nextLine[0]+")");
 		        categoryCount++;
 	        	Long passwordsInCategory= new Long(1);
 		        if (categoriesFound.containsKey(nextLine[0])) {

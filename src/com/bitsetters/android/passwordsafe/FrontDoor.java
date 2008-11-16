@@ -37,6 +37,7 @@ import android.widget.Toast;
  */
 public class FrontDoor extends Activity {
 
+	private boolean debug = true;
 	private static String TAG = "FrontDoor";
 
 	private EditText pbeKey;
@@ -51,6 +52,9 @@ public class FrontDoor extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+
+		if (debug) Log.d(TAG,"onCreate()");
+
 		dbHelper = new DBHelper(this);
 		ch = new CryptoHelper();
 
@@ -120,7 +124,28 @@ public class FrontDoor extends Activity {
 		});
 	}
 
-	/**
+    @Override
+    protected void onPause() {
+		super.onPause();
+		
+		if (debug) Log.d(TAG,"onPause()");
+		
+		dbHelper.close();
+		dbHelper = null;	
+    }
+
+    @Override
+    protected void onResume() {
+		super.onPause();
+		
+		if (debug) Log.d(TAG,"onResume()");
+		if (dbHelper == null) {
+		    dbHelper = new DBHelper(this);
+		}
+
+    }
+
+    /**
 	 * 
 	 * @return
 	 */

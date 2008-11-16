@@ -21,7 +21,7 @@
 <resources>
     <string name="app_name">Password Safe</string>
     <string name="authors">Steven Osborn, Randy McEoin</string>
-    <string name="version">0.3.0</string>
+    <string name="version">0.4.0</string>
     <string name="empty_safe">No Passwords present for this category.</string>
     <string name="empty_category">No categories present.  Please add one via Menu->Add</string>
     <string name="password_lock">Lock</string>
@@ -76,4 +76,12 @@
 	<string name="go">Go</string>
 	<string name="dialog_delete_password_title">Delete Password</string>
 	<string name="dialog_delete_password_msg">Are you sure you want to delete this password?</string>
+	<string name="change_password">Change Password</string>
+	<string name="chg_pass_explaination">Use this to change the password you use to unlock Password Safe.   Your data will be re-encrypted with the new password.  The more complex your password is, the safer your data will be.</string>
+	<string name="old_password">Old password</string>
+	<string name="new_password">New password</string>
+	<string name="verify_password">Verify password</string>
+	<string name="new_verify_mismatch">New and Verify passwords do not match.</string>
+    <string name="invalid_old_password">Old password is invalid.  Please try again.</string>
+    <string name="password_changed">Password changed</string>
 </resources>

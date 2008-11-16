@@ -116,9 +116,6 @@ public class DBHelper {
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
     }
 
@@ -144,7 +141,6 @@ public class DBHelper {
     public void deleteDatabase()
     {
         try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 			db.execSQL(PASSWORDS_DROP);
 			db.execSQL(PASSWORDS_CREATE);
 
@@ -153,10 +149,7 @@ public class DBHelper {
         } catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
-		}    	
+		}
     }
     
     public boolean getPrePopulate()
@@ -167,14 +160,12 @@ public class DBHelper {
      * Close database connection
      */
     public void close() {
-    /*
     	try {
     		db.close();
 	    } catch (SQLException e)
 	    {
 	    	Log.d(TAG,"close exception: " + e.getLocalizedMessage());
 	    }
-	    */
     }
 
     /**
@@ -184,7 +175,6 @@ public class DBHelper {
     public String fetchPBEKey() {
     	String key="";
         try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 			Cursor c = db.query(true, TABLE_VERIFY, new String[] {"confirm"},
 				null, null, null, null, null,null);
 			if(c.getCount() > 0) {
@@ -195,9 +185,6 @@ public class DBHelper {
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
 		return key;
     }
@@ -209,16 +196,12 @@ public class DBHelper {
     public void storePBEKey(String PBEKey) {
 		ContentValues args = new ContentValues();
         try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 			db.delete(TABLE_VERIFY, "1=1", null);
 			args.put("confirm", PBEKey);
 			db.insert(TABLE_VERIFY, null, args);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
     }
 
@@ -233,14 +216,10 @@ public class DBHelper {
     	initialValues.put("name", entry.name);
 
         try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 	        db.insert(TABLE_CATEGORIES, null, initialValues);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
     }
 
@@ -250,14 +229,10 @@ public class DBHelper {
      */
     public void deleteCategory(long Id) {
         try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 			db.delete(TABLE_CATEGORIES, "id=" + Id, null);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
     }
 
@@ -268,7 +243,6 @@ public class DBHelper {
     public List<CategoryEntry> fetchAllCategoryRows(){
         ArrayList<CategoryEntry> ret = new ArrayList<CategoryEntry>();
         try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 	        Cursor c =
 	            db.query(TABLE_CATEGORIES, new String[] {
 	                "id", "name"},
@@ -286,9 +260,6 @@ public class DBHelper {
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
         return ret;
     }
@@ -301,7 +272,6 @@ public class DBHelper {
     public CategoryEntry fetchCategory(long Id) {
         CategoryEntry row = new CategoryEntry();
         try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 	        Cursor c =
 	            db.query(true, TABLE_CATEGORIES, new String[] {
 	                "id", "name"}, "id=" + Id, null, null, null, null, null);
@@ -318,9 +288,6 @@ public class DBHelper {
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
         return row;
     }
@@ -335,14 +302,10 @@ public class DBHelper {
         args.put("name", entry.name);
         
         try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 			db.update(TABLE_CATEGORIES, args, "id=" + Id, null);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
     }
 
@@ -364,14 +327,10 @@ public class DBHelper {
 	    initialValues.put("note", entry.note);
 	
 	    try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 	        db.insert(TABLE_PASSWORDS, null, initialValues);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
 	}
 	
@@ -381,14 +340,10 @@ public class DBHelper {
 	 */
 	public void deletePassword(long Id) {
 	    try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 			db.delete(TABLE_PASSWORDS, "id=" + Id, null);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
 	}
 
@@ -399,18 +354,15 @@ public class DBHelper {
 	public int countPasswords(long categoryId) {
 		int count=0;
 	    try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 	        Cursor c = db.query(TABLE_PASSWORDS, new String[] {
 	                "count(*)"},
 	                "category="+categoryId, null, null, null, null);
 	        c.moveToFirst();
 	        count=c.getInt(0);
+	        c.close();
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
 		Log.i(TAG,"count="+count);
 		return count;
@@ -423,7 +375,6 @@ public class DBHelper {
 	public List<PassEntry> fetchAllRows(Long CategoryId){
 	    ArrayList<PassEntry> ret = new ArrayList<PassEntry>();
 	    try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 	        Cursor c;
 	        if (CategoryId==0)
 	        {
@@ -456,9 +407,6 @@ public class DBHelper {
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
 	    return ret;
 	}
@@ -471,7 +419,6 @@ public class DBHelper {
 	public PassEntry fetchPassword(long Id) {
 	    PassEntry row = new PassEntry();
 	    try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 	        Cursor c =
 	            db.query(true, TABLE_PASSWORDS, new String[] {
 	                "id", "password", "description", "username", "website",
@@ -495,9 +442,6 @@ public class DBHelper {
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
 	    return row;
 	}
@@ -516,16 +460,53 @@ public class DBHelper {
 	    args.put("note", entry.note);
 	    
 	    try {
-			db = myCtx.openOrCreateDatabase(DATABASE_NAME, 0,null);
 			db.update(TABLE_PASSWORDS, args, "id=" + Id, null);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		} finally 
-		{
-			db.close();
 		}
 	}
 
+	/**
+	 * Begin a transaction on an open database.
+	 * 
+	 * @return true if successful
+	 */
+	public boolean beginTransaction() {
+        try {
+			db.execSQL("begin transaction;");
+        } catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+			return false;
+		}
+        return true;
+	}
+
+	/**
+	 * Commit all changes since the begin transaction on an 
+	 * open database.
+	 */
+	public void commit() {
+        try {
+			db.execSQL("commit;");
+        } catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Rollback all changes since the begin transaction on an 
+	 * open database.
+	 */
+	public void rollback() {
+        try {
+			db.execSQL("rollback;");
+        } catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+	}
 }
 

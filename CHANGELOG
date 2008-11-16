@@ -11,3 +11,9 @@
  [I13] Fixed issue with passwords/categories not being saved after orientation change
  Made Delete menu option disabled on list views if there is no item selected
  Launching browser from password edit screen copies password to clip board
+0.4.0 [Nov 15, 2008]
+ [I14] Added the ChangePass activity allowing user to change the
+       password used to unlock the app and encrypt the data
+ [I19] User is not prompted before deleting a password
+ [I20] During import a progress dialog is displayed
+ 
