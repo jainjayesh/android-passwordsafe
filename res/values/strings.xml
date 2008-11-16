@@ -84,4 +84,6 @@
 	<string name="new_verify_mismatch">New and Verify passwords do not match.</string>
     <string name="invalid_old_password">Old password is invalid.  Please try again.</string>
     <string name="password_changed">Password changed</string>
+    <string name="confirm">Confirm</string>
+    <string name="confirm_pass_fail">Password entries do not match.</string>
 </resources>

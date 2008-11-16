@@ -42,7 +42,9 @@ public class FrontDoor extends Activity {
 
 	private EditText pbeKey;
 	private DBHelper dbHelper;
-	private TextView IntroText;
+	private TextView introText;
+	private TextView confirmText;
+	private EditText confirmPass;
 	private String PBEKey;
 	private String confirmKey;
 	private CryptoHelper ch;
@@ -53,7 +55,8 @@ public class FrontDoor extends Activity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
-		if (debug) Log.d(TAG,"onCreate()");
+		if (debug)
+			Log.d(TAG, "onCreate()");
 
 		dbHelper = new DBHelper(this);
 		ch = new CryptoHelper();
@@ -69,11 +72,15 @@ public class FrontDoor extends Activity {
 		header.setText(head);
 
 		pbeKey = (EditText) findViewById(R.id.password);
-		IntroText = (TextView) findViewById(R.id.first_time);
+		introText = (TextView) findViewById(R.id.first_time);
+		confirmPass = (EditText) findViewById(R.id.pass_confirm);
+		confirmText = (TextView) findViewById(R.id.confirm_lbl);
 		confirmKey = dbHelper.fetchPBEKey();
 		if (confirmKey.length() == 0) {
 			firstTime = true;
-			IntroText.setVisibility(View.VISIBLE);
+			introText.setVisibility(View.VISIBLE);
+			confirmText.setVisibility(View.VISIBLE);
+			confirmPass.setVisibility(View.VISIBLE);
 		}
 
 		Button continueButton = (Button) findViewById(R.id.continue_button);
@@ -95,6 +102,16 @@ public class FrontDoor extends Activity {
 				// we have to store it in the database. We are going to
 				// store an encrypted hash of the password.
 				if (firstTime) {
+
+					// Make sure password and confirm fields match
+					if (pbeKey.getText().toString().compareTo(
+							confirmPass.getText().toString()) != 0) {
+						Toast.makeText(FrontDoor.this,
+								R.string.confirm_pass_fail, Toast.LENGTH_SHORT)
+								.show();
+						return;
+					}
+
 					byte[] md5Key = CryptoHelper.md5String(PBEKey);
 					String hexKey = CryptoHelper.toHexString(md5Key);
 					String cryptKey = "";
@@ -124,28 +141,30 @@ public class FrontDoor extends Activity {
 		});
 	}
 
-    @Override
-    protected void onPause() {
+	@Override
+	protected void onPause() {
 		super.onPause();
-		
-		if (debug) Log.d(TAG,"onPause()");
-		
-		dbHelper.close();
-		dbHelper = null;	
-    }
 
-    @Override
-    protected void onResume() {
+		if (debug)
+			Log.d(TAG, "onPause()");
+
+		dbHelper.close();
+		dbHelper = null;
+	}
+
+	@Override
+	protected void onResume() {
 		super.onPause();
-		
-		if (debug) Log.d(TAG,"onResume()");
+
+		if (debug)
+			Log.d(TAG, "onResume()");
 		if (dbHelper == null) {
-		    dbHelper = new DBHelper(this);
+			dbHelper = new DBHelper(this);
 		}
 
-    }
+	}
 
-    /**
+	/**
 	 * 
 	 * @return
 	 */
