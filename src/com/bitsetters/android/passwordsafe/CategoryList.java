@@ -646,7 +646,9 @@ public class CategoryList extends ListActivity {
 		    //
 			HashMap<String,Long> categoriesFound = new HashMap<String,Long>();
 		    int categoryCount=0;
+		    int line=0;
 		    while ((nextLine = reader.readNext()) != null) {
+		    	line++;
 		    	if (importThread.isInterrupted()) {
 		    		return;
 		    	}
@@ -657,11 +659,14 @@ public class CategoryList extends ListActivity {
 		        if (categoryToId.containsKey(nextLine[0])){
 		        	continue;	// don't recreate existing categories
 		        }
-		        if (debug) Log.d(TAG,"found category ("+nextLine[0]+")");
-		        categoryCount++;
+//		        if (debug) Log.d(TAG,"line["+line+"] found category ("+nextLine[0]+")");
 	        	Long passwordsInCategory= new Long(1);
 		        if (categoriesFound.containsKey(nextLine[0])) {
+		        	// we've seen this category before, bump its count
 		        	passwordsInCategory+=categoriesFound.get(nextLine[0]);
+		        } else {
+		        	// newly discovered category
+			        categoryCount++;
 		        }
 	        	categoriesFound.put(nextLine[0], passwordsInCategory);
 		        if (categoryCount>MAX_CATEGORIES){
@@ -669,6 +674,7 @@ public class CategoryList extends ListActivity {
 			        return;
 		        }
 		    }
+		    if (debug) Log.d(TAG,"found "+categoryCount+" categories");
 		    if (categoryCount!=0)
 		    {
 			    Set<String> categorySet = categoriesFound.keySet();

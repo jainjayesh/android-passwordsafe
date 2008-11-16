@@ -8,6 +8,13 @@ Then to open it with sqlite3::
 
 sqlite3 passwordsafe
 
+To delete the database and force a clean start::
+
+adb shell rm /data/data/com.bitsetters.android.passwordsafe/databases/passwordsafe
+
+To uninstall the application completely::
+
+adb uninstall com.bitsetters.android.passwordsafe
 
 To make the keyword Id update::
 
