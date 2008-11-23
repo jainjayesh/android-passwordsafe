@@ -20,6 +20,7 @@ package com.bitsetters.android.passwordsafe;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -97,7 +98,7 @@ public class PassEdit extends Activity {
 		goButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
 
-				Toast.makeText(PassEdit.this, "Copying Password to Clipboard",
+				Toast.makeText(PassEdit.this, R.string.copy_to_clipboard,
 						Toast.LENGTH_SHORT).show();
 
 				ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
@@ -106,7 +107,12 @@ public class PassEdit extends Activity {
 				Intent i = new Intent(Intent.ACTION_VIEW);
 				Uri u = Uri.parse(websiteText.getText().toString());
 				i.setData(u);
-				startActivity(i);
+				try {
+					startActivity(i);
+				} catch (ActivityNotFoundException e) {
+					Toast.makeText(PassEdit.this, R.string.invalid_website,
+						Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 

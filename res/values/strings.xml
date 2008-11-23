@@ -100,4 +100,6 @@
     <string name="restore_found">Found</string>
     <string name="restore_passwords">passwords from backup dated </string>
     <string name="restore_complete">Complete.  Passwords restored: </string>
+    <string name="copy_to_clipboard">Copying Password to Clipboard</string>
+    <string name="invalid_website">Invalid website</string>
 </resources>
