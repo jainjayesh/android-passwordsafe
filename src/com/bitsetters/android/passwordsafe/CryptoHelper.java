@@ -62,6 +62,7 @@ public class CryptoHelper {
     protected static String password = null;          
     protected static SecretKey pbeKey;
     protected static Cipher pbeCipher;
+    private boolean status=false;	// status of the last encrypt/decrypt
 
     private static final byte[] salt = {
 		(byte)0xfc, (byte)0x76, (byte)0x80, (byte)0xae,
@@ -153,6 +154,10 @@ public class CryptoHelper {
 			{
 				Log.i(TAG,e.getLocalizedMessage());
 				return bytes;
+			} catch (StringIndexOutOfBoundsException e)
+			{
+				Log.i(TAG,"StringIndexOutOfBoundsException");
+				return bytes;
 			}
 		}
     	return bytes;
@@ -190,6 +195,7 @@ public class CryptoHelper {
      * @throws Exception
      */
     public String encrypt(String plaintext) throws CryptoHelperException {
+		status=false; // assume failure
 		if(password == null) {
 		    String msg = "Must call setPassword before runing encrypt.";
 		    throw new CryptoHelperException(msg);
@@ -199,6 +205,7 @@ public class CryptoHelper {
 		try {
 		    pbeCipher.init(Cipher.ENCRYPT_MODE, pbeKey, pbeParamSpec);
 		    ciphertext = pbeCipher.doFinal(plaintext.getBytes());
+		    status=true;
 		} catch (IllegalBlockSizeException e) {
 		    Log.e(TAG,"encrypt(): "+e.toString());
 		} catch (BadPaddingException e) {
@@ -221,17 +228,22 @@ public class CryptoHelper {
      * @throws Exception
      */
     public String decrypt(String ciphertext) throws CryptoHelperException {
+		status=false; // assume failure
 		if(password == null) {
-		    String msg = "Must call setPassword before runing decrypt.";
+		    String msg = "Must call setPassword before running decrypt.";
 		    throw new CryptoHelperException(msg);
 		}
 	
+		if ((ciphertext==null) || (ciphertext=="")) {
+			return "";
+		}
 		byte[] byteCiphertext=hexStringToBytes(ciphertext);
 		byte[] plaintext = {};
 		
 		try {
 		    pbeCipher.init(Cipher.DECRYPT_MODE, pbeKey, pbeParamSpec);
 		    plaintext = pbeCipher.doFinal(byteCiphertext);
+		    status=true;
 		} catch (IllegalBlockSizeException e) {
 		    Log.e(TAG,"decrypt(): "+e.toString());
 		} catch (BadPaddingException e) {
@@ -245,4 +257,12 @@ public class CryptoHelper {
 		return new String(plaintext);
     }
 
+    /**
+     * Status of the last encrypt or decrypt.
+     * 
+     * @return true if last operation was successful
+     */
+    public boolean getStatus() {
+    	return status;
+    }
 }

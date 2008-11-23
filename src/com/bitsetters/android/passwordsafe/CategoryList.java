@@ -54,7 +54,7 @@ import android.widget.Toast;
  */
 public class CategoryList extends ListActivity {
 
-	private static boolean debug = true;
+	private static boolean debug = false;
     private static final String TAG = "CategoryList";
 
     // Menu Item order
@@ -66,6 +66,8 @@ public class CategoryList extends ListActivity {
     public static final int EXPORT_INDEX = Menu.FIRST + 5;
     public static final int IMPORT_INDEX = Menu.FIRST + 6;
     public static final int CHANGE_PASS_INDEX = Menu.FIRST + 7;
+    public static final int BACKUP_INDEX = Menu.FIRST + 8;
+    public static final int RESTORE_INDEX = Menu.FIRST + 9;
     
     public static final int REQUEST_ONCREATE = 0;
     public static final int REQUEST_EDIT_CATEGORY = 1;
@@ -73,14 +75,15 @@ public class CategoryList extends ListActivity {
 
     protected static final int MSG_IMPORT = 0x101; 
     protected static final int MSG_FILLDATA = MSG_IMPORT + 1; 
+    protected static final int MSG_BACKUP = MSG_FILLDATA + 1; 
     
-    ProgressDialog mImportProgress;
-
     private static final int IMPORT_PROGRESS_KEY = 0;
+    private static final int BACKUP_PROGRESS_KEY = IMPORT_PROGRESS_KEY + 1;
 
     public static final int MAX_CATEGORIES = 256;
 
     private static final String EXPORT_FILENAME = "/sdcard/passwordsafe.csv";
+    private static final String BACKUP_FILENAME = "/sdcard/passwordsafe.xml";
     
     public static final String KEY_ID = "id";  // Intent keys
 
@@ -92,7 +95,9 @@ public class CategoryList extends ListActivity {
 	private int importedEntries=0;
 	private Thread importThread=null;
 	private boolean importDeletedDatabase=false;
-	
+
+	private Thread backupThread=null;
+
     private static String PBEKey;	      // Password Based Encryption Key			
 
     private List<CategoryEntry> rows;
@@ -106,27 +111,33 @@ public class CategoryList extends ListActivity {
         }
     };
 
-    Handler myViewUpdateHandler = new Handler(){
-        // @Override
-        public void handleMessage(Message msg) {
-             switch (msg.what) {
-                  case CategoryList.MSG_IMPORT:
-	                  	if (importMessage != "") {
-	                		Toast.makeText(CategoryList.this, importMessage,
-	    		                Toast.LENGTH_LONG).show();
-	                	}
-	      				if ((importedEntries!=0) || (importDeletedDatabase))
-	    				{
-	                        fillData();
-	    				}
-      					break;
-                  case CategoryList.MSG_FILLDATA:
-                       fillData();
-                       break;
+    public Handler myViewUpdateHandler = new Handler(){
+    	// @Override
+    	public void handleMessage(Message msg) {
+    		switch (msg.what) {
+    			case CategoryList.MSG_BACKUP:
+    				Bundle b=msg.getData();
+    				String result=b.getString("msg");
+         			Toast.makeText(CategoryList.this, result,
+             				Toast.LENGTH_LONG).show();
+    				break;
+             	case CategoryList.MSG_IMPORT:
+             		if (importMessage != "") {
+             			Toast.makeText(CategoryList.this, importMessage,
+             				Toast.LENGTH_LONG).show();
+             		}
+             		if ((importedEntries!=0) || (importDeletedDatabase))
+             		{
+             			fillData();
+             		}
+             		break;
+             	case CategoryList.MSG_FILLDATA:
+             		fillData();
+             		break;
              }
              super.handleMessage(msg);
         }
-   }; 
+    }; 
     /** 
      * Called when the activity is first created. 
      */
@@ -186,9 +197,14 @@ public class CategoryList extends ListActivity {
 		
 		if ((importThread != null) && (importThread.isAlive())) {
 			if (debug) Log.d(TAG,"wait for thread");
-//			importThread.interrupt();
 			int maxWaitToDie=500000;
 			try { importThread.join(maxWaitToDie); } 
+			catch(InterruptedException e){} //  ignore 
+		}
+		if ((backupThread != null) && (backupThread.isAlive())) {
+			if (debug) Log.d(TAG,"wait for backup thread");
+			int maxWaitToDie=500000;
+			try { backupThread.join(maxWaitToDie); } 
 			catch(InterruptedException e){} //  ignore 
 		}
 		dbHelper.close();
@@ -215,7 +231,15 @@ public class CategoryList extends ListActivity {
         switch (id) {
             case IMPORT_PROGRESS_KEY: {
                 ProgressDialog dialog = new ProgressDialog(this);
-                dialog.setMessage("Please wait while importing...");
+                dialog.setMessage(getString(R.string.import_progress));
+                dialog.setIndeterminate(false);
+                dialog.setCancelable(false);
+                return dialog;
+            }
+            case BACKUP_PROGRESS_KEY: {
+                ProgressDialog dialog = new ProgressDialog(this);
+                dialog.setMessage(getString(R.string.backup_progress)+
+                		" "+BACKUP_FILENAME);
                 dialog.setIndeterminate(false);
                 dialog.setCancelable(false);
                 return dialog;
@@ -328,7 +352,10 @@ public class CategoryList extends ListActivity {
 
 		menu.add(0, CHANGE_PASS_INDEX, 0, R.string.change_password)
 			.setIcon(android.R.drawable.ic_menu_manage);
-	
+
+		menu.add(0, BACKUP_INDEX, 0, R.string.backup);
+		menu.add(0, RESTORE_INDEX, 0, R.string.restore);
+
 		return super.onCreateOptionsMenu(menu);
     }
 
@@ -400,10 +427,54 @@ public class CategoryList extends ListActivity {
 			Intent changePass = new Intent(this, ChangePass.class);
 			startActivity(changePass);
 			break;
+		case BACKUP_INDEX:
+			backupThreadStart();
+			break;
+		case RESTORE_INDEX:
+			restoreDatabase();
+			break;
 		}
 		return super.onOptionsItemSelected(item);
     }
 
+    private String backupDatabase() {
+    	Backup backup=new Backup(this);
+    	
+    	backup.write(BACKUP_FILENAME, PBEKey);
+    	return backup.getResult();
+    }
+
+	/**
+	 * Start a separate thread to backup the database.   By running
+	 * the backup in a thread it allows the main UI thread to return
+	 * and permit the updating of the progress dialog.
+	 */
+	private void backupThreadStart(){
+		showDialog(BACKUP_PROGRESS_KEY);
+		backupThread = new Thread(new Runnable() {
+			public void run() {
+				String result=backupDatabase();
+				dismissDialog(BACKUP_PROGRESS_KEY);
+
+				Message m = new Message();
+				m.what = CategoryList.MSG_BACKUP;
+				Bundle b = new Bundle();
+				b.putString("msg", result);
+				m.setData(b);
+				CategoryList.this.myViewUpdateHandler.sendMessage(m); 
+				
+				if (debug) Log.d(TAG,"thread end");
+				}
+			});
+		backupThread.start();
+	}
+
+    private void restoreDatabase() {
+    	Restore restore=new Restore(myViewUpdateHandler, this);
+    	
+    	restore.read(BACKUP_FILENAME, PBEKey);
+    }
+    
     protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 	

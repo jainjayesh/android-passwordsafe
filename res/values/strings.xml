@@ -21,7 +21,7 @@
 <resources>
     <string name="app_name">Password Safe</string>
     <string name="authors">Steven Osborn, Randy McEoin</string>
-    <string name="version">0.4.0</string>
+    <string name="version">0.5.0</string>
     <string name="empty_safe">No Passwords present for this category.</string>
     <string name="empty_category">No categories present.  Please add one via Menu->Add</string>
     <string name="password_lock">Lock</string>
@@ -59,13 +59,13 @@
 	<string name="dialog_import_msg">Do you want to replace the database?</string>
 	<string name="yes">Yes</string>
 	<string name="no">No</string>
+	<string name="import_progress">Please wait while importing...</string>
 	<string name="import_no_categories">No categories found.</string>
 	<string name="import_no_entries">No entries found in CSV.</string>
 	<string name="import_too_many_categories">Too many categories.</string>
 	<string name="import_not_enough_fields">Not enough fields</string>
 	<string name="import_blank_category">Blank category</string>
 	<string name="import_blank_description">Blank description</string>
-	<string name="import_progress_msg">Please wait while importing..."</string>
 	<string name="dialog_delete_database_title">Delete Database</string>
 	<string name="dialog_delete_database_msg">Are you really sure you want to delete the database?  This cannot be undone.</string>
 	<string name="added">Added</string>
@@ -86,4 +86,18 @@
     <string name="password_changed">Password changed</string>
     <string name="confirm">Confirm</string>
     <string name="confirm_pass_fail">Password entries do not match.</string>
+    <string name="backup">Backup</string>
+    <string name="backup_progress">Backing up to </string>
+    <string name="backup_complete">Complete.  Passwords backed up: </string>
+    <string name="backup_failed">Backup failed: </string>
+    <string name="restore">Restore</string>
+    <string name="restore_unable_to_open">Unable to open file:</string>
+    <string name="restore_bad_version">Version not supported:</string>
+    <string name="restore_error">Restore error.</string>
+    <string name="restore_decrypt_error">Encryption key does not match restore file.  Try changing the current password to match.\nMenu -> Change Password</string>
+    <string name="dialog_restore_database_title">Restore Database</string>
+    <string name="dialog_restore_database_msg">Are you sure you want to replace the current data?</string>
+    <string name="restore_found">Found</string>
+    <string name="restore_passwords">passwords from backup dated </string>
+    <string name="restore_complete">Complete.  Passwords restored: </string>
 </resources>

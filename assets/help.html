@@ -5,6 +5,8 @@
 body {
   background: black;
   color: white; } 
+.warning {
+  color: red; }
 --> 
 </style>
 </head>
@@ -44,7 +46,54 @@ body {
 <dd>Miscellaneous notes about this entry.  You may type as much as you want, the field
  will expand to accommodate.</dd>
 </dl>
- 
+
+<h2>Backup and Restore</h2>
+
+<p>You should backup your database of passwords from time to time.  To do this
+   use Menu -> Backup.   This will create a file named 'passwordsafe.xml' on
+   the sdcard.  Connect your phone to a computer and allow the USB mounting.
+   Look for 'passwordsafe.xml' and copy that to a safe location on your computer.
+   The file is encrypted using the same encryption as the database on your phone.</p>
+
+<h2>Import and Export</h2>
+
+<p>You can import data into Password Safe using CSV files.  It is easiest to
+   create and manage a CSV within a spreadsheet program like Excel or
+   OpenOffice.  Create a file with the following columns in the first row.</p>
+   
+<table border="1">
+ <tr>
+   <td>Category</td>
+   <td>Description</td>
+   <td>Website</td>
+   <td>Username</td>
+   <td>Password</td>
+   <td>Notes</td>
+ </tr>
+</table>
+
+<p>Password Safe import is very sensitive about the first row,
+   so please specify the first
+   row exactly like the above list.  You may also find it helpful to
+   put some data into the Password Safe and perform an export first, so
+   that you can see what the CSV should look like.</p>
+   
+<p>Use the name 'passwordsafe.csv' for your filename.   Connect the
+   phone to your computer and copy 'passwordsafe.csv' onto the phone.
+   The file must be in the base directory of the phone's USB storage.</p>
+   
+<p>Once the CSV file is in place, use Menu -> Import to import the file.
+   Be sure that your phone is not connected to your computer as the sdcard
+   is not allowed to be accessed by both your computer and the phone at
+   the same time.</p>
+
+<p>Exporting is a snap.  Just use Menu -> Export.  This will create the
+   file 'passwordsafe.csv'.  Connect your phone to a computer to retrieve
+   this file.  
+   <div class="warning">WARNING: The exported file is not encrypted!!
+   After exporting and working with the file, you should delete it
+   as soon as possible!</div></p>
+      
 <h2>Security Concerns</h2>
  
 <p>Password Safe was written to safely store your passwords so that nobody can see
@@ -54,9 +103,9 @@ body {
   local.  It does not get transferred to the Internet.   In fact, the application
   doesn't have the security privileges to even access the Internet.</p>
   
-<p>Because Password Safe cannot access the Internet, the data is not backed up.
-  In order to backup, you will need to export to a CSV and store that file
-  in some other secure fashion.</p>
+<p>Because Password Safe cannot access the Internet, the data is not 
+  automatically backed up.
+  In order to backup, you will need to use Menu -> Backup.</p>
 
 <h3>Locking</h3>
 

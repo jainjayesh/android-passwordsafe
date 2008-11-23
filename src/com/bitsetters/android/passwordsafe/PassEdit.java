@@ -57,11 +57,13 @@ public class PassEdit extends Activity {
 	private CryptoHelper ch;
 	private boolean pass_gen_ret = false;
 	
+	private static boolean debug = false;
 	private static String TAG = "PassEdit";
 
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
+		if (debug) Log.d(TAG,"onCreate()");
 		String title = getResources().getString(R.string.app_name) + " - "
 				+ getResources().getString(R.string.edit_entry);
 		setTitle(title);
@@ -90,7 +92,7 @@ public class PassEdit extends Activity {
 			RowId = extras != null ? extras.getLong(PassList.KEY_ID) : null;
 		}
 
-		populateFields();
+//		populateFields();
 
 		goButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
@@ -142,6 +144,9 @@ public class PassEdit extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		if (debug) Log.d(TAG,"onResume()");
+
 		if (dbHelper == null) {
 			dbHelper = new DBHelper(this);
 		}
@@ -289,6 +294,7 @@ public class PassEdit extends Activity {
 	 * 
 	 */
 	private void populateFields() {
+		if (debug) Log.d(TAG,"populateFields()");
 		if(pass_gen_ret == true){
 			pass_gen_ret = false;
 			return;
@@ -297,16 +303,16 @@ public class PassEdit extends Activity {
 			PassEntry row = dbHelper.fetchPassword(RowId);
 			if (row.id > -1) {
 				String cryptDesc = row.description;
-				String cryptNote = row.note;
 				String cryptWebsite = row.website;
-				String cryptPass = row.password;
 				String cryptUsername = row.username;
+				String cryptPass = row.password;
+				String cryptNote = row.note;
 				try {
 					descriptionText.setText(ch.decrypt(cryptDesc));
-					passwordText.setText(ch.decrypt(cryptPass));
-					usernameText.setText(ch.decrypt(cryptUsername));
-					noteText.setText(ch.decrypt(cryptNote));
 					websiteText.setText(ch.decrypt(cryptWebsite));
+					usernameText.setText(ch.decrypt(cryptUsername));
+					passwordText.setText(ch.decrypt(cryptPass));
+					noteText.setText(ch.decrypt(cryptNote));
 				} catch (CryptoHelperException e) {
 					Log.e(TAG, e.toString());
 				}

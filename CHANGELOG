@@ -16,4 +16,6 @@
        password used to unlock the app and encrypt the data
  [I19] User is not prompted before deleting a password
  [I20] During import a progress dialog is displayed
+0.5.0 [Nov 22, 2008]
+ [I23] Added the ability for an encrypted backup/restore
  
