@@ -39,12 +39,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.View;
 import android.view.MenuItem;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 /**
  * CategoryList Activity
@@ -59,20 +63,22 @@ public class CategoryList extends ListActivity {
 
     // Menu Item order
     public static final int LOCK_CATEGORY_INDEX = Menu.FIRST;
-    public static final int EDIT_CATEGORY_INDEX = Menu.FIRST + 1;
-    public static final int ADD_CATEGORY_INDEX = Menu.FIRST + 2;
-    public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 3;
-    public static final int HELP_INDEX = Menu.FIRST + 4;
-    public static final int EXPORT_INDEX = Menu.FIRST + 5;
-    public static final int IMPORT_INDEX = Menu.FIRST + 6;
-    public static final int CHANGE_PASS_INDEX = Menu.FIRST + 7;
-    public static final int BACKUP_INDEX = Menu.FIRST + 8;
-    public static final int RESTORE_INDEX = Menu.FIRST + 9;
+    public static final int OPEN_CATEGORY_INDEX = Menu.FIRST + 1;
+    public static final int EDIT_CATEGORY_INDEX = Menu.FIRST + 2;
+    public static final int ADD_CATEGORY_INDEX = Menu.FIRST + 3;
+    public static final int DEL_CATEGORY_INDEX = Menu.FIRST + 4;
+    public static final int HELP_INDEX = Menu.FIRST + 5;
+    public static final int EXPORT_INDEX = Menu.FIRST + 6;
+    public static final int IMPORT_INDEX = Menu.FIRST + 7;
+    public static final int CHANGE_PASS_INDEX = Menu.FIRST + 8;
+    public static final int BACKUP_INDEX = Menu.FIRST + 9;
+    public static final int RESTORE_INDEX = Menu.FIRST + 10;
     
     public static final int REQUEST_ONCREATE = 0;
     public static final int REQUEST_EDIT_CATEGORY = 1;
     public static final int REQUEST_ADD_CATEGORY = 2;
-
+    public static final int REQUEST_OPEN_CATEGORY = 3;
+    
     protected static final int MSG_IMPORT = 0x101; 
     protected static final int MSG_FILLDATA = MSG_IMPORT + 1; 
     protected static final int MSG_BACKUP = MSG_FILLDATA + 1; 
@@ -171,6 +177,11 @@ public class CategoryList extends ListActivity {
         registerReceiver(mIntentReceiver, filter);
 
 		fillData();
+
+		final ListView list = getListView();
+		list.setFocusable(true);
+		list.setOnCreateContextMenuListener(this);
+		registerForContextMenu(list);
     }
 
     @Override
@@ -225,7 +236,30 @@ public class CategoryList extends ListActivity {
 		unregisterReceiver(mIntentReceiver);
 		if (debug) Log.d(TAG,"onDestroy()");
     }
-    
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view,
+    		ContextMenuInfo menuInfo) {
+
+		AdapterView.AdapterContextMenuInfo info;
+		info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+
+		menu.setHeaderTitle(rows.get(info.position).plainName);
+		menu.add(0,OPEN_CATEGORY_INDEX, 0, R.string.open)
+			.setIcon(android.R.drawable.ic_menu_view)
+			.setAlphabeticShortcut('o');
+		menu.add(0,EDIT_CATEGORY_INDEX, 0, R.string.password_edit)
+			.setIcon(android.R.drawable.ic_menu_edit)
+			.setAlphabeticShortcut('e');
+		menu.add(0, DEL_CATEGORY_INDEX, 0, R.string.password_delete)  
+			.setIcon(android.R.drawable.ic_menu_delete)
+			.setAlphabeticShortcut('d');
+    }
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		onOptionsItemSelected(item);
+		return true;
+    }
+
     @Override
     protected Dialog onCreateDialog(int id) {
         switch (id) {
@@ -383,6 +417,15 @@ public class CategoryList extends ListActivity {
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
+    	
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		int position=-1;
+		if (info==null) {
+			position=getSelectedItemPosition();
+		} else {
+			// used when this is called from a ContextMenu
+			position=info.position;
+		}
 		switch(item.getItemId()) {
 		case LOCK_CATEGORY_INDEX:
 			PBEKey=null;
@@ -390,11 +433,15 @@ public class CategoryList extends ListActivity {
 		    startActivity(frontdoor);
 		    finish();
 			break;
+		case OPEN_CATEGORY_INDEX:
+			Intent passList = new Intent(this, PassList.class);
+			passList.putExtra(KEY_ID, rows.get(info.position).id);
+			startActivityForResult(passList,REQUEST_OPEN_CATEGORY);
+			break;
 		case EDIT_CATEGORY_INDEX:
 			Intent i = new Intent(this, CategoryEdit.class);
-			int sel = getSelectedItemPosition();
-			if (sel > -1) {
-				i.putExtra(KEY_ID, rows.get(sel).id);
+			if (position > -1) {
+				i.putExtra(KEY_ID, rows.get(position).id);
 				startActivityForResult(i,REQUEST_EDIT_CATEGORY);
 			}
 		    break;
@@ -403,9 +450,8 @@ public class CategoryList extends ListActivity {
 		    break;
 		case DEL_CATEGORY_INDEX:
 		    try {
-				int delPosition = getSelectedItemPosition();
-				if (delPosition > -1) {
-					delCategory(rows.get(delPosition).id);
+				if (position > -1) {
+					delCategory(rows.get(position).id);
 				}
 		    } catch (IndexOutOfBoundsException e) {
 				// This should only happen when there are no
@@ -432,6 +478,9 @@ public class CategoryList extends ListActivity {
 			break;
 		case RESTORE_INDEX:
 			restoreDatabase();
+			break;
+		default:
+			Log.e(TAG,"Unknown itemId");
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -480,7 +529,7 @@ public class CategoryList extends ListActivity {
 	
 		Intent i = new Intent(this, PassList.class);
 		i.putExtra(KEY_ID, rows.get(position).id);
-	    startActivityForResult(i,1);
+	    startActivityForResult(i,REQUEST_OPEN_CATEGORY);
     }
 
     @Override
