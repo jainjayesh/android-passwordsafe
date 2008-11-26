@@ -28,11 +28,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.View;
 import android.view.MenuItem;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 /**
  * PassList Activity
@@ -93,6 +97,11 @@ public class PassList extends ListActivity {
 			finish();	// no valid category less than one
 		}
 		fillData();
+
+		final ListView list = getListView();
+		list.setFocusable(true);
+		list.setOnCreateContextMenuListener(this);
+		registerForContextMenu(list);
     }
     
     @Override
@@ -130,6 +139,27 @@ public class PassList extends ListActivity {
 			dbHelper=null;
 		}
     }
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view,
+    		ContextMenuInfo menuInfo) {
+
+		AdapterView.AdapterContextMenuInfo info;
+		info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+
+		menu.setHeaderTitle(rows.get(info.position).plainDescription);
+		menu.add(0, EDIT_PASSWORD_INDEX, 0, R.string.password_edit)
+			.setIcon(android.R.drawable.ic_menu_edit)
+			.setAlphabeticShortcut('e');
+		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete)  
+			.setIcon(android.R.drawable.ic_menu_delete)
+			.setAlphabeticShortcut('d');
+    }
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		onOptionsItemSelected(item);
+		return true;
+    }
+
     /**
      * Populates the password ListView
      */
@@ -214,13 +244,13 @@ public class PassList extends ListActivity {
 	 * Prompt the user with a dialog asking them if they really want
 	 * to delete the password.
 	 */
-	public void deletePassword(){
+	public void deletePassword(final int position){
 		Dialog about = new AlertDialog.Builder(this)
 			.setIcon(R.drawable.passicon)
 			.setTitle(R.string.dialog_delete_password_title)
 			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					deletePassword2();
+					deletePassword2(position);
 				}
 			})
 			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -237,9 +267,9 @@ public class PassList extends ListActivity {
 	 * Follow up for the Delete Password dialog.  If we have a RowId then
 	 * delete the password, otherwise just finish this Activity.
 	 */
-	public void deletePassword2(){
+	public void deletePassword2(int position){
 	    try {
-	    	delPassword(rows.get(getSelectedItemPosition()).id);
+	    	delPassword(rows.get(position).id);
 	    } catch (IndexOutOfBoundsException e) {
 			// This should only happen when there are no
 			// entries to delete.
@@ -253,12 +283,28 @@ public class PassList extends ListActivity {
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
+    	
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		int position=-1;
+		if (info==null) {
+			position=getSelectedItemPosition();
+		} else {
+			// used when this is called from a ContextMenu
+			position=info.position;
+		}
+
 		switch(item.getItemId()) {
 		case ADD_PASSWORD_INDEX:
 		    addPassword();
 		    break;
+		case EDIT_PASSWORD_INDEX:
+			Intent i = new Intent(this, PassEdit.class);
+			i.putExtra(KEY_ID, rows.get(position).id);
+			i.putExtra(KEY_CATEGORY_ID, CategoryId);
+			startActivityForResult(i,REQUEST_EDIT_PASSWORD);
+			break;
 		case DEL_PASSWORD_INDEX:
-			deletePassword();
+			deletePassword(position);
 		    break;
 		}
 		return super.onOptionsItemSelected(item);
