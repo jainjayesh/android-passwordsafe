@@ -18,4 +18,6 @@
  [I20] During import a progress dialog is displayed
 0.5.0 [Nov 22, 2008]
  [I23] Added the ability for an encrypted backup/restore
+ [I24] Offer a ContextMenu on CategoryList when user long presses
+ [I25] Fixed crashing when user hits Go on an invalid URL in PassEdit
  
