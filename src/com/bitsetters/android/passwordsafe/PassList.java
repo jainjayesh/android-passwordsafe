@@ -49,6 +49,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
  */
 public class PassList extends ListActivity {
 
+	private static final boolean debug= false;
     private static final String TAG = "PassList";
 
     // Menu Item order
@@ -77,7 +78,7 @@ public class PassList extends ListActivity {
     public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		
-//		Log.d(TAG,"onCreate()");
+		if (debug) Log.d(TAG,"onCreate()");
 		setContentView(R.layout.pass_list);
 		
 		String title = getResources().getString(R.string.app_name) + " - " +
@@ -104,11 +105,23 @@ public class PassList extends ListActivity {
 		registerForContextMenu(list);
     }
     
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		
+		// remember which Category we're looking at
+		if (CategoryId != null) {
+			outState.putLong(CategoryList.KEY_ID, CategoryId);
+		} else {
+			outState.putLong(CategoryList.KEY_ID, -1);
+		}
+	}
+
     @Override
     protected void onPause() {
 		super.onPause();
 		
-//		Log.d(TAG,"onPause()");
+		if (debug) Log.d(TAG,"onPause()");
 		if (dbHelper != null) {
 			dbHelper.close();
 			dbHelper = null;
@@ -119,7 +132,7 @@ public class PassList extends ListActivity {
     protected void onResume() {
 		super.onResume();
 		
-//		Log.d(TAG,"onResume()");
+		if (debug) Log.d(TAG,"onResume()");
 
 		if (CategoryList.isSignedIn()==false) {
 			finish();
@@ -133,7 +146,7 @@ public class PassList extends ListActivity {
     public void onStop() {
 		super.onStop();
 		
-//		Log.d(TAG,"onStop()");
+		if (debug) Log.d(TAG,"onStop()");
 		if (dbHelper != null) {
 			dbHelper.close();
 			dbHelper=null;
