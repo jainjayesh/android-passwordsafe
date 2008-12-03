@@ -104,7 +104,7 @@ public class CategoryList extends ListActivity {
 
 	private Thread backupThread=null;
 
-    private static String PBEKey;	      // Password Based Encryption Key			
+    private static String masterKey;			
 
     private List<CategoryEntry> rows;
     
@@ -112,7 +112,7 @@ public class CategoryList extends ListActivity {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 if (debug) Log.d(TAG,"caught ACTION_SCREEN_OFF");
-                PBEKey=null;
+                masterKey=null;
             }
         }
     };
@@ -288,7 +288,7 @@ public class CategoryList extends ListActivity {
      * @return	True if signed in
      */
     public static boolean isSignedIn() {
-    	if (PBEKey != null) {
+    	if (masterKey != null) {
     		return true;
     	}
     	return false;
@@ -302,7 +302,7 @@ public class CategoryList extends ListActivity {
      */
     public static void setSignedOut() {
     	if (debug) Log.d(TAG,"setSignedOut()");
-    	PBEKey=null;
+    	masterKey=null;
     }
     /**
      * Populates the category ListView
@@ -312,10 +312,10 @@ public class CategoryList extends ListActivity {
 		// initialize crypto so that we can display readable descriptions in
 		// the list view
 		ch = new CryptoHelper();
-		if(PBEKey == null) {
-		    PBEKey = "";
+		if(masterKey == null) {
+		    masterKey = "";
 		}
-		ch.setPassword(PBEKey);
+		ch.setPassword(masterKey);
 	
 		List<String> items = new ArrayList<String>();
 		if (dbHelper==null) {
@@ -393,12 +393,12 @@ public class CategoryList extends ListActivity {
 		return super.onCreateOptionsMenu(menu);
     }
 
-    static void setPBEKey(String key) {
-		PBEKey = key;
+    static void setMasterKey(String key) {
+		masterKey = key;
     }
 
-    static String getPBEKey() {
-		return PBEKey;
+    static String getMasterKey() {
+		return masterKey;
     }
 
     private void addCategory() {
@@ -428,7 +428,7 @@ public class CategoryList extends ListActivity {
 		}
 		switch(item.getItemId()) {
 		case LOCK_CATEGORY_INDEX:
-			PBEKey=null;
+			masterKey=null;
 		    Intent frontdoor = new Intent(this, FrontDoor.class);
 		    startActivity(frontdoor);
 		    finish();
@@ -489,7 +489,7 @@ public class CategoryList extends ListActivity {
     private String backupDatabase() {
     	Backup backup=new Backup(this);
     	
-    	backup.write(BACKUP_FILENAME, PBEKey);
+    	backup.write(BACKUP_FILENAME, masterKey);
     	return backup.getResult();
     }
 
@@ -521,7 +521,7 @@ public class CategoryList extends ListActivity {
     private void restoreDatabase() {
     	Restore restore=new Restore(myViewUpdateHandler, this);
     	
-    	restore.read(BACKUP_FILENAME, PBEKey);
+    	restore.read(BACKUP_FILENAME, masterKey);
     }
     
     protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -563,10 +563,10 @@ public class CategoryList extends ListActivity {
 
 		try {
 			ch = new CryptoHelper();
-			if(PBEKey == null) {
-			    PBEKey = "";
+			if(masterKey == null) {
+			    masterKey = "";
 			}
-			ch.setPassword(PBEKey);
+			ch.setPassword(masterKey);
 
 		    entry.name = ch.encrypt(namePlain);
 		} catch(CryptoHelperException e) {
@@ -589,10 +589,10 @@ public class CategoryList extends ListActivity {
 			writer.writeNext(header);
 			
 			ch = new CryptoHelper();
-			if(PBEKey == null) {
-			    PBEKey = "";
+			if(masterKey == null) {
+			    masterKey = "";
 			}
-			ch.setPassword(PBEKey);
+			ch.setPassword(masterKey);
 		
 			HashMap<Long, String> categories = new HashMap<Long, String>();
 			
@@ -905,10 +905,10 @@ public class CategoryList extends ListActivity {
 		if (ch == null){
 			ch = new CryptoHelper();
 		}
-		if(PBEKey == null) {
-		    PBEKey = "";
+		if(masterKey == null) {
+		    masterKey = "";
 		}
-		ch.setPassword(PBEKey);
+		ch.setPassword(masterKey);
 	
 		HashMap<String,Long> categories = new HashMap<String,Long>();
 		rows = dbHelper.fetchAllCategoryRows();

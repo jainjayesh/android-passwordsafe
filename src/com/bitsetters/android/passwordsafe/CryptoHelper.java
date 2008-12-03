@@ -29,6 +29,7 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -59,6 +60,7 @@ public class CryptoHelper {
     protected static String algorithm = "PBEWithMD5And128BitAES-CBC-OpenSSL";
 //  protected static String algorithm = "PBEWithSHA1And128BitAES-CBC-BC";  // slower
 //	protected static String algorithm = "PBEWithSHA1And256BitAES-CBC-BC";  // even slower
+    protected static String desAlgorithm = "DES";
     protected static String password = null;          
     protected static SecretKey pbeKey;
     protected static Cipher pbeCipher;
@@ -86,6 +88,23 @@ public class CryptoHelper {
 		    Log.e(TAG,"CryptoHelper(): "+e.toString());		
 		}
     }
+    /**
+     * @author Isaac Potoczny-Jones
+     * 
+     * @return null if failure, otherwise hex string version of DES key
+     */
+	public static String generateDESKey () {
+		//set up the des key
+		try {
+			KeyGenerator keygen;
+			keygen = KeyGenerator.getInstance(desAlgorithm);
+			SecretKey genDesKey = keygen.generateKey();
+			return toHexString (genDesKey.getEncoded());
+		} catch (NoSuchAlgorithmException e) {
+			Log.e(TAG,"generateDESKey(): "+e.toString());
+		}
+		return null; //error case.
+	}
 
     /**
      * 

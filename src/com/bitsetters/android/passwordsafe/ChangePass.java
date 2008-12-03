@@ -282,7 +282,7 @@ public class ChangePass extends Activity {
 		Log.i(TAG, "Saving Password: " + hexKey);
 		try {
 			cryptKey = ch.encrypt(hexKey);
-			dbHelper.storePBEKey(cryptKey);
+			dbHelper.storeMasterKey(cryptKey);
 		} catch (CryptoHelperException e) {
 			Log.e(TAG, e.toString());
             Toast.makeText(ChangePass.this, e.toString(),
@@ -294,8 +294,8 @@ public class ChangePass extends Activity {
 
 		dbHelper.commit();
 		
-		PassList.setPBEKey(newPass);
-		CategoryList.setPBEKey(newPass);
+		PassList.setMasterKey(newPass);
+		CategoryList.setMasterKey(newPass);
 
 		dbHelper.close();
     }
@@ -313,7 +313,7 @@ public class ChangePass extends Activity {
 		String decryptConfirm = "";
 		
 		DBHelper dbHelper= new DBHelper(this);
-		String confirmKey = dbHelper.fetchPBEKey();
+		String confirmKey = dbHelper.fetchMasterKey();
 
 		CryptoHelper ch = new CryptoHelper();
 		ch.setPassword(pass);

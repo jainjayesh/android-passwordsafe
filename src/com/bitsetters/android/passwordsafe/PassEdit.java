@@ -70,7 +70,7 @@ public class PassEdit extends Activity {
 		setTitle(title);
 
 		ch = new CryptoHelper();
-		ch.setPassword(PassList.getPBEKey());
+		ch.setPassword(PassList.getMasterKey());
 
 		if (dbHelper == null) {
 			dbHelper = new DBHelper(this);

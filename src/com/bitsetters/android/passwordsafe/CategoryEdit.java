@@ -43,7 +43,7 @@ public class CategoryEdit extends Activity {
 		Log.d(TAG, "onCreate");
 		
 		ch = new CryptoHelper();
-		ch.setPassword(PassList.getPBEKey());
+		ch.setPassword(PassList.getMasterKey());
 
 		if (dbHelper == null){
 			dbHelper = new DBHelper(this);

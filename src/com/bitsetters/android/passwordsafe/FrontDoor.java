@@ -48,7 +48,7 @@ public class FrontDoor extends Activity {
 	private TextView confirmText;
 	private EditText confirmPass;
 	private String PBEKey;
-	private String confirmKey;
+	private String masterKey;
 	private CryptoHelper ch;
 	private boolean firstTime = false;
 
@@ -77,8 +77,8 @@ public class FrontDoor extends Activity {
 		introText = (TextView) findViewById(R.id.first_time);
 		confirmPass = (EditText) findViewById(R.id.pass_confirm);
 		confirmText = (TextView) findViewById(R.id.confirm_lbl);
-		confirmKey = dbHelper.fetchPBEKey();
-		if (confirmKey.length() == 0) {
+		masterKey = dbHelper.fetchMasterKey();
+		if (masterKey.length() == 0) {
 			firstTime = true;
 			introText.setVisibility(View.VISIBLE);
 			confirmText.setVisibility(View.VISIBLE);
@@ -117,14 +117,11 @@ public class FrontDoor extends Activity {
 								.show();
 						return;
 					}
-
-					byte[] md5Key = CryptoHelper.md5String(PBEKey);
-					String hexKey = CryptoHelper.toHexString(md5Key);
-					String cryptKey = "";
-					Log.i(TAG, "Saving Password: " + hexKey);
+					masterKey = CryptoHelper.generateDESKey();
+					Log.i(TAG, "Saving Password: " + masterKey);
 					try {
-						cryptKey = ch.encrypt(hexKey);
-						dbHelper.storePBEKey(cryptKey);
+						String encryptedMasterKey = ch.encrypt(masterKey);
+						dbHelper.storeMasterKey(encryptedMasterKey);
 					} catch (CryptoHelperException e) {
 						Log.e(TAG, e.toString());
 					}
@@ -139,8 +136,8 @@ public class FrontDoor extends Activity {
 			        findViewById(R.id.password).startAnimation(shake);
 					return;
 				}
-				PassList.setPBEKey(PBEKey);
-				CategoryList.setPBEKey(PBEKey);
+				PassList.setMasterKey(masterKey);
+				CategoryList.setMasterKey(masterKey);
 
 				Intent i = new Intent(getApplicationContext(),
 						CategoryList.class);
@@ -179,17 +176,18 @@ public class FrontDoor extends Activity {
 	 * @return
 	 */
 	private boolean checkUserPassword() {
-		byte[] md5Pass = CryptoHelper.md5String(PBEKey);
-		String hexPass = CryptoHelper.toHexString(md5Pass);
-		String decryptConfirm = "";
+		String encryptedMasterKey = dbHelper.fetchMasterKey();
+		String decryptedMasterKey = "";
 		try {
-			decryptConfirm = ch.decrypt(confirmKey);
+			decryptedMasterKey = ch.decrypt(encryptedMasterKey);
 		} catch (CryptoHelperException e) {
 			Log.e(TAG, e.toString());
 		}
-		if (decryptConfirm.compareTo(hexPass) == 0) {
+		if (ch.getStatus()==true) {
+			masterKey=decryptedMasterKey;
 			return true;
 		}
+		masterKey=null;
 		return false;
 	}
 }
