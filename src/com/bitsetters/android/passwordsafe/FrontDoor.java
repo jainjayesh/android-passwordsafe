@@ -61,7 +61,7 @@ public class FrontDoor extends Activity {
 			Log.d(TAG, "onCreate()");
 
 		dbHelper = new DBHelper(this);
-		ch = new CryptoHelper();
+		ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
 
 		// Setup layout
 		setContentView(R.layout.front_door);

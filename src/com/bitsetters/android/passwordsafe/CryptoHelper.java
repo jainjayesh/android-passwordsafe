@@ -57,9 +57,14 @@ public class CryptoHelper {
     protected static PBEKeySpec pbeKeySpec;
     protected static PBEParameterSpec pbeParamSpec;
     protected static SecretKeyFactory keyFac;
-    protected static String algorithm = "PBEWithMD5And128BitAES-CBC-OpenSSL";
+
+    public final static int EncryptionMedium=1;
+    public final static int EncryptionStrong=2;
+
+    protected static String algorithmMedium = "PBEWithMD5And128BitAES-CBC-OpenSSL";
 //  protected static String algorithm = "PBEWithSHA1And128BitAES-CBC-BC";  // slower
-//	protected static String algorithm = "PBEWithSHA1And256BitAES-CBC-BC";  // even slower
+	protected static String algorithmStrong = "PBEWithSHA1And256BitAES-CBC-BC";
+	private String algorithm = "";
     protected static String desAlgorithm = "DES";
     protected static String password = null;          
     protected static SecretKey pbeKey;
@@ -74,10 +79,34 @@ public class CryptoHelper {
     private static final int count = 20;
 
     /**
-     * 
-     * @throws Exception
+     * Constructor which defaults to a medium encryption level.
      */
     CryptoHelper() {
+    	initialize(EncryptionMedium);
+    }
+    /**
+     * Constructor which allows the specification of the encryption level.
+     * 
+     * @param Strength encryption strength
+     */
+    CryptoHelper(int Strength) {
+        initialize(Strength);
+    }
+    /**
+     * Initialize the class.  Sets the encryption level for the instance
+     * and generates the secret key factory.
+     * 
+     * @param Strength
+     */
+    private void initialize(int Strength) {
+    	switch (Strength) {
+    	case EncryptionMedium:
+    		algorithm=algorithmMedium;
+    		break;
+    	case EncryptionStrong:
+    		algorithm=algorithmStrong;
+    		break;
+    	}
 		pbeParamSpec = new PBEParameterSpec(salt,count);
 		try {
 		    keyFac = SecretKeyFactory
