@@ -17,6 +17,7 @@
 package com.bitsetters.android.passwordsafe;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +29,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bitsetters.android.passwordsafe.AskPassword;
 
 /**
  * FrontDoor Activity
@@ -52,100 +55,94 @@ public class FrontDoor extends Activity {
 	private CryptoHelper ch;
 	private boolean firstTime = false;
 
+	//probably remove these:
+	public final String ACTION_ENCRYPT = "org.syntaxpolice.crypto.action.ENCRYPT";
+	public final String ACTION_DECRYPT = "org.syntaxpolice.crypto.action.DECRYPT";
+	
+	public final String BODY = "org.syntaxpolice.crypto.extras.EXTRA_CRYPTO_BODY";
+	public final String CALLBACK = "org.syntaxpolice.crypto.extras.EXTRA_CALLBACK";
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+		if (masterKey == null || masterKey.equals("")) {
+			Intent askPass = new Intent(getApplicationContext(),
+					AskPassword.class);
 
-		if (debug)
-			Log.d(TAG, "onCreate()");
-
-		dbHelper = new DBHelper(this);
-		ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
-
-		// Setup layout
-		setContentView(R.layout.front_door);
-		ImageView icon = (ImageView) findViewById(R.id.entry_icon);
-		icon.setImageResource(R.drawable.passicon);
-		TextView header = (TextView) findViewById(R.id.entry_header);
-		String version = getString(R.string.version);
-		String appName = getString(R.string.app_name);
-		String head = appName + " " + version + "\n";
-		header.setText(head);
-
-		pbeKey = (EditText) findViewById(R.id.password);
-		introText = (TextView) findViewById(R.id.first_time);
-		confirmPass = (EditText) findViewById(R.id.pass_confirm);
-		confirmText = (TextView) findViewById(R.id.confirm_lbl);
-		masterKey = dbHelper.fetchMasterKey();
-		if (masterKey.length() == 0) {
-			firstTime = true;
-			introText.setVisibility(View.VISIBLE);
-			confirmText.setVisibility(View.VISIBLE);
-			confirmPass.setVisibility(View.VISIBLE);
+			final Intent thisIntent = getIntent();
+        	String inputBody = thisIntent.getStringExtra (BODY);
+        	String callbackAction = thisIntent.getStringExtra (CALLBACK);
+        	
+        	askPass.putExtra (BODY, inputBody);
+        	askPass.putExtra (CALLBACK, callbackAction);
+        	//TODO: Is there a way to make sure all the extras are set?
+        	
+			startActivityForResult (askPass, 0);
+		} else {
+			actionDispatch();
 		}
+	}
 
-		Button continueButton = (Button) findViewById(R.id.continue_button);
+	protected void onActivityResult (int requestCode, int resultCode, Intent data) {    
+		masterKey = data.getStringExtra("masterKey");
+		actionDispatch();
+	}
+	
+	protected void actionDispatch () {    
+		final Intent thisIntent = getIntent();
+        final String action = thisIntent.getAction();
+		PassList.setMasterKey(masterKey);
+        CategoryList.setMasterKey(masterKey);
+        if (ch == null) {
+    		ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
+    		ch.setPassword(masterKey);        	
+        }
 
-		continueButton.setOnClickListener(new View.OnClickListener() {
 
-			public void onClick(View arg0) {
-				PBEKey = pbeKey.getText().toString();
-				ch.setPassword(PBEKey);
+        if (action == null || action.equals(Intent.ACTION_MAIN)){
+        	//TODO: When launched from debugger, action is null. Other such cases?
+        	Intent i = new Intent(getApplicationContext(),
+        			CategoryList.class);
+        	startActivity(i);
+        	finish();
+        } else {
+        	// get the body text out of the extras. we'll encrypt or decrypt this.
+        	String inputBody = thisIntent.getStringExtra (BODY);
+        	String outputBody = "";
+        	// which action?
+        	if (action.equals (ACTION_ENCRYPT)) {
+        		try {
+        			outputBody = ch.encrypt (inputBody);
+        		} catch (CryptoHelperException e) {
+        			Log.e(TAG, e.toString());
+        		}  catch (NullPointerException e) {
+        			Toast.makeText(FrontDoor.this,
+        					"error in calling function - ch: " + ch + " inputBody: " + inputBody,
+            				Toast.LENGTH_SHORT).show();
+        			Log.e(TAG, e.toString() + "ch: " + ch + " inputBody: " + inputBody );
+        			
+        		}
+        	} else if (action.equals (ACTION_DECRYPT)) {
+        		try {
+        			outputBody = ch.decrypt (inputBody);
+        		} catch (CryptoHelperException e) {
+        			Log.e(TAG, e.toString());
+        		}
+        	}
+        	Intent callbackIntent = new Intent();
 
-				// Password must be at least 4 characters
-				if (PBEKey.length() < 4) {
-					Toast.makeText(FrontDoor.this, R.string.notify_blank_pass,
-							Toast.LENGTH_SHORT).show();
-				    Animation shake = AnimationUtils
-			        .loadAnimation(FrontDoor.this, R.anim.shake);
-			        
-			        findViewById(R.id.password).startAnimation(shake);
-					return;
-				}
+        	String callbackAction = thisIntent.getStringExtra (CALLBACK);
+        	callbackIntent.setAction(callbackAction);
+        	callbackIntent.setType("text/plain");
+        	// stash the encrypted/decrypted text in the extra
+        	callbackIntent.putExtra(BODY, outputBody);
 
-				// If it's the user's first time to enter a password,
-				// we have to store it in the database. We are going to
-				// store an encrypted hash of the password.
-				if (firstTime) {
-
-					// Make sure password and confirm fields match
-					if (pbeKey.getText().toString().compareTo(
-							confirmPass.getText().toString()) != 0) {
-						Toast.makeText(FrontDoor.this,
-								R.string.confirm_pass_fail, Toast.LENGTH_SHORT)
-								.show();
-						return;
-					}
-					masterKey = CryptoHelper.generateDESKey();
-					Log.i(TAG, "Saving Password: " + masterKey);
-					try {
-						String encryptedMasterKey = ch.encrypt(masterKey);
-						dbHelper.storeMasterKey(encryptedMasterKey);
-					} catch (CryptoHelperException e) {
-						Log.e(TAG, e.toString());
-					}
-				} else if (!checkUserPassword()) {
-					// Check the user's password and display a
-					// message if it's wrong
-					Toast.makeText(FrontDoor.this, R.string.invalid_password,
-							Toast.LENGTH_SHORT).show();
-			        Animation shake = AnimationUtils
-			        .loadAnimation(FrontDoor.this, R.anim.shake);
-			        
-			        findViewById(R.id.password).startAnimation(shake);
-					return;
-				}
-				PassList.setMasterKey(masterKey);
-				CategoryList.setMasterKey(masterKey);
-
-				Intent i = new Intent(getApplicationContext(),
-						CategoryList.class);
-				startActivity(i);
-				finish();
-			}
-
-		});
+        	// call-back the callback URL
+        	setResult(RESULT_OK, callbackIntent);
+        	finish(); //maybe we don't want to finish so that we can continue to respond to requests?
+        }
+			
 	}
 
 	@Override

@@ -7,12 +7,25 @@
                 <action android:name="android.intent.action.MAIN" />
 		        <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
+            <intent-filter android:label="org.syntaxpolice.crypto.action.ENCRYPT">
+                <action android:name="org.syntaxpolice.crypto.action.ENCRYPT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.syntaxpolice.crypto.contents" />
+        	</intent-filter>
+        	<intent-filter android:label="org.syntaxpolice.crypto.action.DECRYPT">
+                <action android:name="org.syntaxpolice.crypto.action.DECRYPT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.syntaxpolice.crypto.contents" />
+        	</intent-filter>
+            
         </activity>
         <activity class=".PassGen" android:name="PassGen" android:label="@string/app_name" />
         <activity class=".CategoryEdit" android:name="CategoryEdit" android:label="@string/app_name" />
         <activity class=".PassList" android:name="PassList" android:label="@string/app_name" />
         <activity class=".PassEdit" android:name="PassEdit" android:label="@string/app_name" />
         <activity class=".CategoryList" android:name="CategoryList" android:label="@string/app_name" />
+        <activity class=".AskPassword" android:name="AskPassword" android:label="@string/app_name" />
         <activity class=".Help" android:name="Help" android:label="@string/app_name" />
         <activity class=".ChangePass" android:name="ChangePass" android:label="@string/app_name" />
     </application>
