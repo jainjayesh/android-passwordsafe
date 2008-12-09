@@ -1,4 +1,4 @@
-/* $Id: AskPassword.java 54 2008-12-05 00:58:22Z rmceoin $
+/* $Id$
  * 
  * Copyright 2007-2008 Steven Osborn
  *

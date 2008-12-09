@@ -77,7 +77,7 @@ public class DBHelper {
     		+ "encryptedkey text not null);";
 
     private SQLiteDatabase db;
-    private boolean needsPrePopulation=false;
+    private static boolean needsPrePopulation=false;
 
     /**
      * 
@@ -211,16 +211,18 @@ public class DBHelper {
      * 
      * @param entry
      */
-    public void addCategory(CategoryEntry entry) {
+    public long addCategory(CategoryEntry entry) {
         ContentValues initialValues = new ContentValues();
     	initialValues.put("name", entry.name);
 
+    	long ret=-1;
         try {
-	        db.insert(TABLE_CATEGORIES, null, initialValues);
+	        ret=db.insert(TABLE_CATEGORIES, null, initialValues);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
 		}
+		return ret;
     }
 
     /**

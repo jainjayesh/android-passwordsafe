@@ -95,7 +95,6 @@ public class CategoryList extends ListActivity {
 
     private CryptoHelper ch=null;
     private DBHelper dbHelper=null;
-	private boolean needPrePopulateCategories=false;
 	
 	private String importMessage="";
 	private int importedEntries=0;
@@ -168,7 +167,7 @@ public class CategoryList extends ListActivity {
 			dbHelper = new DBHelper(this);
 			if (dbHelper.getPrePopulate()==true)
 			{
-				needPrePopulateCategories=true;
+				prePopulate();
 			}
 		}
 		
@@ -540,23 +539,19 @@ public class CategoryList extends ListActivity {
 		    dbHelper = new DBHelper(this);
 		}
 
-    	if (requestCode==REQUEST_ONCREATE) {
-    		if (needPrePopulateCategories==true)
-	    	{
-	    		needPrePopulateCategories=false;
-	    		addCategory(getString(R.string.category_business));
-	    		addCategory(getString(R.string.category_personal));
-	    	}
-    	}
-    	
     	if (resultCode == RESULT_OK) {
     		fillData();
     	}
     }
 
-    private void addCategory(String name) {
+    private void prePopulate() {
+		addCategory(getString(R.string.category_business));
+		addCategory(getString(R.string.category_personal));
+    }
+    
+    private long addCategory(String name) {
     	if (debug) Log.d(TAG,"addCategory("+name+")");
-    	if ((name==null) || (name=="")) return;
+    	if ((name==null) || (name=="")) return -1;
 		CategoryEntry entry =  new CategoryEntry();
 	
 		String namePlain = name;
@@ -572,7 +567,7 @@ public class CategoryList extends ListActivity {
 		} catch(CryptoHelperException e) {
 		    Log.e(TAG,e.toString());
 		}
-	    dbHelper.addCategory(entry);
+	    return dbHelper.addCategory(entry);
     }
     
 	public boolean exportDatabase(){
