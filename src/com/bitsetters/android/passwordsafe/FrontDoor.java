@@ -84,9 +84,11 @@ public class FrontDoor extends Activity {
 		}
 	}
 
-	protected void onActivityResult (int requestCode, int resultCode, Intent data) {    
-		masterKey = data.getStringExtra("masterKey");
-		actionDispatch();
+	protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+		if (resultCode==RESULT_OK) {
+			masterKey = data.getStringExtra("masterKey");
+			actionDispatch();
+		}
 	}
 	
 	protected void actionDispatch () {    

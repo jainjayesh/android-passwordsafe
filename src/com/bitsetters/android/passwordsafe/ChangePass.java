@@ -152,7 +152,8 @@ public class ChangePass extends Activity {
                     Toast.LENGTH_SHORT).show();
             return;
 		}
-		changePassThreadStart(oldPlain, newPlain);
+//		changePassThreadStart(oldPlain, newPlain);
+		changeMasterPassword(oldPlain, newPlain);
     }
     
 	/**
@@ -163,6 +164,7 @@ public class ChangePass extends Activity {
 	 * @param oldPass clear text old password
 	 * @param newPass clear text new password
 	 */
+    /*
 	private void changePassThreadStart(String oldPass, String newPass){
 		if (debug) Log.d(TAG,"changePassThreadStart(,)");
 		showDialog(CHANGE_PASS_PROGRESS_KEY);
@@ -183,8 +185,52 @@ public class ChangePass extends Activity {
 			});
 		changePassThread.start();
 	}
-	
-    private void changePassword(String oldPass, String newPass) {
+	*/
+
+    private boolean changeMasterPassword(String oldPass, String newPass) {
+    	
+		DBHelper dbHelper= new DBHelper(this);
+
+		CryptoHelper ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
+
+		String encryptedMasterKey = dbHelper.fetchMasterKey();
+		String decryptedMasterKey = "";
+		try {
+			ch.setPassword(oldPass);
+			decryptedMasterKey = ch.decrypt(encryptedMasterKey);
+			if (ch.getStatus()==true) {	// successful decryption?
+				ch.setPassword(newPass);
+				encryptedMasterKey = ch.encrypt(decryptedMasterKey);
+				if (ch.getStatus()==true) { // successful encryption?
+					dbHelper.storeMasterKey(encryptedMasterKey);
+					dbHelper.close();
+					Toast.makeText(ChangePass.this, R.string.password_changed,
+							Toast.LENGTH_LONG).show();
+					setResult(RESULT_OK);
+					finish();
+					return true;
+				}
+			}
+
+		} catch (CryptoHelperException e) {
+			Log.e(TAG, e.toString());
+		}
+
+		dbHelper.close();
+
+		Toast.makeText(ChangePass.this, R.string.error_changing_password,
+				Toast.LENGTH_LONG).show();
+		return false;
+    }
+    
+    /**
+     * This is an older function.   We'll want to re-use this when we
+     * allow the user to regenerate the master key.
+     * 
+     * @param oldPass
+     * @param newPass
+     */
+    public void changePassword(String oldPass, String newPass) {
     	if (debug) Log.d(TAG,"changePassword(,)");
     	
 		DBHelper dbHelper= new DBHelper(this);
@@ -308,25 +354,24 @@ public class ChangePass extends Activity {
      * @return True if password is correct.
      */
     private boolean checkUserPassword(String pass) {
-		byte[] md5Pass = CryptoHelper.md5String(pass);
-		String hexPass = CryptoHelper.toHexString(md5Pass);
-		String decryptConfirm = "";
-		
+    	if (debug) Log.d(TAG,"checkUserPassword()");
+    	
 		DBHelper dbHelper= new DBHelper(this);
 		String confirmKey = dbHelper.fetchMasterKey();
 
-		CryptoHelper ch = new CryptoHelper();
+		CryptoHelper ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
 		ch.setPassword(pass);
 
 		try {
-			decryptConfirm = ch.decrypt(confirmKey);
+			ch.decrypt(confirmKey);
 		} catch (CryptoHelperException e) {
 			Log.e(TAG, e.toString());
 		}
 		dbHelper.close();
-		
-		if (decryptConfirm.compareTo(hexPass) == 0) {
-			return true;
+
+		// was decryption of the master key successful?
+		if (ch.getStatus()==true) {
+			return true;	// then we must have a good master password
 		}
 		return false;
 	}
