@@ -30,7 +30,7 @@ public class Backup {
 	private static boolean debug = false;
 	private static final String TAG = "Backup";
 	
-	public static int CURRENT_VERSION = 1;
+	public static int CURRENT_VERSION = 2;
 	
 	private String result="";
 	
@@ -40,7 +40,7 @@ public class Backup {
 		myCtx=ctx;
 	}
 
-    public boolean write(String filename, String PBEKey) {
+    public boolean write(String filename) {
     	if (debug) Log.d(TAG,"write("+filename+",)");
     	
 		try {
@@ -66,9 +66,11 @@ public class Backup {
             
 			DBHelper dbHelper=new DBHelper(myCtx);
 			
-			CryptoHelper ch = new CryptoHelper();
-			ch.setPassword(PBEKey);
-
+			String masterKeyEncrypted = dbHelper.fetchMasterKey();
+			serializer.startTag(null, "MasterKey");
+			serializer.text(masterKeyEncrypted);
+			serializer.endTag(null, "MasterKey");
+			
 			List<CategoryEntry> crows;
 			crows = dbHelper.fetchAllCategoryRows();
 

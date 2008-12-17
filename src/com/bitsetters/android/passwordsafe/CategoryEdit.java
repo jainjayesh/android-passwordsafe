@@ -17,6 +17,7 @@
 package com.bitsetters.android.passwordsafe;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -108,6 +109,11 @@ public class CategoryEdit extends Activity {
 		Log.d(TAG, "onResume");
 		if (dbHelper == null) {
 		    dbHelper = new DBHelper(this);
+		}
+		if (!CategoryList.isSignedIn()) {
+			Intent frontdoor = new Intent(this, FrontDoor.class);
+			startActivity(frontdoor);		
+			finish();
 		}
 		populateFields();
     }

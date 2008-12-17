@@ -78,6 +78,7 @@ public class CategoryList extends ListActivity {
     public static final int REQUEST_EDIT_CATEGORY = 1;
     public static final int REQUEST_ADD_CATEGORY = 2;
     public static final int REQUEST_OPEN_CATEGORY = 3;
+    public static final int REQUEST_RESTORE = 4;
     
     protected static final int MSG_IMPORT = 0x101; 
     protected static final int MSG_FILLDATA = MSG_IMPORT + 1; 
@@ -89,7 +90,7 @@ public class CategoryList extends ListActivity {
     public static final int MAX_CATEGORIES = 256;
 
     private static final String EXPORT_FILENAME = "/sdcard/passwordsafe.csv";
-    private static final String BACKUP_FILENAME = "/sdcard/passwordsafe.xml";
+    public static final String BACKUP_FILENAME = "/sdcard/passwordsafe.xml";
     
     public static final String KEY_ID = "id";  // Intent keys
 
@@ -489,7 +490,7 @@ public class CategoryList extends ListActivity {
     private String backupDatabase() {
     	Backup backup=new Backup(this);
     	
-    	backup.write(BACKUP_FILENAME, masterKey);
+    	backup.write(BACKUP_FILENAME);
     	return backup.getResult();
     }
 
@@ -519,9 +520,11 @@ public class CategoryList extends ListActivity {
 	}
 
     private void restoreDatabase() {
-    	Restore restore=new Restore(myViewUpdateHandler, this);
+//    	Restore restore=new Restore(myViewUpdateHandler, this);
     	
-    	restore.read(BACKUP_FILENAME, masterKey);
+//    	restore.read(BACKUP_FILENAME, masterKey);
+		Intent i = new Intent(this, Restore.class);
+	    startActivityForResult(i,REQUEST_RESTORE);
     }
     
     protected void onListItemClick(ListView l, View v, int position, long id) {

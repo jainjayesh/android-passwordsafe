@@ -92,10 +92,13 @@
     <string name="backup_complete">Complete.  Passwords backed up: </string>
     <string name="backup_failed">Backup failed: </string>
     <string name="restore">Restore</string>
+    <string name="filename">Filename</string>
+    <string name="restore_no_file">Backup file not found.  You need to perform a backup first to create it.  Or copy a backup from your PC.</string>
+    <string name="restore_set_password">Please provide the password used by the backup file.  Your master password will be set to this.</string>
     <string name="restore_unable_to_open">Unable to open file:</string>
     <string name="restore_bad_version">Version not supported:</string>
     <string name="restore_error">Restore error.</string>
-    <string name="restore_decrypt_error">Encryption key does not match restore file.  Try changing the current password to match.\nMenu -> Change Password</string>
+    <string name="restore_decrypt_error">Bad password.</string>
     <string name="dialog_restore_database_title">Restore Database</string>
     <string name="dialog_restore_database_msg">Are you sure you want to replace the current data?</string>
     <string name="restore_found">Found</string>

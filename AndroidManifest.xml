@@ -28,5 +28,6 @@
         <activity class=".AskPassword" android:name="AskPassword" android:label="@string/app_name" />
         <activity class=".Help" android:name="Help" android:label="@string/app_name" />
         <activity class=".ChangePass" android:name="ChangePass" android:label="@string/app_name" />
+        <activity class=".Restore" android:name="Restore" android:label="@string/app_name" />
     </application>
 </manifest> 
