@@ -168,6 +168,7 @@ public class CategoryList extends ListActivity {
 			if (dbHelper.getPrePopulate()==true)
 			{
 				prePopulate();
+				dbHelper.clearPrePopulate();
 			}
 		}
 		

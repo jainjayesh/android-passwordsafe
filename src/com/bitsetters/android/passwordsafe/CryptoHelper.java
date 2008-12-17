@@ -120,17 +120,17 @@ public class CryptoHelper {
     /**
      * @author Isaac Potoczny-Jones
      * 
-     * @return null if failure, otherwise hex string version of DES key
+     * @return null if failure, otherwise hex string version of key
      */
-	public static String generateDESKey () {
-		//set up the des key
+	public static String generateMasterKey () {
 		try {
 			KeyGenerator keygen;
-			keygen = KeyGenerator.getInstance(desAlgorithm);
+			keygen = KeyGenerator.getInstance("AES");
+			keygen.init(256);
 			SecretKey genDesKey = keygen.generateKey();
-			return toHexString (genDesKey.getEncoded());
+			return toHexString(genDesKey.getEncoded());
 		} catch (NoSuchAlgorithmException e) {
-			Log.e(TAG,"generateDESKey(): "+e.toString());
+			Log.e(TAG,"generateMasterKey(): "+e.toString());
 		}
 		return null; //error case.
 	}

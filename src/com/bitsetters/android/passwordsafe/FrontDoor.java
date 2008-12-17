@@ -17,17 +17,9 @@
 package com.bitsetters.android.passwordsafe;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bitsetters.android.passwordsafe.AskPassword;
@@ -45,22 +37,16 @@ public class FrontDoor extends Activity {
 	private boolean debug = true;
 	private static String TAG = "FrontDoor";
 
-	private EditText pbeKey;
 	private DBHelper dbHelper;
-	private TextView introText;
-	private TextView confirmText;
-	private EditText confirmPass;
-	private String PBEKey;
 	private String masterKey;
 	private CryptoHelper ch;
-	private boolean firstTime = false;
 
 	//probably remove these:
-	public final String ACTION_ENCRYPT = "org.syntaxpolice.crypto.action.ENCRYPT";
-	public final String ACTION_DECRYPT = "org.syntaxpolice.crypto.action.DECRYPT";
+	public final String ACTION_ENCRYPT = "org.openintents.action.ENCRYPT";
+	public final String ACTION_DECRYPT = "org.syntaxpolice.action.DECRYPT";
 	
-	public final String BODY = "org.syntaxpolice.crypto.extras.EXTRA_CRYPTO_BODY";
-	public final String CALLBACK = "org.syntaxpolice.crypto.extras.EXTRA_CALLBACK";
+	public final String BODY = "org.openintents.extras.EXTRA_CRYPTO_BODY";
+	public final String CALLBACK = "org.openintents.extras.EXTRA_CALLBACK";
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -85,9 +71,15 @@ public class FrontDoor extends Activity {
 	}
 
 	protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-		if (resultCode==RESULT_OK) {
+		switch (resultCode) {
+		case RESULT_OK:
 			masterKey = data.getStringExtra("masterKey");
 			actionDispatch();
+			break;
+		case RESULT_CANCELED:
+			setResult(RESULT_CANCELED);
+			finish();
+			break;
 		}
 	}
 	
@@ -100,7 +92,6 @@ public class FrontDoor extends Activity {
     		ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
     		ch.setPassword(masterKey);        	
         }
-
 
         if (action == null || action.equals(Intent.ACTION_MAIN)){
         	//TODO: When launched from debugger, action is null. Other such cases?
@@ -168,25 +159,5 @@ public class FrontDoor extends Activity {
 			dbHelper = new DBHelper(this);
 		}
 
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private boolean checkUserPassword() {
-		String encryptedMasterKey = dbHelper.fetchMasterKey();
-		String decryptedMasterKey = "";
-		try {
-			decryptedMasterKey = ch.decrypt(encryptedMasterKey);
-		} catch (CryptoHelperException e) {
-			Log.e(TAG, e.toString());
-		}
-		if (ch.getStatus()==true) {
-			masterKey=decryptedMasterKey;
-			return true;
-		}
-		masterKey=null;
-		return false;
 	}
 }

@@ -17,6 +17,9 @@
 package com.bitsetters.android.passwordsafe;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -53,11 +56,11 @@ public class AskPassword extends Activity {
 	private boolean firstTime = false;
 
 	//probably remove these:
-	public final String ACTION_ENCRYPT = "org.syntaxpolice.crypto.action.ENCRYPT";
-	public final String ACTION_DECRYPT = "org.syntaxpolice.crypto.action.DECRYPT";
+//	public final String ACTION_ENCRYPT = "org.syntaxpolice.crypto.action.ENCRYPT";
+//	public final String ACTION_DECRYPT = "org.syntaxpolice.crypto.action.DECRYPT";
 	
-	public final String BODY = "org.syntaxpolice.crypto.extras.EXTRA_CRYPTO_BODY";
-	public final String CALLBACK = "org.syntaxpolice.crypto.extras.EXTRA_CALLBACK";
+//	public final String BODY = "org.syntaxpolice.crypto.extras.EXTRA_CRYPTO_BODY";
+//	public final String CALLBACK = "org.syntaxpolice.crypto.extras.EXTRA_CALLBACK";
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -74,6 +77,12 @@ public class AskPassword extends Activity {
 					Toast.LENGTH_SHORT).show();
 			
 		ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
+		if (dbHelper.needsUpgrade()) {
+			switch (dbHelper.fetchVersion()) {
+			case 2:
+				databaseVersionError();
+			}
+		}
 
 		// Setup layout
 		setContentView(R.layout.front_door);
@@ -129,7 +138,7 @@ public class AskPassword extends Activity {
 								.show();
 						return;
 					}
-					masterKey = CryptoHelper.generateDESKey();
+					masterKey = CryptoHelper.generateMasterKey();
 					Log.i(TAG, "Saving Password: " + masterKey);
 					try {
 						String encryptedMasterKey = ch.encrypt(masterKey);
@@ -185,6 +194,21 @@ public class AskPassword extends Activity {
 
 	}
 
+	private void databaseVersionError() {
+		Dialog about = new AlertDialog.Builder(this)
+		.setIcon(R.drawable.passicon)
+		.setTitle(R.string.database_version_error_title)
+		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				setResult(RESULT_CANCELED);
+				finish();
+			}
+		})
+		.setMessage(R.string.database_version_error_msg)
+		.create();
+		about.show();
+
+	}
 	/**
 	 * 
 	 * @return

@@ -40,6 +40,7 @@ public class DBHelper {
     private static final String TABLE_DBVERSION = "dbversion";
     private static final String TABLE_PASSWORDS = "passwords";
     private static final String TABLE_CATEGORIES = "categories";
+    private static final String TABLE_VERIFY = "verify_crypto";
     private static final String TABLE_MASTER_KEY = "master_key";
     private static final int DATABASE_VERSION = 3;
     private static String TAG = "DBHelper";
@@ -78,6 +79,7 @@ public class DBHelper {
 
     private SQLiteDatabase db;
     private static boolean needsPrePopulation=false;
+    private static boolean needsUpgrade=false;
 
     /**
      * 
@@ -107,6 +109,7 @@ public class DBHelper {
 				}
 				vc.close();
 				if (version!=DATABASE_VERSION) {
+					needsUpgrade=true;
 					Log.e(TAG,"database version mismatch");
 				}
 			}
@@ -152,9 +155,19 @@ public class DBHelper {
 		}
     }
     
+    public boolean needsUpgrade()
+    {
+    	return needsUpgrade;
+    }
+
     public boolean getPrePopulate()
     {
     	return needsPrePopulation;
+    }
+
+    public void clearPrePopulate()
+    {
+    	needsPrePopulation=false;
     }
     /**
      * Close database connection
@@ -168,6 +181,40 @@ public class DBHelper {
 	    }
     }
 
+    public int fetchVersion() {
+    	int version=0;
+        try {
+			Cursor c = db.query(true, TABLE_DBVERSION,
+				new String[] {"version"},
+				null, null, null, null, null,null);
+			if(c.getCount() > 0) {
+			    c.moveToFirst();
+			    version=c.getInt(0);
+			}
+			c.close();
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+		return version;
+    }
+
+    public String fetchOldConfirm() {
+    	String key="";
+        try {
+			Cursor c = db.query(true, TABLE_VERIFY, new String[] {"confirm"},
+				null, null, null, null, null,null);
+			if(c.getCount() > 0) {
+			    c.moveToFirst();
+			    key=c.getString(0);
+			}
+			c.close();
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+		return key;
+    }
     /**
      * 
      * @return
