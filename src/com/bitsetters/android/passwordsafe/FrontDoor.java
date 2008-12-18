@@ -20,8 +20,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
-
 import com.bitsetters.android.passwordsafe.AskPassword;
 
 /**
@@ -89,7 +87,7 @@ public class FrontDoor extends Activity {
 		PassList.setMasterKey(masterKey);
         CategoryList.setMasterKey(masterKey);
         if (ch == null) {
-    		ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
+    		ch = new CryptoHelper(CryptoHelper.EncryptionMedium);
     		ch.setPassword(masterKey);        	
         }
 
@@ -110,10 +108,7 @@ public class FrontDoor extends Activity {
         		} catch (CryptoHelperException e) {
         			Log.e(TAG, e.toString());
         		}  catch (NullPointerException e) {
-        			Toast.makeText(FrontDoor.this,
-        					"error in calling function - ch: " + ch + " inputBody: " + inputBody,
-            				Toast.LENGTH_SHORT).show();
-        			Log.e(TAG, e.toString() + "ch: " + ch + " inputBody: " + inputBody );
+        			if (debug) Log.e(TAG, e.toString() + "ch: " + ch + " inputBody: " + inputBody );
         			
         		}
         	} else if (action.equals (ACTION_DECRYPT)) {

@@ -71,10 +71,6 @@ public class AskPassword extends Activity {
 			Log.d(TAG, "onCreate()");
 
 		dbHelper = new DBHelper(this);
-		if (ch != null)
-			Toast.makeText(AskPassword.this,
-					"already have CH ",
-					Toast.LENGTH_SHORT).show();
 			
 		ch = new CryptoHelper(CryptoHelper.EncryptionStrong);
 		if (dbHelper.needsUpgrade()) {
