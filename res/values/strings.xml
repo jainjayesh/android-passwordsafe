@@ -21,7 +21,7 @@
 <resources>
     <string name="app_name">Password Safe</string>
     <string name="authors">Steven Osborn, Randy McEoin</string>
-    <string name="version">0.5.0</string>
+    <string name="version">0.6.0</string>
     <string name="empty_safe">No Passwords present for this category.</string>
     <string name="empty_category">No categories present.  Please add one via Menu->Add</string>
     <string name="password_lock">Lock</string>
@@ -76,14 +76,15 @@
 	<string name="go">Go</string>
 	<string name="dialog_delete_password_title">Delete Password</string>
 	<string name="dialog_delete_password_msg">Are you sure you want to delete this password?</string>
-	<string name="change_password">Change Password</string>
+	<string name="change_password">Change Master Password</string>
 	<string name="chg_pass_explaination">Use this to change the password you use to unlock Password Safe.   Your data will be re-encrypted with the new password.  The more complex your password is, the safer your data will be.</string>
 	<string name="old_password">Old password</string>
 	<string name="new_password">New password</string>
 	<string name="verify_password">Verify password</string>
 	<string name="new_verify_mismatch">New and Verify passwords do not match.</string>
     <string name="invalid_old_password">Old password is invalid.  Please try again.</string>
-    <string name="password_changed">Password changed</string>
+    <string name="error_changing_password">Error changing password</string>
+    <string name="password_changed">Master Password changed</string>
     <string name="confirm">Confirm</string>
     <string name="confirm_pass_fail">Password entries do not match.</string>
     <string name="backup">Backup</string>
@@ -91,10 +92,13 @@
     <string name="backup_complete">Complete.  Passwords backed up: </string>
     <string name="backup_failed">Backup failed: </string>
     <string name="restore">Restore</string>
+    <string name="filename">Filename</string>
+    <string name="restore_no_file">Backup file not found.  You need to perform a backup first to create it.  Or copy a backup from your PC.</string>
+    <string name="restore_set_password">Please provide the password used by the backup file.  Your master password will be set to this.</string>
     <string name="restore_unable_to_open">Unable to open file:</string>
     <string name="restore_bad_version">Version not supported:</string>
     <string name="restore_error">Restore error.</string>
-    <string name="restore_decrypt_error">Encryption key does not match restore file.  Try changing the current password to match.\nMenu -> Change Password</string>
+    <string name="restore_decrypt_error">Bad password.</string>
     <string name="dialog_restore_database_title">Restore Database</string>
     <string name="dialog_restore_database_msg">Are you sure you want to replace the current data?</string>
     <string name="restore_found">Found</string>
@@ -103,4 +107,6 @@
     <string name="copy_to_clipboard">Copying Password to Clipboard</string>
     <string name="invalid_website">Invalid website</string>
     <string name="open">Open</string>
+    <string name="database_version_error_title">Database Version Error</string>
+    <string name="database_version_error_msg">Sorry, but the version of the database is not supported.   You must install the version associated with this database.</string>
 </resources>

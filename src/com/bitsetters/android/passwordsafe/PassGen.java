@@ -193,6 +193,9 @@ public class PassGen extends Activity {
     protected void onResume() {
 		super.onResume();
 
+		if (!CategoryList.isSignedIn()) {
+			finish();
+		}
     }
 
     @Override

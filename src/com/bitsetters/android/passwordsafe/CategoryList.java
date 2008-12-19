@@ -78,6 +78,7 @@ public class CategoryList extends ListActivity {
     public static final int REQUEST_EDIT_CATEGORY = 1;
     public static final int REQUEST_ADD_CATEGORY = 2;
     public static final int REQUEST_OPEN_CATEGORY = 3;
+    public static final int REQUEST_RESTORE = 4;
     
     protected static final int MSG_IMPORT = 0x101; 
     protected static final int MSG_FILLDATA = MSG_IMPORT + 1; 
@@ -89,13 +90,12 @@ public class CategoryList extends ListActivity {
     public static final int MAX_CATEGORIES = 256;
 
     private static final String EXPORT_FILENAME = "/sdcard/passwordsafe.csv";
-    private static final String BACKUP_FILENAME = "/sdcard/passwordsafe.xml";
+    public static final String BACKUP_FILENAME = "/sdcard/passwordsafe.xml";
     
     public static final String KEY_ID = "id";  // Intent keys
 
     private CryptoHelper ch=null;
     private DBHelper dbHelper=null;
-	private boolean needPrePopulateCategories=false;
 	
 	private String importMessage="";
 	private int importedEntries=0;
@@ -104,7 +104,7 @@ public class CategoryList extends ListActivity {
 
 	private Thread backupThread=null;
 
-    private static String PBEKey;	      // Password Based Encryption Key			
+    private static String masterKey;			
 
     private List<CategoryEntry> rows;
     
@@ -112,7 +112,7 @@ public class CategoryList extends ListActivity {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 if (debug) Log.d(TAG,"caught ACTION_SCREEN_OFF");
-                PBEKey=null;
+                masterKey=null;
             }
         }
     };
@@ -168,7 +168,8 @@ public class CategoryList extends ListActivity {
 			dbHelper = new DBHelper(this);
 			if (dbHelper.getPrePopulate()==true)
 			{
-				needPrePopulateCategories=true;
+				prePopulate();
+				dbHelper.clearPrePopulate();
 			}
 		}
 		
@@ -288,7 +289,7 @@ public class CategoryList extends ListActivity {
      * @return	True if signed in
      */
     public static boolean isSignedIn() {
-    	if (PBEKey != null) {
+    	if (masterKey != null) {
     		return true;
     	}
     	return false;
@@ -302,7 +303,7 @@ public class CategoryList extends ListActivity {
      */
     public static void setSignedOut() {
     	if (debug) Log.d(TAG,"setSignedOut()");
-    	PBEKey=null;
+    	masterKey=null;
     }
     /**
      * Populates the category ListView
@@ -312,10 +313,10 @@ public class CategoryList extends ListActivity {
 		// initialize crypto so that we can display readable descriptions in
 		// the list view
 		ch = new CryptoHelper();
-		if(PBEKey == null) {
-		    PBEKey = "";
+		if(masterKey == null) {
+		    masterKey = "";
 		}
-		ch.setPassword(PBEKey);
+		ch.setPassword(masterKey);
 	
 		List<String> items = new ArrayList<String>();
 		if (dbHelper==null) {
@@ -346,19 +347,22 @@ public class CategoryList extends ListActivity {
 		
     }
 
-    @Override
-    public boolean onMenuOpened(int featureId, Menu menu) {
-		    	MenuItem mi = menu.findItem(DEL_CATEGORY_INDEX);
-    	if (getSelectedItemPosition() > -1) {
-    		mi.setEnabled(true);
-    	} else {
-    		mi.setEnabled(false);
-    	}
-    	return super.onMenuOpened(featureId, menu);
-    }
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+	@Override
+	public boolean onMenuOpened(int featureId, Menu menu) {
+		MenuItem miDelete = menu.findItem(DEL_CATEGORY_INDEX);
+		MenuItem miEdit = menu.findItem(EDIT_CATEGORY_INDEX);
+		if (getSelectedItemPosition() > -1) {
+			miDelete.setEnabled(true);
+			miEdit.setEnabled(true);
+		} else {
+			miDelete.setEnabled(false);
+			miEdit.setEnabled(false);
+		}
+		return super.onMenuOpened(featureId, menu);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 	
 		menu.add(0,LOCK_CATEGORY_INDEX, 0, R.string.password_lock)
@@ -393,12 +397,12 @@ public class CategoryList extends ListActivity {
 		return super.onCreateOptionsMenu(menu);
     }
 
-    static void setPBEKey(String key) {
-		PBEKey = key;
+    static void setMasterKey(String key) {
+		masterKey = key;
     }
 
-    static String getPBEKey() {
-		return PBEKey;
+    static String getMasterKey() {
+		return masterKey;
     }
 
     private void addCategory() {
@@ -428,7 +432,7 @@ public class CategoryList extends ListActivity {
 		}
 		switch(item.getItemId()) {
 		case LOCK_CATEGORY_INDEX:
-			PBEKey=null;
+			masterKey=null;
 		    Intent frontdoor = new Intent(this, FrontDoor.class);
 		    startActivity(frontdoor);
 		    finish();
@@ -489,7 +493,7 @@ public class CategoryList extends ListActivity {
     private String backupDatabase() {
     	Backup backup=new Backup(this);
     	
-    	backup.write(BACKUP_FILENAME, PBEKey);
+    	backup.write(BACKUP_FILENAME);
     	return backup.getResult();
     }
 
@@ -519,9 +523,11 @@ public class CategoryList extends ListActivity {
 	}
 
     private void restoreDatabase() {
-    	Restore restore=new Restore(myViewUpdateHandler, this);
+//    	Restore restore=new Restore(myViewUpdateHandler, this);
     	
-    	restore.read(BACKUP_FILENAME, PBEKey);
+//    	restore.read(BACKUP_FILENAME, masterKey);
+		Intent i = new Intent(this, Restore.class);
+	    startActivityForResult(i,REQUEST_RESTORE);
     }
     
     protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -540,39 +546,35 @@ public class CategoryList extends ListActivity {
 		    dbHelper = new DBHelper(this);
 		}
 
-    	if (requestCode==REQUEST_ONCREATE) {
-    		if (needPrePopulateCategories==true)
-	    	{
-	    		needPrePopulateCategories=false;
-	    		addCategory(getString(R.string.category_business));
-	    		addCategory(getString(R.string.category_personal));
-	    	}
-    	}
-    	
     	if (resultCode == RESULT_OK) {
     		fillData();
     	}
     }
 
-    private void addCategory(String name) {
+    private void prePopulate() {
+		addCategory(getString(R.string.category_business));
+		addCategory(getString(R.string.category_personal));
+    }
+    
+    private long addCategory(String name) {
     	if (debug) Log.d(TAG,"addCategory("+name+")");
-    	if ((name==null) || (name=="")) return;
+    	if ((name==null) || (name=="")) return -1;
 		CategoryEntry entry =  new CategoryEntry();
 	
 		String namePlain = name;
 
 		try {
 			ch = new CryptoHelper();
-			if(PBEKey == null) {
-			    PBEKey = "";
+			if(masterKey == null) {
+			    masterKey = "";
 			}
-			ch.setPassword(PBEKey);
+			ch.setPassword(masterKey);
 
 		    entry.name = ch.encrypt(namePlain);
 		} catch(CryptoHelperException e) {
 		    Log.e(TAG,e.toString());
 		}
-	    dbHelper.addCategory(entry);
+	    return dbHelper.addCategory(entry);
     }
     
 	public boolean exportDatabase(){
@@ -589,10 +591,10 @@ public class CategoryList extends ListActivity {
 			writer.writeNext(header);
 			
 			ch = new CryptoHelper();
-			if(PBEKey == null) {
-			    PBEKey = "";
+			if(masterKey == null) {
+			    masterKey = "";
 			}
-			ch.setPassword(PBEKey);
+			ch.setPassword(masterKey);
 		
 			HashMap<Long, String> categories = new HashMap<Long, String>();
 			
@@ -905,10 +907,10 @@ public class CategoryList extends ListActivity {
 		if (ch == null){
 			ch = new CryptoHelper();
 		}
-		if(PBEKey == null) {
-		    PBEKey = "";
+		if(masterKey == null) {
+		    masterKey = "";
 		}
-		ch.setPassword(PBEKey);
+		ch.setPassword(masterKey);
 	
 		HashMap<String,Long> categories = new HashMap<String,Long>();
 		rows = dbHelper.fetchAllCategoryRows();

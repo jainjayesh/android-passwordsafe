@@ -20,4 +20,8 @@
  [I23] Added the ability for an encrypted backup/restore
  [I24] Offer a ContextMenu on CategoryList when user long presses
  [I25] Fixed crashing when user hits Go on an invalid URL in PassEdit
- 
+0.6.0 [Dec 18, 2008]
+ Changed encryption method to use a generated master key.  User provides
+ a master password that decrypts the master key.  The master key is used
+ to encrypt/decrypt the password entries.
+ Database is now version 3.   No upgrade path provided, user must export/import. 

@@ -27,6 +27,7 @@ public class RestoreDataSet {
 
 	private int version = 0;
 	private String date = null;
+	private String masterKeyEncrypted = null;
 	private Long currentCategoryId = new Long(0);
 	private CategoryEntry currentCategory = null;
 	private ArrayList<CategoryEntry> categoryEntries = new ArrayList<CategoryEntry>();
@@ -45,6 +46,12 @@ public class RestoreDataSet {
 	}
 	public void setDate(String extractedDate) {
 		date = extractedDate;
+	}
+	public String getMasterKeyEncrypted() {
+		return masterKeyEncrypted;
+	}
+	public void setMasterKeyEncrypted(String extractedKey) {
+		masterKeyEncrypted = extractedKey;
 	}
 	public ArrayList<CategoryEntry> getCategories() {
 		return categoryEntries;

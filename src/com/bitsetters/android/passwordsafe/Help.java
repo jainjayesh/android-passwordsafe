@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
@@ -31,7 +32,8 @@ import android.webkit.WebView;
  */
 public class Help extends Activity {
 
-//    private static String TAG = "Help";
+	private static boolean debug = false;
+	private static String TAG = "Help";
 	
     // Menu Item order
     public static final int CLOSE_HELP_INDEX = Menu.FIRST;
@@ -78,6 +80,17 @@ public class Help extends Activity {
         }
 
     }
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		if (debug) Log.d(TAG,"onResume()");
+
+		if (CategoryList.isSignedIn() == false) {
+			finish();
+		}
+	}
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);

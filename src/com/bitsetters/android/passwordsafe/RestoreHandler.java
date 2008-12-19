@@ -32,6 +32,7 @@ public class RestoreHandler extends DefaultHandler {
     // ===========================================================
     
     private boolean in_apws = false;
+    private boolean in_masterkey = false;
     private boolean in_category = false;
     private boolean in_entry = false;
     private boolean in_description = false;
@@ -84,6 +85,11 @@ public class RestoreHandler extends DefaultHandler {
 
 			if (debug) Log.d(TAG,"found APWS "+version+" date "+date);
 			
+		}else if (in_apws && localName.equals("MasterKey")) {
+			in_masterkey = true;
+
+			if (debug) Log.d(TAG,"found MasterKey");
+
 		}else if (in_apws && localName.equals("Category")) {
 			in_category = true;
 
@@ -121,6 +127,8 @@ public class RestoreHandler extends DefaultHandler {
 	
 		if (localName.equals("AndroidPasswordSafe")) {
 			in_apws = false;
+		}else if (in_apws && localName.equals("MasterKey")) {
+			in_masterkey = false;
 		}else if (in_apws && localName.equals("Category")) {
 			in_category = false;
 			
@@ -148,6 +156,9 @@ public class RestoreHandler extends DefaultHandler {
 	 * &lt;tag>characters&lt;/tag> */
 	@Override
 	public void characters(char ch[], int start, int length) {
+		if (in_masterkey){
+			myRestoreDataSet.setMasterKeyEncrypted(new String(ch, start, length));
+		}
 		if (in_description){
 			myRestoreDataSet.setDescription(new String(ch, start, length));
 		}

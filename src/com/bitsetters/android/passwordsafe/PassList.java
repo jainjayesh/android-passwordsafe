@@ -67,7 +67,7 @@ public class PassList extends ListActivity {
     private DBHelper dbHelper=null;
     private static Long CategoryId=null;
 
-    private static String PBEKey;	      // Password Based Encryption Key			
+    private static String masterKey;			
 
     private List<PassEntry> rows;
     
@@ -180,10 +180,10 @@ public class PassList extends ListActivity {
 		// initialize crypto so that we can display readable descriptions in
 		// the list view
 		ch = new CryptoHelper();
-		if(PBEKey == null) {
-		    PBEKey = "";
+		if(masterKey == null) {
+		    masterKey = "";
 		}
-		ch.setPassword(PBEKey);
+		ch.setPassword(masterKey);
 	
 		List<String> items = new ArrayList<String>();
 		rows = dbHelper.fetchAllRows(CategoryId);
@@ -237,12 +237,12 @@ public class PassList extends ListActivity {
 		return super.onCreateOptionsMenu(menu);
     }
 
-    static void setPBEKey(String key) {
-		PBEKey = key;
+    static void setMasterKey(String key) {
+		masterKey = key;
     }
 
-    static String getPBEKey() {
-		return PBEKey;
+    static String getMasterKey() {
+		return masterKey;
     }
 
     static long getCategoryId() {

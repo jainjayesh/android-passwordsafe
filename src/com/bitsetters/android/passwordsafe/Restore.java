@@ -28,32 +28,115 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Handler;
-import android.os.Message;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class Restore {
+public class Restore extends Activity {
 	
 	private static boolean debug = false;
 	private static final String TAG = "Restore";
 	
-	DBHelper dbHelper=null;
-	Handler myViewHandler=null;
-	Context myCtx=null;
+	private DBHelper dbHelper=null;
+	private String masterKey="";
+	private String filename=null;
+	private RestoreDataSet restoreDataSet=null;
 
-	RestoreDataSet restoreDataSet;
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
 
-	public Restore(Handler handler, Context ctx) {
-		myViewHandler=handler;
-		myCtx=ctx;
+		if (debug) Log.d(TAG,"onCreate()");
+
+		if (!CategoryList.isSignedIn()) {
+			Intent frontdoor = new Intent(this, FrontDoor.class);
+			startActivity(frontdoor);		
+			finish();
+		}
+
+		setContentView(R.layout.restore);
+		String title = getResources().getString(R.string.app_name) + " - " +
+			getResources().getString(R.string.restore);
+		setTitle(title);
+		
+		if (filename==null) {
+			filename=CategoryList.BACKUP_FILENAME;
+		}
+		TextView filenameText;
+		filenameText = (TextView) findViewById(R.id.restore_filename);
+		filenameText.setText(filename);
+
+		TextView restoreInfoText;
+		restoreInfoText = (TextView) findViewById(R.id.restore_info);
+
+		EditText passwordText;
+		passwordText = (EditText) findViewById(R.id.restore_password);
+		
+		Button restoreButton;
+		restoreButton = (Button) findViewById(R.id.restore_button);
+
+		if (!backupFileExists(filename)) {
+			passwordText.setVisibility(0);
+			restoreButton.setVisibility(0);
+			restoreInfoText.setText(R.string.restore_no_file);
+			return;
+		}
+
+		restoreInfoText.setText(R.string.restore_set_password);
+
+		passwordText.setVisibility(1);
+		restoreButton.setVisibility(1);
+
+		restoreButton.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View arg0) {
+				EditText passwordText;
+				passwordText = (EditText) findViewById(R.id.restore_password);
+
+				String masterPassword = passwordText.getText().toString();
+				read(filename, masterPassword);
+			}
+		});
+    }
+
+    @Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (debug) Log.d(TAG,"onResume()");
+		
+		if (!CategoryList.isSignedIn()) {
+			Intent frontdoor = new Intent(this, FrontDoor.class);
+			startActivity(frontdoor);		
+			finish();
+		}
 	}
-	
-	public boolean read(String filename, String PBEKey) {
+
+    private boolean backupFileExists(String filename) {
+		FileReader fr;
+		try {
+			fr = new FileReader(filename);
+			fr.close();
+		} catch (FileNotFoundException e) {
+			return false;
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+    }
+
+    public boolean read(String filename, String masterPassword) {
 		if (debug) Log.d(TAG,"read("+filename+",)");
     	
 		FileReader fr;
@@ -61,7 +144,7 @@ public class Restore {
 			fr = new FileReader(filename);
 		} catch (FileNotFoundException e1) {
 			// e1.printStackTrace();
-			Toast.makeText(myCtx, myCtx.getString(R.string.restore_unable_to_open)+
+			Toast.makeText(Restore.this, getString(R.string.restore_unable_to_open)+
 				" "+e1.getLocalizedMessage(),
 				Toast.LENGTH_LONG).show();
 			return false;
@@ -82,38 +165,58 @@ public class Restore {
 
 		} catch (ParserConfigurationException e) {
 			//e.printStackTrace();
-			Toast.makeText(myCtx, myCtx.getString(R.string.restore_unable_to_open)+
+			Toast.makeText(Restore.this, getString(R.string.restore_unable_to_open)+
 				" "+e.getLocalizedMessage(),
 				Toast.LENGTH_LONG).show();
 			return false;
 		} catch (SAXException e) {
 			//e.printStackTrace();
-			Toast.makeText(myCtx, myCtx.getString(R.string.restore_unable_to_open)+
+			Toast.makeText(Restore.this, getString(R.string.restore_unable_to_open)+
 				" "+e.getLocalizedMessage(),
 				Toast.LENGTH_LONG).show();
 			return false;
 		} catch (IOException e) {
 			//e.printStackTrace();
-			Toast.makeText(myCtx, myCtx.getString(R.string.restore_unable_to_open)+
+			Toast.makeText(Restore.this, getString(R.string.restore_unable_to_open)+
 				" "+e.getLocalizedMessage(),
 				Toast.LENGTH_LONG).show();
 			return false;
 		} 
 
 		if (restoreDataSet.getVersion() != Backup.CURRENT_VERSION) {
-			Toast.makeText(myCtx, myCtx.getString(R.string.restore_bad_version)+
+			Toast.makeText(Restore.this, getString(R.string.restore_bad_version)+
 				" "+Integer.toString(restoreDataSet.getVersion()),
 				Toast.LENGTH_LONG).show();
         	return false;
 		}
 		CategoryEntry firstCatEntry=restoreDataSet.getCategories().get(0);
 		if (firstCatEntry==null) {
-			Toast.makeText(myCtx, myCtx.getString(R.string.restore_error),
+			Toast.makeText(Restore.this, getString(R.string.restore_error),
 				Toast.LENGTH_LONG).show();
 			return false;
 		}
-		CryptoHelper ch=new CryptoHelper();
-		ch.setPassword(PBEKey);
+		CryptoHelper ch=new CryptoHelper(CryptoHelper.EncryptionStrong);
+		ch.setPassword(masterPassword);
+		
+		String masterKeyEncrypted=restoreDataSet.getMasterKeyEncrypted();
+		masterKey="";
+		try {
+			masterKey = ch.decrypt(masterKeyEncrypted);
+		} catch (CryptoHelperException e) {
+			Log.e(TAG,e.toString());
+		}
+		if (ch.getStatus()==false) {
+			Toast.makeText(Restore.this, getString(R.string.restore_decrypt_error),
+					Toast.LENGTH_LONG).show();
+	        Animation shake = AnimationUtils
+	        	.loadAnimation(Restore.this, R.anim.shake);
+	        findViewById(R.id.restore_password).startAnimation(shake);
+
+			return false;
+		}
+		ch=new CryptoHelper(CryptoHelper.EncryptionMedium);
+		ch.setPassword(masterKey);
+		
 		String firstCategory="";
 		try {
 			firstCategory = ch.decrypt(firstCatEntry.name);
@@ -121,20 +224,20 @@ public class Restore {
 			Log.e(TAG,e.toString());
 		}
 		if (ch.getStatus() == false) {
-			Toast.makeText(myCtx, myCtx.getString(R.string.restore_decrypt_error),
+			Toast.makeText(Restore.this, getString(R.string.restore_decrypt_error),
 				Toast.LENGTH_LONG).show();
 			return false;
 		}
 		if (debug) Log.d(TAG,"firstCategory="+firstCategory);
 
-		dbHelper=new DBHelper(myCtx);
+		dbHelper=new DBHelper(Restore.this);
 
-		String msg=myCtx.getString(R.string.restore_found)+" "+
+		String msg=getString(R.string.restore_found)+" "+
         	Integer.toString(restoreDataSet.getTotalEntries())+" "+
-        	myCtx.getString(R.string.restore_passwords)+" "+
+        	getString(R.string.restore_passwords)+" "+
         	restoreDataSet.getDate()+".\n"+
-			myCtx.getString(R.string.dialog_restore_database_msg);
-		Dialog confirm = new AlertDialog.Builder(myCtx)
+			getString(R.string.dialog_restore_database_msg);
+		Dialog confirm = new AlertDialog.Builder(Restore.this)
 		.setIcon(android.R.drawable.ic_menu_manage)
 		.setTitle(R.string.dialog_restore_database_title)
 		.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -158,6 +261,9 @@ public class Restore {
 		dbHelper.beginTransaction();
 		dbHelper.deleteDatabase();
 
+		dbHelper.storeMasterKey(restoreDataSet.getMasterKeyEncrypted());
+		CategoryList.setMasterKey(masterKey);
+		PassList.setMasterKey(masterKey);
 		for (CategoryEntry category : restoreDataSet.getCategories()) {
 			if (debug) Log.d(TAG,"category="+category.name);
 			dbHelper.addCategory(category);
@@ -170,12 +276,17 @@ public class Restore {
 		dbHelper.commit();
 		dbHelper.close();
 
-		Toast.makeText(myCtx, myCtx.getString(R.string.restore_complete)+
+		Toast.makeText(Restore.this, getString(R.string.restore_complete)+
 			" "+Integer.toString(totalPasswords),
 			Toast.LENGTH_LONG).show();
 
+		setResult(RESULT_OK);
+		finish();
+
+		/*
 		Message m = new Message();
 		m.what = CategoryList.MSG_FILLDATA;
 		myViewHandler.sendMessage(m);
+		*/
 	}
 }

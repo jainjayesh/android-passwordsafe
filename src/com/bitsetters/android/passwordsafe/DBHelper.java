@@ -41,7 +41,8 @@ public class DBHelper {
     private static final String TABLE_PASSWORDS = "passwords";
     private static final String TABLE_CATEGORIES = "categories";
     private static final String TABLE_VERIFY = "verify_crypto";
-    private static final int DATABASE_VERSION = 2;
+    private static final String TABLE_MASTER_KEY = "master_key";
+    private static final int DATABASE_VERSION = 3;
     private static String TAG = "DBHelper";
     Context myCtx;
 
@@ -72,12 +73,13 @@ public class DBHelper {
     private static final String CATEGORIES_DROP =
     	"drop table " + TABLE_CATEGORIES + ";";
 
-    private static final String VERIFY_CREATE = 
-    	"create table " + TABLE_VERIFY + " ("
-    		+ "confirm text not null);";
+    private static final String MASTER_KEY_CREATE = 
+    	"create table " + TABLE_MASTER_KEY + " ("
+    		+ "encryptedkey text not null);";
 
     private SQLiteDatabase db;
-    private boolean needsPrePopulation=false;
+    private static boolean needsPrePopulation=false;
+    private static boolean needsUpgrade=false;
 
     /**
      * 
@@ -107,6 +109,7 @@ public class DBHelper {
 				}
 				vc.close();
 				if (version!=DATABASE_VERSION) {
+					needsUpgrade=true;
 					Log.e(TAG,"database version mismatch");
 				}
 			}
@@ -131,7 +134,7 @@ public class DBHelper {
 			needsPrePopulation=true;
 			
 			db.execSQL(PASSWORDS_CREATE);
-			db.execSQL(VERIFY_CREATE);
+			db.execSQL(MASTER_KEY_CREATE);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
@@ -152,9 +155,19 @@ public class DBHelper {
 		}
     }
     
+    public boolean needsUpgrade()
+    {
+    	return needsUpgrade;
+    }
+
     public boolean getPrePopulate()
     {
     	return needsPrePopulation;
+    }
+
+    public void clearPrePopulate()
+    {
+    	needsPrePopulation=false;
     }
     /**
      * Close database connection
@@ -168,14 +181,48 @@ public class DBHelper {
 	    }
     }
 
+    public int fetchVersion() {
+    	int version=0;
+        try {
+			Cursor c = db.query(true, TABLE_DBVERSION,
+				new String[] {"version"},
+				null, null, null, null, null,null);
+			if(c.getCount() > 0) {
+			    c.moveToFirst();
+			    version=c.getInt(0);
+			}
+			c.close();
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+		return version;
+    }
+
+    public String fetchOldConfirm() {
+    	String key="";
+        try {
+			Cursor c = db.query(true, TABLE_VERIFY, new String[] {"confirm"},
+				null, null, null, null, null,null);
+			if(c.getCount() > 0) {
+			    c.moveToFirst();
+			    key=c.getString(0);
+			}
+			c.close();
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+		return key;
+    }
     /**
      * 
      * @return
      */
-    public String fetchPBEKey() {
+    public String fetchMasterKey() {
     	String key="";
         try {
-			Cursor c = db.query(true, TABLE_VERIFY, new String[] {"confirm"},
+			Cursor c = db.query(true, TABLE_MASTER_KEY, new String[] {"encryptedkey"},
 				null, null, null, null, null,null);
 			if(c.getCount() > 0) {
 			    c.moveToFirst();
@@ -193,12 +240,12 @@ public class DBHelper {
      * 
      * @param PBEKey
      */
-    public void storePBEKey(String PBEKey) {
+    public void storeMasterKey(String MasterKey) {
 		ContentValues args = new ContentValues();
         try {
-			db.delete(TABLE_VERIFY, "1=1", null);
-			args.put("confirm", PBEKey);
-			db.insert(TABLE_VERIFY, null, args);
+			db.delete(TABLE_MASTER_KEY, "1=1", null);
+			args.put("encryptedkey", MasterKey);
+			db.insert(TABLE_MASTER_KEY, null, args);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
@@ -211,16 +258,18 @@ public class DBHelper {
      * 
      * @param entry
      */
-    public void addCategory(CategoryEntry entry) {
+    public long addCategory(CategoryEntry entry) {
         ContentValues initialValues = new ContentValues();
     	initialValues.put("name", entry.name);
 
+    	long ret=-1;
         try {
-	        db.insert(TABLE_CATEGORIES, null, initialValues);
+	        ret=db.insert(TABLE_CATEGORIES, null, initialValues);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
 		}
+		return ret;
     }
 
     /**
