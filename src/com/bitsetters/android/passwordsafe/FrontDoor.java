@@ -41,10 +41,9 @@ public class FrontDoor extends Activity {
 
 	//probably remove these:
 	public final String ACTION_ENCRYPT = "org.openintents.action.ENCRYPT";
-	public final String ACTION_DECRYPT = "org.syntaxpolice.action.DECRYPT";
+	public final String ACTION_DECRYPT = "org.openintents.action.DECRYPT";
 	
 	public final String BODY = "org.openintents.extras.EXTRA_CRYPTO_BODY";
-	public final String CALLBACK = "org.openintents.extras.EXTRA_CALLBACK";
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -56,10 +55,8 @@ public class FrontDoor extends Activity {
 
 			final Intent thisIntent = getIntent();
         	String inputBody = thisIntent.getStringExtra (BODY);
-        	String callbackAction = thisIntent.getStringExtra (CALLBACK);
         	
         	askPass.putExtra (BODY, inputBody);
-        	askPass.putExtra (CALLBACK, callbackAction);
         	//TODO: Is there a way to make sure all the extras are set?
         	
 			startActivityForResult (askPass, 0);
@@ -88,7 +85,7 @@ public class FrontDoor extends Activity {
         CategoryList.setMasterKey(masterKey);
         if (ch == null) {
     		ch = new CryptoHelper(CryptoHelper.EncryptionMedium);
-    		ch.setPassword(masterKey);        	
+    		ch.setPassword(masterKey);
         }
 
         if (action == null || action.equals(Intent.ACTION_MAIN)){
@@ -119,9 +116,6 @@ public class FrontDoor extends Activity {
         		}
         	}
         	Intent callbackIntent = new Intent();
-
-        	String callbackAction = thisIntent.getStringExtra (CALLBACK);
-        	callbackIntent.setAction(callbackAction);
         	callbackIntent.setType("text/plain");
         	// stash the encrypted/decrypted text in the extra
         	callbackIntent.putExtra(BODY, outputBody);
