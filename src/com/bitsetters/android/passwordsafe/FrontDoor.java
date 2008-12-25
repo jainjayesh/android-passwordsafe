@@ -17,8 +17,13 @@
 package com.bitsetters.android.passwordsafe;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import com.bitsetters.android.passwordsafe.AskPassword;
 
@@ -39,7 +44,11 @@ public class FrontDoor extends Activity {
 	private String masterKey;
 	private CryptoHelper ch;
 
-	//probably remove these:
+	// service elements
+    private ServiceDispatch service;
+    private ServiceDispatchConnection conn;
+
+	//probably remove these to put in xml file?
 	public final String ACTION_ENCRYPT = "org.openintents.action.ENCRYPT";
 	public final String ACTION_DECRYPT = "org.openintents.action.DECRYPT";
 	
@@ -49,26 +58,20 @@ public class FrontDoor extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		if (masterKey == null || masterKey.equals("")) {
-			Intent askPass = new Intent(getApplicationContext(),
-					AskPassword.class);
-
-			final Intent thisIntent = getIntent();
-        	String inputBody = thisIntent.getStringExtra (BODY);
-        	
-        	askPass.putExtra (BODY, inputBody);
-        	//TODO: Is there a way to make sure all the extras are set?
-        	
-			startActivityForResult (askPass, 0);
-		} else {
-			actionDispatch();
-		}
+		initService(); // start up the PWS service so other applications can query.
 	}
 
+	//currently only handles result from askPassword function.
 	protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 		switch (resultCode) {
 		case RESULT_OK:
 			masterKey = data.getStringExtra("masterKey");
+			try {
+				service.setPassword(masterKey); // should already be connected.
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			actionDispatch();
 			break;
 		case RESULT_CANCELED:
@@ -119,10 +122,8 @@ public class FrontDoor extends Activity {
         	callbackIntent.setType("text/plain");
         	// stash the encrypted/decrypted text in the extra
         	callbackIntent.putExtra(BODY, outputBody);
-
-        	// call-back the callback URL
         	setResult(RESULT_OK, callbackIntent);
-        	finish(); //maybe we don't want to finish so that we can continue to respond to requests?
+        	finish();
         }
 			
 	}
@@ -149,4 +150,63 @@ public class FrontDoor extends Activity {
 		}
 
 	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		releaseService();
+	}
+
+
+	//--------------------------- service stuff ------------
+	private void initService() {
+		conn = new ServiceDispatchConnection();
+		Intent i = new Intent();
+		i.setClassName( "com.bitsetters.android.passwordsafe", "com.bitsetters.android.passwordsafe.ServiceDispatchImpl" );
+		startService(i);
+		bindService( i, conn, Context.BIND_AUTO_CREATE);
+	}
+
+	private void releaseService() {
+		unbindService( conn );
+		conn = null;
+	}
+
+	class ServiceDispatchConnection implements ServiceConnection
+	{
+		public void onServiceConnected(ComponentName className, 
+				IBinder boundService )
+		{
+			service = ServiceDispatch.Stub.asInterface((IBinder)boundService);
+			try {
+				if (service.getPassword() == null) {
+					// the service isn't running
+					Intent askPass = new Intent(getApplicationContext(),
+							AskPassword.class);
+
+					final Intent thisIntent = getIntent();
+					String inputBody = thisIntent.getStringExtra (BODY);
+
+					askPass.putExtra (BODY, inputBody);
+					//TODO: Is there a way to make sure all the extras are set?	
+					startActivityForResult (askPass, 0);
+
+				} else {
+					//service already started, so don't need to ask pw.
+					masterKey = service.getPassword();
+					actionDispatch();
+				}
+			} catch (RemoteException e) {
+				Log.d(TAG, e.toString());
+			}
+			Log.d( TAG,"onServiceConnected" );
+		}
+		
+		public void onServiceDisconnected(ComponentName className)
+		{
+			service = null;
+			Log.d( TAG,"onServiceDisconnected" );
+		}
+	};
+
 }
