@@ -435,8 +435,7 @@ public class CategoryList extends ListActivity {
 			Intent serviceIntent = new Intent();
 			serviceIntent.setClassName( "com.bitsetters.android.passwordsafe", FrontDoor.SERVICE_NAME );
 			//TODO: Get these strings from a resource?
-		      boolean stopped
-				= stopService(serviceIntent);
+		    stopService(serviceIntent);
 			masterKey=null;
 		    Intent frontdoor = new Intent(this, FrontDoor.class);
 		    frontdoor.setAction(Intent.ACTION_MAIN);
