@@ -51,6 +51,7 @@ public class FrontDoor extends Activity {
 	//probably remove these to put in xml file?
 	public final String ACTION_ENCRYPT = "org.openintents.action.ENCRYPT";
 	public final String ACTION_DECRYPT = "org.openintents.action.DECRYPT";
+	public static String SERVICE_NAME = "com.bitsetters.android.passwordsafe.ServiceDispatchImpl";
 	
 	public final String BODY = "org.openintents.extras.EXTRA_CRYPTO_BODY";
 	
@@ -96,7 +97,6 @@ public class FrontDoor extends Activity {
         	Intent i = new Intent(getApplicationContext(),
         			CategoryList.class);
         	startActivity(i);
-        	finish();
         } else {
         	// get the body text out of the extras. we'll encrypt or decrypt this.
         	String inputBody = thisIntent.getStringExtra (BODY);
@@ -123,9 +123,8 @@ public class FrontDoor extends Activity {
         	// stash the encrypted/decrypted text in the extra
         	callbackIntent.putExtra(BODY, outputBody);
         	setResult(RESULT_OK, callbackIntent);
-        	finish();
         }
-			
+        finish();
 	}
 
 	@Override
@@ -135,6 +134,7 @@ public class FrontDoor extends Activity {
 		if (debug)
 			Log.d(TAG, "onPause()");
 
+		releaseService();
 		dbHelper.close();
 		dbHelper = null;
 	}
@@ -162,14 +162,17 @@ public class FrontDoor extends Activity {
 	private void initService() {
 		conn = new ServiceDispatchConnection();
 		Intent i = new Intent();
-		i.setClassName( "com.bitsetters.android.passwordsafe", "com.bitsetters.android.passwordsafe.ServiceDispatchImpl" );
+		i.setClassName( "com.bitsetters.android.passwordsafe", SERVICE_NAME );
+		//TODO: Get these strings from a resource?
 		startService(i);
 		bindService( i, conn, Context.BIND_AUTO_CREATE);
 	}
 
 	private void releaseService() {
-		unbindService( conn );
-		conn = null;
+		if (conn != null ) {
+			unbindService( conn );
+			conn = null;
+		}
 	}
 
 	class ServiceDispatchConnection implements ServiceConnection

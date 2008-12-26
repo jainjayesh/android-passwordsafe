@@ -7,7 +7,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class ServiceDispatchImpl extends Service {
-
+	private CryptoHelper ch;
+	private String masterKey;
     
     @Override
     public IBinder onBind(Intent intent) {
@@ -22,13 +23,19 @@ public class ServiceDispatchImpl extends Service {
       super.onCreate();
 	  Log.d( "ServieDispatchImpl","onCreate" );
     }
+    
+    @Override
+    public void onDestroy() {
+	  super.onDestroy();
+	  masterKey = null;
+	  ch = null;
+	  Log.d( "ADDERSERVICEIMPL","onDestroy" );
+    }
 
     /**
      * The ServiceDispatch is defined through IDL
      */
     private final ServiceDispatch.Stub mBinder = new ServiceDispatch.Stub() {
-    	private CryptoHelper ch;
-    	private String masterKey;
     	private String TAG = "SERVICEDISPATCH";
 
     	public String encrypt (String clearText)  {
@@ -66,9 +73,4 @@ public class ServiceDispatchImpl extends Service {
 		}
     };
 
-    @Override
-    public void onDestroy() {
-	  super.onDestroy();
-	  Log.d( "ADDERSERVICEIMPL","onDestroy" );
-    }
 }
