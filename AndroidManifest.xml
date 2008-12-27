@@ -29,12 +29,21 @@
         <activity class=".Help" android:name="Help" android:label="@string/app_name" />
         <activity class=".ChangePass" android:name="ChangePass" android:label="@string/app_name" />
         <activity class=".Restore" android:name="Restore" android:label="@string/app_name" />
-        <service class=".FrontDoor.ServiceDispatchImpl" android:name="ServiceDispatchImpl" android:label="@string/app_name">
- 			android:permission="com.bitsetters.android.passwordsafe.ACCESS_SERVICE"
-			android:process=":remote"  android:exported="true"
+        <service class=".FrontDoor.ServiceDispatchImpl" android:name="ServiceDispatchImpl"
+            android:label="@string/app_name"
+			android:permission="com.bitsetters.android.passwordsafe.ACCESS_SERVICE">
             <intent-filter>
                 <action android:name="com.bitsetters.android.passwordsafe.ServiceDispatchImpl" />
             </intent-filter> 
-        </service>
-    </application>
+        </service>    
+    </application> 
+
+    <permission android:name="com.bitsetters.android.passwordsafe.ACCESS_SERVICE"
+			android:process=":remote"  android:exported="true"
+			android:protectionLevel="signature"
+			android:label="@string/permlab_service"
+        	android:description="@string/permdesc_service">		
+   	</permission>
+    <uses-permission android:name="com.bitsetters.android.passwordsafe.ACCESS_SERVICE" />
+    
 </manifest> 

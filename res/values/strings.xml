@@ -109,4 +109,7 @@
     <string name="open">Open</string>
     <string name="database_version_error_title">Database Version Error</string>
     <string name="database_version_error_msg">Sorry, but the version of the database is not supported.   You must install the version associated with this database.</string>
+	<string name="permlab_service">access stored password</string>
+    <string name="permdesc_service">Allows the application to encrypt and decrypt text, and access the passwords stored by Android Passwordsafe.</string>	
+
 </resources>
