@@ -1,20 +1,19 @@
 package org.syntaxpolice.apws.ServiceTest;
 
+import org.openintents.intents.CryptoIntents;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.util.Log;
 
 public class ServiceTest extends Activity {
 	public final String TAG="SERVICE_TEST";
-	public final String ACTION_ENCRYPT = "org.openintents.action.ENCRYPT";
-	public final String ACTION_DECRYPT = "org.openintents.action.DECRYPT";
-	public final String BODY = "org.openintents.extras.EXTRA_CRYPTO_BODY";
 	public final Integer ENCRYPT_REQUEST = 1;
 	public final Integer DECRYPT_REQUEST = 2;
 	
@@ -57,14 +56,14 @@ public class ServiceTest extends Activity {
 		EditText inputText = (EditText) findViewById(R.id.input_entry);
 		String inputStr = inputText.getText().toString();
         Intent i = new Intent();
-		i.putExtra(BODY, inputStr);
+		i.putExtra(CryptoIntents.EXTRA_TEXT, inputStr);
         i.setType("text/plain");
         
     	if (request == ENCRYPT_REQUEST) {
-            i.setAction(ACTION_ENCRYPT);
+            i.setAction(CryptoIntents.ACTION_ENCRYPT);
     		
     	} else if (request == DECRYPT_REQUEST) {
-            i.setAction(ACTION_DECRYPT);
+            i.setAction(CryptoIntents.ACTION_DECRYPT);
     	}
         try {
         	startActivityForResult(i, request);
@@ -77,7 +76,7 @@ public class ServiceTest extends Activity {
     }
     
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-        String resultText = data.getStringExtra (BODY);
+        String resultText = data.getStringExtra (CryptoIntents.EXTRA_TEXT);
 		EditText outputText = (EditText) findViewById(R.id.output_entry);
 		outputText.setText(resultText, android.widget.TextView.BufferType.EDITABLE);
     }

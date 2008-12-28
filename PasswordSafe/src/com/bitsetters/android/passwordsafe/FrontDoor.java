@@ -16,6 +16,8 @@
  */
 package com.bitsetters.android.passwordsafe;
 
+import org.openintents.intents.CryptoIntents;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -48,12 +50,7 @@ public class FrontDoor extends Activity {
     private ServiceDispatch service;
     private ServiceDispatchConnection conn;
 
-	//probably remove these to put in xml file?
-	public final String ACTION_ENCRYPT = "org.openintents.action.ENCRYPT";
-	public final String ACTION_DECRYPT = "org.openintents.action.DECRYPT";
 	public static String SERVICE_NAME = "com.bitsetters.android.passwordsafe.ServiceDispatchImpl";
-	
-	public final String BODY = "org.openintents.extras.EXTRA_CRYPTO_BODY";
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -99,10 +96,10 @@ public class FrontDoor extends Activity {
         	startActivity(i);
         } else {
         	// get the body text out of the extras. we'll encrypt or decrypt this.
-        	String inputBody = thisIntent.getStringExtra (BODY);
+        	String inputBody = thisIntent.getStringExtra (CryptoIntents.EXTRA_TEXT);
         	String outputBody = "";
         	// which action?
-        	if (action.equals (ACTION_ENCRYPT)) {
+        	if (action.equals (CryptoIntents.ACTION_ENCRYPT)) {
         		try {
         			outputBody = ch.encrypt (inputBody);
         		} catch (CryptoHelperException e) {
@@ -111,7 +108,7 @@ public class FrontDoor extends Activity {
         			if (debug) Log.e(TAG, e.toString() + "ch: " + ch + " inputBody: " + inputBody );
         			
         		}
-        	} else if (action.equals (ACTION_DECRYPT)) {
+        	} else if (action.equals (CryptoIntents.ACTION_DECRYPT)) {
         		try {
         			outputBody = ch.decrypt (inputBody);
         		} catch (CryptoHelperException e) {
@@ -119,9 +116,9 @@ public class FrontDoor extends Activity {
         		}
         	}
         	Intent callbackIntent = new Intent();
-        	callbackIntent.setType("text/plain");
+        	//callbackIntent.setType("text/plain");
         	// stash the encrypted/decrypted text in the extra
-        	callbackIntent.putExtra(BODY, outputBody);
+        	callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT, outputBody);
         	setResult(RESULT_OK, callbackIntent);
         }
         finish();
@@ -188,9 +185,9 @@ public class FrontDoor extends Activity {
 							AskPassword.class);
 
 					final Intent thisIntent = getIntent();
-					String inputBody = thisIntent.getStringExtra (BODY);
+					String inputBody = thisIntent.getStringExtra (CryptoIntents.EXTRA_TEXT);
 
-					askPass.putExtra (BODY, inputBody);
+					askPass.putExtra (CryptoIntents.EXTRA_TEXT, inputBody);
 					//TODO: Is there a way to make sure all the extras are set?	
 					startActivityForResult (askPass, 0);
 
