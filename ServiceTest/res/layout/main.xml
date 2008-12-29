@@ -31,11 +31,19 @@
             android:layout_alignTop="@id/encrypti"
             android:text="Decrypt" />
             
-    <Button android:id="@+id/outToIn" 
+    <Button android:id="@+id/get" 
            android:layout_width="wrap_content" 
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@id/decrypti"
             android:layout_alignTop="@id/decrypti"
+            android:text="Get" />
+            
+            
+    <Button android:id="@+id/outToIn" 
+           android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/get"
+            android:layout_alignTop="@id/get"
             android:text="Out->In" />
 
     <TextView android:id="@+id/output_label" 

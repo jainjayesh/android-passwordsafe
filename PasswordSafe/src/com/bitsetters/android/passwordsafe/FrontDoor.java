@@ -16,6 +16,8 @@
  */
 package com.bitsetters.android.passwordsafe;
 
+import java.util.List;
+
 import org.openintents.intents.CryptoIntents;
 
 import android.app.Activity;
@@ -23,11 +25,13 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import com.bitsetters.android.passwordsafe.AskPassword;
+import android.widget.Toast;
 
 /**
  * FrontDoor Activity
@@ -114,6 +118,44 @@ public class FrontDoor extends Activity {
         		} catch (CryptoHelperException e) {
         			Log.e(TAG, e.toString());
         		}
+        	} else if (action.equals (CryptoIntents.ACTION_GET_PASSWORD)) {
+        		try {
+        			DBHelper dbHelper = new DBHelper(this);
+        			Log.d(TAG, "GET_PASSWORD");
+        			String username = "none";
+        			String password = "none";
+        			Uri uri = thisIntent.getData();
+        			List<String> segments = uri.getPathSegments();
+        			String caller = getCallingPackage();
+        			String clearCategory =  segments.get(0);// must match caller
+        			
+        			if (!clearCategory.equals(caller)) {
+            			Toast.makeText(FrontDoor.this,
+            					"This application cannot request passwords of type " + clearCategory + ".",
+            					Toast.LENGTH_SHORT).show();
+            			throw (new Exception ("permission denied...")); // TODO: security exception?
+        			}
+        			
+        			String category = ch.encrypt(clearCategory);
+        			String description = ch.encrypt(segments.get(1));
+        			PassEntry row = dbHelper.fetchPassword(category, description);
+        			if (row.id > 1) {
+        				username = ch.decrypt(row.username);
+        				password = ch.decrypt(row.password);
+        			}
+        			outputBody = "username: " + username + " password: " + password;
+        			Toast.makeText(FrontDoor.this,
+        					outputBody,
+        					Toast.LENGTH_SHORT).show();
+        			dbHelper.close();
+        			dbHelper = null;
+        		} catch (CryptoHelperException e) {
+        			Log.e(TAG, e.toString());
+        		} catch (Exception e) {
+        			Log.e(TAG, e.toString());
+        			
+        		}
+
         	}
         	Intent callbackIntent = new Intent();
         	//callbackIntent.setType("text/plain");

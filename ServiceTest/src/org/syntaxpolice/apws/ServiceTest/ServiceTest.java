@@ -5,6 +5,7 @@ import org.openintents.intents.CryptoIntents;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +17,8 @@ public class ServiceTest extends Activity {
 	public final String TAG="SERVICE_TEST";
 	public final Integer ENCRYPT_REQUEST = 1;
 	public final Integer DECRYPT_REQUEST = 2;
+	public final Integer GET_PASSWORD = 3;
+	public final String uri = "content://org.openintents.keys/org.syntaxpolice.apws.ServiceTest/opensocial";
 	
 	
     /** Called when the activity is first created. */
@@ -25,11 +28,13 @@ public class ServiceTest extends Activity {
         setContentView(R.layout.main);
 
 		EditText inputText = (EditText) findViewById(R.id.input_entry);
-		inputText.setText("Text to be Encrypted :)", android.widget.TextView.BufferType.EDITABLE);
+		inputText.setText(uri,
+			android.widget.TextView.BufferType.EDITABLE);
 		
 // ---------------- clicky
 		Button encryptIntentButton = (Button) findViewById(R.id.encrypti);
 		Button decryptIntentButton = (Button) findViewById(R.id.decrypti);
+		Button getButton           = (Button) findViewById(R.id.get);
 		Button outToInButton       = (Button) findViewById(R.id.outToIn);
 		
 		encryptIntentButton.setOnClickListener(new View.OnClickListener() {
@@ -40,6 +45,10 @@ public class ServiceTest extends Activity {
 			public void onClick(View arg0) {
 				clickMaster (DECRYPT_REQUEST);
 			}});
+		getButton.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View arg0) {
+					clickMaster (GET_PASSWORD);
+				}});
 		//move output text box to input:
 		outToInButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
@@ -57,21 +66,21 @@ public class ServiceTest extends Activity {
 		String inputStr = inputText.getText().toString();
         Intent i = new Intent();
 		i.putExtra(CryptoIntents.EXTRA_TEXT, inputStr);
-        i.setType("text/plain");
         
     	if (request == ENCRYPT_REQUEST) {
             i.setAction(CryptoIntents.ACTION_ENCRYPT);
-    		
+            i.setType("text/plain");
     	} else if (request == DECRYPT_REQUEST) {
             i.setAction(CryptoIntents.ACTION_DECRYPT);
+            i.setType("text/plain");
+    	} else if (request == GET_PASSWORD) {
+    		i.setData(Uri.parse(inputStr));
+    		i.setAction (CryptoIntents.ACTION_GET_PASSWORD);
     	}
         try {
         	startActivityForResult(i, request);
         } catch (ActivityNotFoundException e) {
-			Toast.makeText(ServiceTest.this,
-					"Failed to invoke encrypt/decrypt!",
-					Toast.LENGTH_SHORT).show();
-			Log.e(TAG, "failed to invoke encrypt");
+			Log.e(TAG, "failed to invoke intent: " + e.toString());
         }
     }
     

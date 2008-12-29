@@ -19,7 +19,11 @@ public class CryptoIntents {
 	 * <p>Constant Value: "org.openintents.action.DECRYPT"</p>
 	 */
 	public static final String ACTION_DECRYPT = "org.openintents.action.DECRYPT";
+	
 
+	public static final String ACTION_GET_PASSWORD = "org.openintents.action.GET_PASSWORD";
+	public static final String ACTION_SET_PASSWORD = "org.openintents.action.SET_PASSWORD";
+	
 	/**
 	 * The text to encrypt or decrypt.
 	 * 

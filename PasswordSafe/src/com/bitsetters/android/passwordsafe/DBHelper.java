@@ -495,6 +495,45 @@ public class DBHelper {
 	    return row;
 	}
 	
+	public PassEntry fetchPassword(String category, String description) {
+	    PassEntry row = new PassEntry();
+		row.id = -1;
+		row.description = row.password = null;
+	    try {
+	        Cursor c =
+	            db.query(true, TABLE_CATEGORIES, new String[] {
+	                "id", "name"}, "name='" + category + "'" , null, null, null, null, null);
+	        if (c.getCount() > 0) {
+	        	c.moveToFirst();
+	        	long categoryId = c.getLong(0);
+	        	String name = c.getString (1);
+	        	c.close();
+	        	c = db.query(true, TABLE_PASSWORDS, new String[] {
+	        				"id", "password", "description", "username", "website",
+	        				"note", "category"}, "category=" + categoryId + " and description='" + description + "'",
+	        				null, null, null, null, null);
+	        	if (c.getCount() > 0) {
+	        		c.moveToFirst();
+	        		row.id = c.getLong(0);
+
+	        		row.password = c.getString(1);
+	        		row.description = c.getString(2);
+	        		row.username = c.getString(3);
+	        		row.website = c.getString(4);
+	        		row.note = c.getString(5);
+
+	        		row.category = c.getLong(6);
+	        	}
+	        	c.close();
+	        }
+	    } catch (SQLException e)
+	    {
+	    	Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+	    }
+	    return row;
+	}
+	
+	
 	/**
 	 * 
 	 * @param Id
