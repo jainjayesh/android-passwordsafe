@@ -21,8 +21,7 @@
         	<intent-filter android:label="org.openintents.action.GET_PASSWORD">
                 <action android:name="org.openintents.action.GET_PASSWORD" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="content"
-                      android:host="org.openintents.keys"/>
+                <data android:mimeType="text/plain" />
         	</intent-filter>
             
         </activity>

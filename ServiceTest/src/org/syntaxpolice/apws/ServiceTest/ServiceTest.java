@@ -5,20 +5,18 @@ import org.openintents.intents.CryptoIntents;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 public class ServiceTest extends Activity {
 	public final String TAG="SERVICE_TEST";
 	public final Integer ENCRYPT_REQUEST = 1;
 	public final Integer DECRYPT_REQUEST = 2;
 	public final Integer GET_PASSWORD = 3;
-	public final String uri = "content://org.openintents.keys/org.syntaxpolice.apws.ServiceTest/opensocial";
+	public final String desc = "opensocial";
 	
 	
     /** Called when the activity is first created. */
@@ -28,7 +26,7 @@ public class ServiceTest extends Activity {
         setContentView(R.layout.main);
 
 		EditText inputText = (EditText) findViewById(R.id.input_entry);
-		inputText.setText(uri,
+		inputText.setText(desc,
 			android.widget.TextView.BufferType.EDITABLE);
 		
 // ---------------- clicky
@@ -65,16 +63,15 @@ public class ServiceTest extends Activity {
 		EditText inputText = (EditText) findViewById(R.id.input_entry);
 		String inputStr = inputText.getText().toString();
         Intent i = new Intent();
+        i.setType("text/plain");
 		i.putExtra(CryptoIntents.EXTRA_TEXT, inputStr);
         
     	if (request == ENCRYPT_REQUEST) {
             i.setAction(CryptoIntents.ACTION_ENCRYPT);
-            i.setType("text/plain");
     	} else if (request == DECRYPT_REQUEST) {
             i.setAction(CryptoIntents.ACTION_DECRYPT);
-            i.setType("text/plain");
     	} else if (request == GET_PASSWORD) {
-    		i.setData(Uri.parse(inputStr));
+    		i.putExtra(CryptoIntents.EXTRA_DESCRIPTION, inputStr);
     		i.setAction (CryptoIntents.ACTION_GET_PASSWORD);
     	}
         try {
@@ -85,7 +82,14 @@ public class ServiceTest extends Activity {
     }
     
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-        String resultText = data.getStringExtra (CryptoIntents.EXTRA_TEXT);
+    	String resultText;
+    	if (requestCode == ENCRYPT_REQUEST || requestCode == DECRYPT_REQUEST) {
+    		resultText = data.getStringExtra (CryptoIntents.EXTRA_TEXT);
+    	} else {
+    		String uname = data.getStringExtra (CryptoIntents.EXTRA_USERNAME);
+    		String pwd = data.getStringExtra (CryptoIntents.EXTRA_PASSWORD);
+    		resultText = uname + ":" + pwd;
+    	}
 		EditText outputText = (EditText) findViewById(R.id.output_entry);
 		outputText.setText(resultText, android.widget.TextView.BufferType.EDITABLE);
     }

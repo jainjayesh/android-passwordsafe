@@ -16,7 +16,6 @@
  */
 package com.bitsetters.android.passwordsafe;
 
-import java.util.List;
 
 import org.openintents.intents.CryptoIntents;
 
@@ -25,7 +24,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -86,6 +84,8 @@ public class FrontDoor extends Activity {
 	protected void actionDispatch () {    
 		final Intent thisIntent = getIntent();
         final String action = thisIntent.getAction();
+    	Intent callbackIntent = new Intent();
+    	int callbackResult = RESULT_CANCELED;
 		PassList.setMasterKey(masterKey);
         CategoryList.setMasterKey(masterKey);
         if (ch == null) {
@@ -106,6 +106,9 @@ public class FrontDoor extends Activity {
         	if (action.equals (CryptoIntents.ACTION_ENCRYPT)) {
         		try {
         			outputBody = ch.encrypt (inputBody);
+                	callbackResult = RESULT_OK;
+                	// stash the encrypted/decrypted text in the extra
+                	callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT, outputBody);
         		} catch (CryptoHelperException e) {
         			Log.e(TAG, e.toString());
         		}  catch (NullPointerException e) {
@@ -115,53 +118,68 @@ public class FrontDoor extends Activity {
         	} else if (action.equals (CryptoIntents.ACTION_DECRYPT)) {
         		try {
         			outputBody = ch.decrypt (inputBody);
+                	callbackResult = RESULT_OK;
+                	// stash the encrypted/decrypted text in the extra
+                	callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT, outputBody);
         		} catch (CryptoHelperException e) {
         			Log.e(TAG, e.toString());
         		}
         	} else if (action.equals (CryptoIntents.ACTION_GET_PASSWORD)) {
         		try {
+        			//TODO: Consider moving this elsewhere. Maybe DBHelper? Also move strings to resource.
         			DBHelper dbHelper = new DBHelper(this);
         			Log.d(TAG, "GET_PASSWORD");
-        			String username = "none";
-        			String password = "none";
-        			Uri uri = thisIntent.getData();
-        			List<String> segments = uri.getPathSegments();
-        			String caller = getCallingPackage();
-        			String clearCategory =  segments.get(0);// must match caller
-        			
-        			if (!clearCategory.equals(caller)) {
-            			Toast.makeText(FrontDoor.this,
-            					"This application cannot request passwords of type " + clearCategory + ".",
-            					Toast.LENGTH_SHORT).show();
-            			throw (new Exception ("permission denied...")); // TODO: security exception?
+        			String username = null;
+        			String password = null;
+        			String callingPackage = getCallingPackage();
+        			String clearCategory  = thisIntent.getStringExtra (CryptoIntents.EXTRA_CATEGORY);
+        			if (clearCategory == null || clearCategory.equals("")) {
+        				clearCategory = callingPackage;
         			}
+        			/*TODO: if clearCategory != callingPackage, ask the user if it's permissible:
+        			 * "Application 'org.syntaxpolice.ServiceTest' wants to access the
+						password for 'opensocial'.
+						[ ] Grant access this time.
+						[ ] Always grant access.
+						[ ] Always grant access to all passwords in org.syntaxpolice.ServiceTest category?
+						[ ] Don't grant access"
+        			 */
+        			if (clearCategory != callingPackage)  throw new Exception ("It is currently not permissible for this application to request passwords from this category.");
+ 
+        			String clearDescription = thisIntent.getStringExtra (CryptoIntents.EXTRA_DESCRIPTION);
+        			
+        			if (clearDescription == null) throw new Exception ("EXTRA_DESCRIPTION not set.");
         			
         			String category = ch.encrypt(clearCategory);
-        			String description = ch.encrypt(segments.get(1));
+        			String description = ch.encrypt(clearDescription);
         			PassEntry row = dbHelper.fetchPassword(category, description);
         			if (row.id > 1) {
         				username = ch.decrypt(row.username);
         				password = ch.decrypt(row.password);
-        			}
+        			} else throw new Exception ("Could not find password with given description in category corresponding to calling application.");
         			outputBody = "username: " + username + " password: " + password;
-        			Toast.makeText(FrontDoor.this,
-        					outputBody,
-        					Toast.LENGTH_SHORT).show();
+
         			dbHelper.close();
         			dbHelper = null;
+        			// stashing the return values:
+                	callbackIntent.putExtra(CryptoIntents.EXTRA_USERNAME, username);
+                	callbackIntent.putExtra(CryptoIntents.EXTRA_PASSWORD, password);
+                	callbackResult = RESULT_OK;
         		} catch (CryptoHelperException e) {
         			Log.e(TAG, e.toString());
+        			Toast.makeText(FrontDoor.this,
+        					"There was a crypto error while retreiving the requested password: " + e.getMessage(),
+        					Toast.LENGTH_SHORT).show();
         		} catch (Exception e) {
         			Log.e(TAG, e.toString());
-        			
+        			//TODO: Turn this into a proper error dialog.
+        			Toast.makeText(FrontDoor.this,
+        					"There was an error in retreiving the requested password: " + e.getMessage(),
+        					Toast.LENGTH_SHORT).show();
         		}
-
         	}
-        	Intent callbackIntent = new Intent();
         	//callbackIntent.setType("text/plain");
-        	// stash the encrypted/decrypted text in the extra
-        	callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT, outputBody);
-        	setResult(RESULT_OK, callbackIntent);
+        	setResult(callbackResult, callbackIntent);
         }
         finish();
 	}
