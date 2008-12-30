@@ -70,7 +70,6 @@ public class ServiceTest extends Activity {
 		String inputStr = inputText.getText().toString();
 		
 		Intent i = new Intent();
-		i.setType("text/plain");
 		i.putExtra(CryptoIntents.EXTRA_TEXT, inputStr);
 		
     	if (request == ENCRYPT_REQUEST) {

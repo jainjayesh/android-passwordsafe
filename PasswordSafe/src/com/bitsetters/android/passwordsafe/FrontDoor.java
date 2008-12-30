@@ -84,7 +84,7 @@ public class FrontDoor extends Activity {
 	protected void actionDispatch () {    
 		final Intent thisIntent = getIntent();
         final String action = thisIntent.getAction();
-    	Intent callbackIntent = new Intent();
+    	Intent callbackIntent = getIntent(); 
     	int callbackResult = RESULT_CANCELED;
 		PassList.setMasterKey(masterKey);
         CategoryList.setMasterKey(masterKey);
@@ -142,7 +142,6 @@ public class FrontDoor extends Activity {
         					Toast.LENGTH_SHORT).show();
         		}
         	}
-        	//callbackIntent.setType("text/plain");
         	setResult(callbackResult, callbackIntent);
         }
         finish();

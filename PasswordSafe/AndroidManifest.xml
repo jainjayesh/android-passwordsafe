@@ -11,22 +11,18 @@
             <intent-filter android:label="org.openintents.action.ENCRYPT">
                 <action android:name="org.openintents.action.ENCRYPT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
         	</intent-filter>
         	<intent-filter android:label="org.openintents.action.DECRYPT">
                 <action android:name="org.openintents.action.DECRYPT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
         	</intent-filter>
         	<intent-filter android:label="org.openintents.action.GET_PASSWORD">
                 <action android:name="org.openintents.action.GET_PASSWORD" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
         	</intent-filter>
         	<intent-filter android:label="org.openintents.action.SET_PASSWORD">
                 <action android:name="org.openintents.action.SET_PASSWORD" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
         	</intent-filter>
             
             
