@@ -47,6 +47,16 @@ public class CryptoIntents {
 	 * <p>Constant Value: "org.openintents.action.GET_PASSWORD"</p>
 	 */
 	public static final String ACTION_GET_PASSWORD = "org.openintents.action.GET_PASSWORD";
+	
+	/**
+	 * Activity Action: Set the password corresponding to the category of the
+	 * calling application, and the EXTRA_DESCRIPTION, EXTRA_USERNAME and
+	 * EXTRA_PASSWORD as provided.
+	 * 
+	 * If both username and password are the non-null empty string, delete this
+	 * password entry.
+	 * <p>Constant Value: "org.openintents.action.SET_PASSWORD"</p>
+	 */
 	public static final String ACTION_SET_PASSWORD = "org.openintents.action.SET_PASSWORD";
 	
 	/**
@@ -57,7 +67,7 @@ public class CryptoIntents {
 	public static final String EXTRA_TEXT = "org.openintents.extra.TEXT";
 	
 	/**
-	 * Input parameter to GET_PASSWORD and SET_PASSWORD. Corresponds to the "description"
+	 * Required input parameter to GET_PASSWORD and SET_PASSWORD. Corresponds to the "description"
 	 * field in passwordsafe. Should be a descriptive name for the password you're using,
 	 * and will already be specific to your application.
 	 * 

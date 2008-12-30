@@ -190,12 +190,17 @@ public class FrontDoor extends Activity {
         } else if (action.equals (CryptoIntents.ACTION_SET_PASSWORD)) {
             String clearUsername  = thisIntent.getStringExtra (CryptoIntents.EXTRA_USERNAME);
             String clearPassword = thisIntent.getStringExtra (CryptoIntents.EXTRA_PASSWORD);
-            if (clearUsername == null || clearPassword == null)
+            if (clearUsername == null || clearPassword == null) {
             		throw new Exception ("EXTRAS USERNAME and PASSWORD must be set.");
+            }  
             row.username = ch.encrypt(clearUsername);
             row.password = ch.encrypt(clearPassword);
-        	if (row.id > 1) { //exists already
-                dbHelper.updatePassword(row.id, row);
+        	if (row.id > 1) { //exists already 
+        		if (clearUsername.equals("") && clearPassword.equals("")) {
+        			dbHelper.deletePassword(row.id);
+        		} else {
+        			dbHelper.updatePassword(row.id, row);
+        		}
         	} else {// add a new one
                 row.description = description;
 	            row.website = ""; // TODO: Should we send these fields in extras also?
