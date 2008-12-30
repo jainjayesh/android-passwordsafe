@@ -15,7 +15,8 @@ public class ServiceTest extends Activity {
 	public final String TAG="SERVICE_TEST";
 	public final Integer ENCRYPT_REQUEST = 1;
 	public final Integer DECRYPT_REQUEST = 2;
-	public final Integer GET_PASSWORD = 3;
+	public final Integer GET_PASSWORD_REQUEST = 3;
+	public final Integer SET_PASSWORD_REQUEST = 4;
 	public final String desc = "opensocial";
 	
 	
@@ -33,6 +34,7 @@ public class ServiceTest extends Activity {
 		Button encryptIntentButton = (Button) findViewById(R.id.encrypti);
 		Button decryptIntentButton = (Button) findViewById(R.id.decrypti);
 		Button getButton           = (Button) findViewById(R.id.get);
+		Button setButton           = (Button) findViewById(R.id.set);
 		Button outToInButton       = (Button) findViewById(R.id.outToIn);
 		
 		encryptIntentButton.setOnClickListener(new View.OnClickListener() {
@@ -44,9 +46,13 @@ public class ServiceTest extends Activity {
 				clickMaster (DECRYPT_REQUEST);
 			}});
 		getButton.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View arg0) {
-					clickMaster (GET_PASSWORD);
-				}});
+			public void onClick(View arg0) {
+				clickMaster (GET_PASSWORD_REQUEST);
+			}});
+		setButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View arg0) {
+				clickMaster (SET_PASSWORD_REQUEST);
+			}});
 		//move output text box to input:
 		outToInButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
@@ -62,17 +68,29 @@ public class ServiceTest extends Activity {
     private void clickMaster (Integer request) {
 		EditText inputText = (EditText) findViewById(R.id.input_entry);
 		String inputStr = inputText.getText().toString();
-        Intent i = new Intent();
-        i.setType("text/plain");
+		
+		Intent i = new Intent();
+		i.setType("text/plain");
 		i.putExtra(CryptoIntents.EXTRA_TEXT, inputStr);
-        
+		
     	if (request == ENCRYPT_REQUEST) {
             i.setAction(CryptoIntents.ACTION_ENCRYPT);
     	} else if (request == DECRYPT_REQUEST) {
             i.setAction(CryptoIntents.ACTION_DECRYPT);
-    	} else if (request == GET_PASSWORD) {
+    	} else if (request == GET_PASSWORD_REQUEST) {
     		i.putExtra(CryptoIntents.EXTRA_DESCRIPTION, inputStr);
     		i.setAction (CryptoIntents.ACTION_GET_PASSWORD);
+    	} else if (request == SET_PASSWORD_REQUEST) {
+    		String descriptionStr = ((EditText) findViewById(R.id.description_entry)).getText().toString();
+    		String passwordStr = ((EditText) findViewById(R.id.password_entry)).getText().toString();
+    		String usernameStr = ((EditText) findViewById(R.id.username_entry)).getText().toString();
+
+
+    		i.putExtra(CryptoIntents.EXTRA_DESCRIPTION, descriptionStr);
+    		i.putExtra(CryptoIntents.EXTRA_PASSWORD, passwordStr);
+    		i.putExtra(CryptoIntents.EXTRA_USERNAME, usernameStr);
+
+    		i.setAction (CryptoIntents.ACTION_SET_PASSWORD);
     	}
         try {
         	startActivityForResult(i, request);
@@ -82,9 +100,11 @@ public class ServiceTest extends Activity {
     }
     
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-    	String resultText;
+    	String resultText = "";
     	if (requestCode == ENCRYPT_REQUEST || requestCode == DECRYPT_REQUEST) {
     		resultText = data.getStringExtra (CryptoIntents.EXTRA_TEXT);
+    	} else if (requestCode == SET_PASSWORD_REQUEST) {
+    		resultText = "Request to set password sent.";
     	} else {
     		String uname = data.getStringExtra (CryptoIntents.EXTRA_USERNAME);
     		String pwd = data.getStringExtra (CryptoIntents.EXTRA_PASSWORD);

@@ -15,6 +15,8 @@ public final class R {
     }
     public static final class id {
         public static final int decrypti=0x7f050003;
+        public static final int description_entry=0x7f05000d;
+        public static final int description_label=0x7f05000c;
         public static final int encrypti=0x7f050002;
         public static final int get=0x7f050004;
         public static final int input_entry=0x7f050001;
@@ -22,6 +24,11 @@ public final class R {
         public static final int outToIn=0x7f050005;
         public static final int output_entry=0x7f050007;
         public static final int output_label=0x7f050006;
+        public static final int password_entry=0x7f05000b;
+        public static final int password_label=0x7f05000a;
+        public static final int set=0x7f05000e;
+        public static final int username_entry=0x7f050009;
+        public static final int username_label=0x7f050008;
     }
     public static final class layout {
         public static final int main=0x7f030000;

@@ -255,21 +255,33 @@ public class DBHelper {
 //////////Category Functions ////////////////
 
     /**
-     * 
+     * Doesn't add the category if it already exists.
      * @param entry
+     * @returns row id
      */
     public long addCategory(CategoryEntry entry) {
         ContentValues initialValues = new ContentValues();
-    	initialValues.put("name", entry.name);
 
-    	long ret=-1;
-        try {
-	        ret=db.insert(TABLE_CATEGORIES, null, initialValues);
-		} catch (SQLException e)
-		{
-			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		}
-		return ret;
+    	long rowID=-1;
+        Cursor c =
+        	db.query(true, TABLE_CATEGORIES, new String[] {
+        			"id", "name"}, "name='" + entry.name + "'" , null, null, null, null, null);
+        if (c.getCount() > 0) {
+        	c.moveToFirst();
+        	rowID = c.getLong(0);
+        	
+        } else {// there's not already such a category...
+        	initialValues.put("name", entry.name);
+
+        	try {
+        		rowID=db.insert(TABLE_CATEGORIES, null, initialValues);
+        	} catch (SQLException e)
+        	{
+        		Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+        	}
+        } 
+		c.close();
+        return rowID;
     }
 
     /**
@@ -361,40 +373,6 @@ public class DBHelper {
 
 ////////// Password Functions ////////////////
 	
-	
-	/**
-	 * 
-	 * @param entry
-	 */
-	public void addPassword(PassEntry entry) {
-	    ContentValues initialValues = new ContentValues();
-		initialValues.put("category", entry.category);
-		initialValues.put("password", entry.password);
-	    initialValues.put("description", entry.description);
-	    initialValues.put("username",entry.username);
-	    initialValues.put("website", entry.website);
-	    initialValues.put("note", entry.note);
-	
-	    try {
-	        db.insert(TABLE_PASSWORDS, null, initialValues);
-		} catch (SQLException e)
-		{
-			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		}
-	}
-	
-	/**
-	 * 
-	 * @param Id
-	 */
-	public void deletePassword(long Id) {
-	    try {
-			db.delete(TABLE_PASSWORDS, "id=" + Id, null);
-		} catch (SQLException e)
-		{
-			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
-		}
-	}
 
 	/**
 	 * 
@@ -506,7 +484,6 @@ public class DBHelper {
 	        if (c.getCount() > 0) {
 	        	c.moveToFirst();
 	        	long categoryId = c.getLong(0);
-	        	String name = c.getString (1);
 	        	c.close();
 	        	c = db.query(true, TABLE_PASSWORDS, new String[] {
 	        				"id", "password", "description", "username", "website",
@@ -533,7 +510,6 @@ public class DBHelper {
 	    return row;
 	}
 	
-	
 	/**
 	 * 
 	 * @param Id
@@ -555,6 +531,39 @@ public class DBHelper {
 		}
 	}
 
+	/**
+	 * 
+	 * @param entry
+	 */
+	public void addPassword(PassEntry entry) {
+	    ContentValues initialValues = new ContentValues();
+		initialValues.put("category", entry.category);
+		initialValues.put("password", entry.password);
+	    initialValues.put("description", entry.description);
+	    initialValues.put("username",entry.username);
+	    initialValues.put("website", entry.website);
+	    initialValues.put("note", entry.note);
+	
+	    try {
+	        db.insert(TABLE_PASSWORDS, null, initialValues);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+	}
+	
+	/**
+	 * 
+	 * @param Id
+	 */
+	public void deletePassword(long Id) {
+	    try {
+			db.delete(TABLE_PASSWORDS, "id=" + Id, null);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+	}
 	/**
 	 * Begin a transaction on an open database.
 	 * 

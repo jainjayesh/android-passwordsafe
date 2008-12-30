@@ -124,46 +124,10 @@ public class FrontDoor extends Activity {
         		} catch (CryptoHelperException e) {
         			Log.e(TAG, e.toString());
         		}
-        	} else if (action.equals (CryptoIntents.ACTION_GET_PASSWORD)) {
+        	} else if (action.equals (CryptoIntents.ACTION_GET_PASSWORD)
+        			|| action.equals (CryptoIntents.ACTION_SET_PASSWORD)) {
         		try {
-        			//TODO: Consider moving this elsewhere. Maybe DBHelper? Also move strings to resource.
-        			DBHelper dbHelper = new DBHelper(this);
-        			Log.d(TAG, "GET_PASSWORD");
-        			String username = null;
-        			String password = null;
-        			String callingPackage = getCallingPackage();
-        			String clearCategory  = thisIntent.getStringExtra (CryptoIntents.EXTRA_CATEGORY);
-        			if (clearCategory == null || clearCategory.equals("")) {
-        				clearCategory = callingPackage;
-        			}
-        			/*TODO: if clearCategory != callingPackage, ask the user if it's permissible:
-        			 * "Application 'org.syntaxpolice.ServiceTest' wants to access the
-						password for 'opensocial'.
-						[ ] Grant access this time.
-						[ ] Always grant access.
-						[ ] Always grant access to all passwords in org.syntaxpolice.ServiceTest category?
-						[ ] Don't grant access"
-        			 */
-        			if (clearCategory != callingPackage)  throw new Exception ("It is currently not permissible for this application to request passwords from this category.");
- 
-        			String clearDescription = thisIntent.getStringExtra (CryptoIntents.EXTRA_DESCRIPTION);
-        			
-        			if (clearDescription == null) throw new Exception ("EXTRA_DESCRIPTION not set.");
-        			
-        			String category = ch.encrypt(clearCategory);
-        			String description = ch.encrypt(clearDescription);
-        			PassEntry row = dbHelper.fetchPassword(category, description);
-        			if (row.id > 1) {
-        				username = ch.decrypt(row.username);
-        				password = ch.decrypt(row.password);
-        			} else throw new Exception ("Could not find password with given description in category corresponding to calling application.");
-        			outputBody = "username: " + username + " password: " + password;
-
-        			dbHelper.close();
-        			dbHelper = null;
-        			// stashing the return values:
-                	callbackIntent.putExtra(CryptoIntents.EXTRA_USERNAME, username);
-                	callbackIntent.putExtra(CryptoIntents.EXTRA_PASSWORD, password);
+        			callbackIntent = getSetPassword (thisIntent, callbackIntent);
                 	callbackResult = RESULT_OK;
         		} catch (CryptoHelperException e) {
         			Log.e(TAG, e.toString());
@@ -184,6 +148,72 @@ public class FrontDoor extends Activity {
         finish();
 	}
 
+	private Intent getSetPassword (Intent thisIntent, Intent callbackIntent) throws CryptoHelperException, Exception {
+        String action = thisIntent.getAction();
+        //TODO: Consider moving this elsewhere. Maybe DBHelper? Also move strings to resource.
+        DBHelper dbHelper = new DBHelper(this);
+        Log.d(TAG, "GET_or_SET_PASSWORD");
+        String username = null;
+        String password = null;
+        String callingPackage = getCallingPackage();
+        String clearCategory  = thisIntent.getStringExtra (CryptoIntents.EXTRA_CATEGORY);
+        if (clearCategory == null || clearCategory.equals("")) {
+        	clearCategory = callingPackage;
+        }
+        /*TODO: if clearCategory != callingPackage, ask the user if it's permissible:
+         * "Application 'org.syntaxpolice.ServiceTest' wants to access the
+				password for 'opensocial'.
+				[ ] Grant access this time.
+				[ ] Always grant access.
+				[ ] Always grant access to all passwords in org.syntaxpolice.ServiceTest category?
+				[ ] Don't grant access"
+         */
+        if (clearCategory != callingPackage)  throw new Exception ("It is currently not permissible for this application to request passwords from this category.");
+
+        String clearDescription = thisIntent.getStringExtra (CryptoIntents.EXTRA_DESCRIPTION);
+
+        if (clearDescription == null) throw new Exception ("EXTRA_DESCRIPTION not set.");
+
+        String category = ch.encrypt(clearCategory);
+        String description = ch.encrypt(clearDescription);
+
+    	PassEntry row = dbHelper.fetchPassword(category, description);
+        if (action.equals (CryptoIntents.ACTION_GET_PASSWORD)) {
+        	if (row.id > 1) {
+        		username = ch.decrypt(row.username);
+        		password = ch.decrypt(row.password);
+        	} else throw new Exception ("Could not find password with given description in category corresponding to calling application.");
+
+        	// stashing the return values:
+        	callbackIntent.putExtra(CryptoIntents.EXTRA_USERNAME, username);
+        	callbackIntent.putExtra(CryptoIntents.EXTRA_PASSWORD, password);
+        } else if (action.equals (CryptoIntents.ACTION_SET_PASSWORD)) {
+            String clearUsername  = thisIntent.getStringExtra (CryptoIntents.EXTRA_USERNAME);
+            String clearPassword = thisIntent.getStringExtra (CryptoIntents.EXTRA_PASSWORD);
+            if (clearUsername == null || clearPassword == null)
+            		throw new Exception ("EXTRAS USERNAME and PASSWORD must be set.");
+            row.username = ch.encrypt(clearUsername);
+            row.password = ch.encrypt(clearPassword);
+        	if (row.id > 1) { //exists already
+                dbHelper.updatePassword(row.id, row);
+        	} else {// add a new one
+                row.description = description;
+	            row.website = ""; // TODO: Should we send these fields in extras also?
+	            row.note = "";
+
+	            CategoryEntry c = new CategoryEntry();
+	            c.name = category;
+	            row.category =dbHelper.addCategory(c); //doesn't add category if it already exists
+	            dbHelper.addPassword(row);
+        	}
+        }
+        
+        dbHelper.close();
+        dbHelper = null;
+
+        return (callbackIntent);
+	}
+	
 	@Override
 	protected void onPause() {
 		super.onPause();
