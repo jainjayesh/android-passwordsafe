@@ -26,6 +26,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import com.bitsetters.android.passwordsafe.service.ServiceDispatchImpl;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -433,8 +436,7 @@ public class CategoryList extends ListActivity {
 		switch(item.getItemId()) {
 		case LOCK_CATEGORY_INDEX:
 			Intent serviceIntent = new Intent();
-			serviceIntent.setClassName( "com.bitsetters.android.passwordsafe", FrontDoor.SERVICE_NAME );
-			//TODO: Get these strings from a resource?
+			serviceIntent.setClass(this, ServiceDispatchImpl.class );
 		    stopService(serviceIntent);
 			masterKey=null;
 		    Intent frontdoor = new Intent(this, FrontDoor.class);

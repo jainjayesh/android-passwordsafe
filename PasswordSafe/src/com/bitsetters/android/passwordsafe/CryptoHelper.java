@@ -81,7 +81,7 @@ public class CryptoHelper {
     /**
      * Constructor which defaults to a medium encryption level.
      */
-    CryptoHelper() {
+    public CryptoHelper() {
     	initialize(EncryptionMedium);
     }
     /**
@@ -89,7 +89,7 @@ public class CryptoHelper {
      * 
      * @param Strength encryption strength
      */
-    CryptoHelper(int Strength) {
+    public CryptoHelper(int Strength) {
         initialize(Strength);
     }
     /**

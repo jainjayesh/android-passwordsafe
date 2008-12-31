@@ -36,11 +36,11 @@
         <activity class=".Help" android:name="Help" android:label="@string/app_name" />
         <activity class=".ChangePass" android:name="ChangePass" android:label="@string/app_name" />
         <activity class=".Restore" android:name="Restore" android:label="@string/app_name" />
-        <service class=".FrontDoor.ServiceDispatchImpl" android:name="ServiceDispatchImpl"
+        <service class=".service.ServiceDispatchImpl" android:name=".service.ServiceDispatchImpl"
             android:label="@string/app_name"
 			android:permission="com.bitsetters.android.passwordsafe.ACCESS_SERVICE">
             <intent-filter>
-                <action android:name="com.bitsetters.android.passwordsafe.ServiceDispatchImpl" />
+                <action android:name="com.bitsetters.android.passwordsafe.service.ServiceDispatchImpl" />
             </intent-filter> 
         </service>    
     </application> 

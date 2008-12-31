@@ -21,15 +21,17 @@ import org.openintents.intents.CryptoIntents;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
-import com.bitsetters.android.passwordsafe.AskPassword;
 import android.widget.Toast;
+
+import com.bitsetters.android.passwordsafe.service.ServiceDispatch;
+import com.bitsetters.android.passwordsafe.service.ServiceDispatchImpl;
 
 /**
  * FrontDoor Activity
@@ -52,7 +54,7 @@ public class FrontDoor extends Activity {
     private ServiceDispatch service;
     private ServiceDispatchConnection conn;
 
-	public static String SERVICE_NAME = "com.bitsetters.android.passwordsafe.ServiceDispatchImpl";
+	//public static String SERVICE_NAME = "com.bitsetters.android.passwordsafe.ServiceDispatchImpl";
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -253,8 +255,7 @@ public class FrontDoor extends Activity {
 	private void initService() {
 		conn = new ServiceDispatchConnection();
 		Intent i = new Intent();
-		i.setClassName( "com.bitsetters.android.passwordsafe", SERVICE_NAME );
-		//TODO: Get these strings from a resource?
+		i.setClass(this, ServiceDispatchImpl.class);
 		startService(i);
 		bindService( i, conn, Context.BIND_AUTO_CREATE);
 	}

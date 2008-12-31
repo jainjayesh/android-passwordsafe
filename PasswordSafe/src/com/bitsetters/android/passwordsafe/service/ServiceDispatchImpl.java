@@ -15,10 +15,13 @@
  * limitations under the License.
  */
 
-package com.bitsetters.android.passwordsafe;
+package com.bitsetters.android.passwordsafe.service;
 
 // TODO: Currently the timer MIGHT not actually de-activate the service
 // if there are still clients attached.  Should be fixed.
+
+import com.bitsetters.android.passwordsafe.CryptoHelper;
+import com.bitsetters.android.passwordsafe.CryptoHelperException;
 
 import android.app.Service;
 import android.content.Intent;

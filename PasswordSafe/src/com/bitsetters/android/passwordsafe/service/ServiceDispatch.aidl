@@ -1,4 +1,4 @@
-package com.bitsetters.android.passwordsafe;
+package com.bitsetters.android.passwordsafe.service;
 /* $Id: $
  * 
  * Copyright 2008 Isaac Potoczny-Jones
