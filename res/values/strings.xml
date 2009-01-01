@@ -30,6 +30,7 @@
     <string name="password_delete">Delete</string>
     <string name="password">Password</string>
     <string name="passwords">Passwords</string>
+    <string name="master_password">Master Password</string>
     <string name="username">Username</string>
     <string name="website">Website</string>
     <string name="description">Description</string>
