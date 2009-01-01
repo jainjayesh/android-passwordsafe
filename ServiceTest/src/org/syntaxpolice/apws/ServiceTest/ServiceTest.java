@@ -100,14 +100,18 @@ public class ServiceTest extends Activity {
     
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
     	String resultText = "";
-    	if (requestCode == ENCRYPT_REQUEST || requestCode == DECRYPT_REQUEST) {
-    		resultText = data.getStringExtra (CryptoIntents.EXTRA_TEXT);
-    	} else if (requestCode == SET_PASSWORD_REQUEST) {
-    		resultText = "Request to set password sent.";
+    	if (resultCode != RESULT_OK) {
+    		resultText = "An error occured while contacting apws.";
     	} else {
-    		String uname = data.getStringExtra (CryptoIntents.EXTRA_USERNAME);
-    		String pwd = data.getStringExtra (CryptoIntents.EXTRA_PASSWORD);
-    		resultText = uname + ":" + pwd;
+    		if (requestCode == ENCRYPT_REQUEST || requestCode == DECRYPT_REQUEST) {
+    			resultText = data.getStringExtra (CryptoIntents.EXTRA_TEXT);
+    		} else if (requestCode == SET_PASSWORD_REQUEST) {
+    			resultText = "Request to set password sent.";
+    		} else {
+    			String uname = data.getStringExtra (CryptoIntents.EXTRA_USERNAME);
+    			String pwd = data.getStringExtra (CryptoIntents.EXTRA_PASSWORD);
+    			resultText = uname + ":" + pwd;
+    		}
     	}
 		EditText outputText = (EditText) findViewById(R.id.output_entry);
 		outputText.setText(resultText, android.widget.TextView.BufferType.EDITABLE);
