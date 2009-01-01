@@ -55,13 +55,6 @@ public class AskPassword extends Activity {
 	private CryptoHelper ch;
 	private boolean firstTime = false;
 
-	//probably remove these:
-//	public final String ACTION_ENCRYPT = "org.syntaxpolice.crypto.action.ENCRYPT";
-//	public final String ACTION_DECRYPT = "org.syntaxpolice.crypto.action.DECRYPT";
-	
-//	public final String BODY = "org.syntaxpolice.crypto.extras.EXTRA_CRYPTO_BODY";
-//	public final String CALLBACK = "org.syntaxpolice.crypto.extras.EXTRA_CALLBACK";
-	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -108,6 +101,9 @@ public class AskPassword extends Activity {
 
 			public void onClick(View arg0) {
 				PBEKey = pbeKey.getText().toString();
+				// For this version of CryptoHelper, we use the user-entered password.
+				// All other versions should be instantiated with the generated master
+				// password.
 				ch.setPassword(PBEKey);
 
 				// Password must be at least 4 characters
@@ -155,12 +151,11 @@ public class AskPassword extends Activity {
 				}
 
 				Intent callbackIntent = new Intent();
-
-				callbackIntent.putExtra("masterPass", PBEKey);
+				
+				// Return the master key to our caller.  We no longer need the
+				// user-entered PBEKey. The master key is used for everything
+				// from here on out.
 				callbackIntent.putExtra("masterKey", masterKey);
-
-
-				// call-back the callback URL
 				setResult(RESULT_OK, callbackIntent);
 				finish();
 			}
