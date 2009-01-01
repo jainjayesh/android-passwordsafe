@@ -517,6 +517,28 @@ public class DBHelper {
 	}
 
 	/**
+	 * Only update the category field of the password entry.
+	 * 
+	 * @param Id the id of the password entry
+	 * @param newCategoryId the updated category id
+	 */
+	public void updatePasswordCategory(long Id, long newCategoryId) {
+		if (Id<0 || newCategoryId<0) {
+			//make sure values appear valid
+			return;
+		}
+	    ContentValues args = new ContentValues();
+	    args.put("category", newCategoryId);
+	    
+	    try {
+			db.update(TABLE_PASSWORDS, args, "id=" + Id, null);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+	}
+
+	/**
 	 * Begin a transaction on an open database.
 	 * 
 	 * @return true if successful

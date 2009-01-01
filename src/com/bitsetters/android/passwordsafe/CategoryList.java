@@ -106,7 +106,7 @@ public class CategoryList extends ListActivity {
 
     private static String masterKey;			
 
-    private List<CategoryEntry> rows;
+    private static List<CategoryEntry> rows;
     
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -438,9 +438,7 @@ public class CategoryList extends ListActivity {
 		    finish();
 			break;
 		case OPEN_CATEGORY_INDEX:
-			Intent passList = new Intent(this, PassList.class);
-			passList.putExtra(KEY_ID, rows.get(info.position).id);
-			startActivityForResult(passList,REQUEST_OPEN_CATEGORY);
+			launchPassList(rows.get(info.position).id);
 			break;
 		case EDIT_CATEGORY_INDEX:
 			Intent i = new Intent(this, CategoryEdit.class);
@@ -490,6 +488,12 @@ public class CategoryList extends ListActivity {
 		return super.onOptionsItemSelected(item);
     }
 
+    private void launchPassList(long id) {
+    	Intent passList = new Intent(this, PassList.class);
+		passList.putExtra(KEY_ID, id);
+		startActivityForResult(passList,REQUEST_OPEN_CATEGORY);
+    }
+
     private String backupDatabase() {
     	Backup backup=new Backup(this);
     	
@@ -533,9 +537,7 @@ public class CategoryList extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 	
-		Intent i = new Intent(this, PassList.class);
-		i.putExtra(KEY_ID, rows.get(position).id);
-	    startActivityForResult(i,REQUEST_OPEN_CATEGORY);
+		launchPassList(rows.get(position).id);
     }
 
     @Override
@@ -762,7 +764,7 @@ public class CategoryList extends ListActivity {
 		    }
 //		    Log.i(TAG,"first line is valid");
 		    
-		    HashMap<String, Long> categoryToId=getCategoryToId();
+		    HashMap<String, Long> categoryToId=getCategoryToId(dbHelper);
 		    //
 		    // take a pass through the CSV and collect any new Categories
 		    //
@@ -807,7 +809,7 @@ public class CategoryList extends ListActivity {
 		    }
 		    reader.close();
 
-		    categoryToId=getCategoryToId();	// re-read the categories to get id's of new categories
+		    categoryToId=getCategoryToId(dbHelper);	// re-read the categories to get id's of new categories
 		    //
 		    // read the whole file again to import the actual fields
 		    //
@@ -902,11 +904,9 @@ public class CategoryList extends ListActivity {
 		}
 	}
 
-	public HashMap<String, Long> getCategoryToId()
+	public static HashMap<String, Long> getCategoryToId(DBHelper dbHelper)
 	{
-		if (ch == null){
-			ch = new CryptoHelper();
-		}
+		CryptoHelper ch = new CryptoHelper();
 		if(masterKey == null) {
 		    masterKey = "";
 		}
