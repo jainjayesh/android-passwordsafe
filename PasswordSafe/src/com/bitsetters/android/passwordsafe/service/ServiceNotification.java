@@ -5,9 +5,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 
 import com.bitsetters.android.passwordsafe.FrontDoor;
 import com.bitsetters.android.passwordsafe.R;
@@ -44,7 +41,7 @@ public class ServiceNotification {
 		NotificationManager nm = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 	
-		String text = "Logged in";
+		String text = "Master Key Logged in";
 
 		Notification notification = new Notification(
 				R.drawable.passicon, null, System

@@ -191,8 +191,8 @@ public class FrontDoor extends Activity {
         } else if (action.equals (CryptoIntents.ACTION_SET_PASSWORD)) {
             String clearUsername  = thisIntent.getStringExtra (CryptoIntents.EXTRA_USERNAME);
             String clearPassword = thisIntent.getStringExtra (CryptoIntents.EXTRA_PASSWORD);
-            if (clearUsername == null || clearPassword == null) {
-            		throw new Exception ("EXTRAS USERNAME and PASSWORD must be set.");
+            if (clearPassword == null) {
+            		throw new Exception ("PASSWORD extra must be set.");
             }  
             row.username = ch.encrypt(clearUsername);
             row.password = ch.encrypt(clearPassword);
@@ -204,7 +204,10 @@ public class FrontDoor extends Activity {
         		}
         	} else {// add a new one
                 row.description = description;
-	            row.website = ""; // TODO: Should we send these fields in extras also?
+                // TODO: Should we send these fields in extras also?  If so, probably not using 
+                // the openintents namespace?  If another application were to implement a keystore
+                // they might not want to use these.
+	            row.website = ""; 
 	            row.note = "";
 
 	            CategoryEntry c = new CategoryEntry();
@@ -253,7 +256,10 @@ public class FrontDoor extends Activity {
 
 	//--------------------------- service stuff ------------
 	private void initService() {
-		conn = new ServiceDispatchConnection();
+
+        String action = getIntent().getAction();
+        boolean isLocal = action == null || action.equals(Intent.ACTION_MAIN);
+		conn = new ServiceDispatchConnection(isLocal);
 		Intent i = new Intent();
 		i.setClass(this, ServiceDispatchImpl.class);
 		startService(i);
@@ -269,6 +275,10 @@ public class FrontDoor extends Activity {
 
 	class ServiceDispatchConnection implements ServiceConnection
 	{
+		boolean askPassIsLocal = false;
+		public ServiceDispatchConnection (Boolean isLocal) {
+			askPassIsLocal = isLocal;
+		}
 		public void onServiceConnected(ComponentName className, 
 				IBinder boundService )
 		{
@@ -283,6 +293,7 @@ public class FrontDoor extends Activity {
 					String inputBody = thisIntent.getStringExtra (CryptoIntents.EXTRA_TEXT);
 
 					askPass.putExtra (CryptoIntents.EXTRA_TEXT, inputBody);
+					askPass.putExtra (AskPassword.EXTRA_IS_LOCAL, askPassIsLocal);
 					//TODO: Is there a way to make sure all the extras are set?	
 					startActivityForResult (askPass, 0);
 

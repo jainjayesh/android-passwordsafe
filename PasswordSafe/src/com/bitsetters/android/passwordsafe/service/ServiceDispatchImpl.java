@@ -114,11 +114,6 @@ public class ServiceDispatchImpl extends Service {
 			masterKey = masterKeyIn;
 			
 			ServiceNotification.setNotification(ServiceDispatchImpl.this);
-			
-			Toast.makeText(ServiceDispatchImpl.this,
-  					"Service started with master key.",
-    				Toast.LENGTH_SHORT).show();
-			
     	}
 
 		@Override

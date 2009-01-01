@@ -42,7 +42,7 @@ public class CryptoIntents {
 	 * Activity Action: Get the password corresponding to the category of the
 	 * calling application, and the EXTRA_DESCRIPTION, as provided.
 	 * Returns the decrypted username & password in the extras EXTRA_USERNAME and
-	 * EXTRA_PASSWORD.
+	 * EXTRA_PASSWORD. CATEGORY is an optional parameter.
 	 * 
 	 * <p>Constant Value: "org.openintents.action.GET_PASSWORD"</p>
 	 */
@@ -51,7 +51,7 @@ public class CryptoIntents {
 	/**
 	 * Activity Action: Set the password corresponding to the category of the
 	 * calling application, and the EXTRA_DESCRIPTION, EXTRA_USERNAME and
-	 * EXTRA_PASSWORD as provided.
+	 * EXTRA_PASSWORD as provided. CATEGORY is an optional parameter.
 	 * 
 	 * If both username and password are the non-null empty string, delete this
 	 * password entry.
@@ -86,7 +86,7 @@ public class CryptoIntents {
 	public static final String EXTRA_CATEGORY = "org.openintents.extra.CATEGORY";
 
 	/**
-	 * Output parameter from GET_PASSWORD and input parameter to SET_PASSWORD.
+	 * Output parameter from GET_PASSWORD and optional input parameter to SET_PASSWORD.
 	 * Corresponds to the decrypted "username" field in passwordsafe.
 	 * 
 	 * <p>Constant Value: "org.openintents.extra.USERNAME"</p>
@@ -94,7 +94,7 @@ public class CryptoIntents {
 	public static final String EXTRA_USERNAME = "org.openintents.extra.USERNAME";
 	
 	/**
-	 * Output parameter from GET_PASSWORD and input parameter to SET_PASSWORD.
+	 * Output parameter from GET_PASSWORD and _required_ input parameter to SET_PASSWORD.
 	 * Corresponds to the decrypted "password" field in passwordsafe.
 	 * 
 	 * <p>Constant Value: "org.openintents.extra.PASSWORD"</p>

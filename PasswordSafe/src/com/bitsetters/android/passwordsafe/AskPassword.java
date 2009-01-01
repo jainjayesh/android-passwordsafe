@@ -44,11 +44,13 @@ public class AskPassword extends Activity {
 
 	private boolean debug = false;
 	private static String TAG = "AskPassword";
+	public static String EXTRA_IS_LOCAL = "com.bitsetters.android.passwordsafe.EXTRA_IS_REMOTE";
 
 	private EditText pbeKey;
 	private DBHelper dbHelper;
 	private TextView introText;
 	private TextView confirmText;
+	private TextView remoteAsk;
 	private EditText confirmPass;
 	private String PBEKey;
 	private String masterKey;
@@ -59,7 +61,10 @@ public class AskPassword extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-
+		Intent thisIntent = getIntent();
+		
+		boolean isLocal = thisIntent.getBooleanExtra (EXTRA_IS_LOCAL, false);
+			
 		if (debug)
 			Log.d(TAG, "onCreate()");
 
@@ -85,6 +90,7 @@ public class AskPassword extends Activity {
 
 		pbeKey = (EditText) findViewById(R.id.password);
 		introText = (TextView) findViewById(R.id.first_time);
+		remoteAsk = (TextView) findViewById(R.id.remote);
 		confirmPass = (EditText) findViewById(R.id.pass_confirm);
 		confirmText = (TextView) findViewById(R.id.confirm_lbl);
 		masterKey = dbHelper.fetchMasterKey();
@@ -94,7 +100,9 @@ public class AskPassword extends Activity {
 			confirmText.setVisibility(View.VISIBLE);
 			confirmPass.setVisibility(View.VISIBLE);
 		}
-
+		if (! isLocal) {
+			remoteAsk.setVisibility(View.VISIBLE);
+		}
 		Button continueButton = (Button) findViewById(R.id.continue_button);
 
 		continueButton.setOnClickListener(new View.OnClickListener() {
@@ -120,6 +128,8 @@ public class AskPassword extends Activity {
 				// If it's the user's first time to enter a password,
 				// we have to store it in the database. We are going to
 				// store an encrypted hash of the password.
+				// Generate a master key, encrypt that with the pbekey
+				// and store the encrypted master key in database.
 				if (firstTime) {
 
 					// Make sure password and confirm fields match
