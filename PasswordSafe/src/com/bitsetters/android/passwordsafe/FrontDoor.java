@@ -101,31 +101,11 @@ public class FrontDoor extends Activity {
         			CategoryList.class);
         	startActivity(i);
         } else {
-        	// get the body text out of the extras. we'll encrypt or decrypt this.
-        	String inputBody = thisIntent.getStringExtra (CryptoIntents.EXTRA_TEXT);
-        	String outputBody = "";
         	// which action?
         	if (action.equals (CryptoIntents.ACTION_ENCRYPT)) {
-        		try {
-        			outputBody = ch.encrypt (inputBody);
-                	callbackResult = RESULT_OK;
-                	// stash the encrypted/decrypted text in the extra
-                	callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT, outputBody);
-        		} catch (CryptoHelperException e) {
-        			Log.e(TAG, e.toString());
-        		}  catch (NullPointerException e) {
-        			if (debug) Log.e(TAG, e.toString() + "ch: " + ch + " inputBody: " + inputBody );
-        			
-        		}
+        		callbackResult = encryptIntent(thisIntent, callbackIntent);
         	} else if (action.equals (CryptoIntents.ACTION_DECRYPT)) {
-        		try {
-        			outputBody = ch.decrypt (inputBody);
-                	callbackResult = RESULT_OK;
-                	// stash the encrypted/decrypted text in the extra
-                	callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT, outputBody);
-        		} catch (CryptoHelperException e) {
-        			Log.e(TAG, e.toString());
-        		}
+        		callbackResult = decryptIntent(thisIntent, callbackIntent);
         	} else if (action.equals (CryptoIntents.ACTION_GET_PASSWORD)
         			|| action.equals (CryptoIntents.ACTION_SET_PASSWORD)) {
         		try {
@@ -149,6 +129,82 @@ public class FrontDoor extends Activity {
         finish();
 	}
 
+
+	/**
+	 * Encrypt all supported fields in the intent and return the result in callbackIntent.
+	 * 
+	 * @param thisIntent
+	 * @param callbackIntent
+	 * @return callbackResult
+	 */
+	private int encryptIntent(final Intent thisIntent, Intent callbackIntent) {
+		int callbackResult = RESULT_CANCELED;
+		try {
+			if (thisIntent.hasExtra(CryptoIntents.EXTRA_TEXT)) {
+				// get the body text out of the extras.
+				String inputBody = thisIntent.getStringExtra (CryptoIntents.EXTRA_TEXT);
+				String outputBody = "";
+				outputBody = ch.encrypt (inputBody);
+				// stash the encrypted text in the extra
+				callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT, outputBody);
+			}
+			
+			if (thisIntent.hasExtra(CryptoIntents.EXTRA_TEXT_ARRAY)) {
+				String[] in = thisIntent.getStringArrayExtra(CryptoIntents.EXTRA_TEXT_ARRAY);
+				String[] out = new String[in.length];
+				for (int i = 0; i < in.length; i++) {
+					out[i] = ch.encrypt(in[i]);
+				}
+				callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT_ARRAY, out);
+			}
+			
+			// Support for binary fields could be added here (like images?)
+			
+			callbackResult = RESULT_OK;
+		} catch (CryptoHelperException e) {
+			Log.e(TAG, e.toString());
+		}
+		return callbackResult;
+	}
+
+	/**
+	 * Decrypt all supported fields in the intent and return the result in callbackIntent.
+	 * 
+	 * @param thisIntent
+	 * @param callbackIntent
+	 * @return callbackResult
+	 */
+	private int decryptIntent(final Intent thisIntent, Intent callbackIntent) {
+    	int callbackResult = RESULT_CANCELED;
+		try {
+
+			if (thisIntent.hasExtra(CryptoIntents.EXTRA_TEXT)) {
+				// get the body text out of the extras.
+				String inputBody = thisIntent.getStringExtra (CryptoIntents.EXTRA_TEXT);
+				String outputBody = "";
+				outputBody = ch.decrypt (inputBody);
+				// stash the encrypted text in the extra
+				callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT, outputBody);
+			}
+			
+			if (thisIntent.hasExtra(CryptoIntents.EXTRA_TEXT_ARRAY)) {
+				String[] in = thisIntent.getStringArrayExtra(CryptoIntents.EXTRA_TEXT_ARRAY);
+				String[] out = new String[in.length];
+				for (int i = 0; i < in.length; i++) {
+					out[i] = ch.decrypt(in[i]);
+				}
+				callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT_ARRAY, out);
+			}
+			
+			// Support for binary fields could be added here (like images?)
+			
+			callbackResult = RESULT_OK;
+		} catch (CryptoHelperException e) {
+			Log.e(TAG, e.toString());
+		}
+		return callbackResult;
+	}
+	
 	private Intent getSetPassword (Intent thisIntent, Intent callbackIntent) throws CryptoHelperException, Exception {
         String action = thisIntent.getAction();
         //TODO: Consider moving this elsewhere. Maybe DBHelper? Also move strings to resource.

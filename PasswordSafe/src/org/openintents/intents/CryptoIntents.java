@@ -15,6 +15,10 @@
  */
 package org.openintents.intents;
 
+// Keeping version information in this file is important, because it has to be
+// copied between various projects and repositories manually.
+//
+// Version: 2009 Jan 2: added EXTRA_TEXT_ARRAY
 
 /**
  * @author Isaac Potoczny-Jones
@@ -23,16 +27,18 @@ package org.openintents.intents;
 public class CryptoIntents {
 
 	/**
-	 * Activity Action: Encrypt the string given in the extra TEXT.
-	 * Returns the encrypted string in the extra TEXT.
+	 * Activity Action: Encrypt all strings given in the extra(s) EXTRA_TEXT or
+	 * EXTRA_TEXT_ARRAY.
+	 * Returns all encrypted string in the same extra(s).
 	 * 
 	 * <p>Constant Value: "org.openintents.action.ENCRYPT"</p>
 	 */
 	public static final String ACTION_ENCRYPT = "org.openintents.action.ENCRYPT";
 
 	/**
-	 * Activity Action: Decrypt the string given in the extra TEXT.
-	 * Returns the decrypted string in the extra TEXT.
+	 * Activity Action: Decrypt all strings given in the extra TEXT or
+	 * EXTRA_TEXT_ARRAY.
+	 * Returns all decrypted string in the same extra(s).
 	 * 
 	 * <p>Constant Value: "org.openintents.action.DECRYPT"</p>
 	 */
@@ -65,6 +71,14 @@ public class CryptoIntents {
 	 * <p>Constant Value: "org.openintents.extra.TEXT"</p>
 	 */
 	public static final String EXTRA_TEXT = "org.openintents.extra.TEXT";
+	
+	/**
+	 * An array of text to encrypt or decrypt, or the location for the return result.
+	 * Use this to encrypt several strings at once.
+	 * 
+	 * <p>Constant Value: "org.openintents.extra.TEXT_ARRAY"</p>
+	 */
+	public static final String EXTRA_TEXT_ARRAY = "org.openintents.extra.TEXT_ARRAY";
 	
 	/**
 	 * Required input parameter to GET_PASSWORD and SET_PASSWORD. Corresponds to the "description"
