@@ -6,7 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
-import com.bitsetters.android.passwordsafe.FrontDoor;
+import com.bitsetters.android.passwordsafe.LogOffActivity;
 import com.bitsetters.android.passwordsafe.R;
 
 public class ServiceNotification {
@@ -48,12 +48,7 @@ public class ServiceNotification {
 						.currentTimeMillis());
 		notification.flags = Notification.FLAG_ONGOING_EVENT;
 
-		// TODO: Launch a new Activity with a big button to log out.
-		Intent intent = new Intent(context, FrontDoor.class);
-		
-		
-		intent.addCategory(Intent.CATEGORY_LAUNCHER);
-		intent.setAction(Intent.ACTION_MAIN);
+		Intent intent = new Intent(context, LogOffActivity.class);
 		PendingIntent pi = PendingIntent.getActivity(context, 0,
 				intent, PendingIntent.FLAG_CANCEL_CURRENT);				
 		// Set the info for the views that show in the notification
