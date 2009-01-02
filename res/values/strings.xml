@@ -54,6 +54,7 @@
 	<string name="export_success">Export to 'passwordsafe.csv' successful.   Warning!   The file is not encrypted.</string>
 	<string name="export_file_error">Unable to create export file 'passwordsafe.csv' on SDCARD.  You might try disconnecting USB from computer.</string>
 	<string name="import_database">Import Database</string>
+	<string name="import_file_missing">Import file is missing:</string>
 	<string name="import_file_error">Unable to import file 'passwordsafe.csv' from SDCARD.  You might try disconnecting USB from computer.</string>
 	<string name="import_error_first_line">First line is missing fields.</string>
 	<string name="dialog_import_title">Import</string>
@@ -71,6 +72,8 @@
 	<string name="dialog_delete_database_msg">Are you really sure you want to delete the database?  This cannot be undone.</string>
 	<string name="added">Added</string>
 	<string name="entries">entries</string>
+	<string name="import_complete">Import complete</string>
+	<string name="import_delete_csv">Since it is not secure to keep passwords in clear text CSV files, would you like to delete</string>
 	<string name="edit_entry">Edit Entry</string>
 	<string name="help">Help</string>
 	<string name="close">Close</string>

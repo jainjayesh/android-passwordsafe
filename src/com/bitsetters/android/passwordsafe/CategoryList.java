@@ -16,6 +16,7 @@
  */
 package com.bitsetters.android.passwordsafe;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -132,6 +133,26 @@ public class CategoryList extends ListActivity {
              			Toast.makeText(CategoryList.this, importMessage,
              				Toast.LENGTH_LONG).show();
              		}
+
+             		String deleteMsg=getString(R.string.import_delete_csv) +
+             			" " + EXPORT_FILENAME + "?";
+             		Dialog about = new AlertDialog.Builder(CategoryList.this)
+        			.setIcon(R.drawable.passicon)
+        			.setTitle(R.string.import_complete)
+        			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+        				public void onClick(DialogInterface dialog, int whichButton) {
+        					File csvFile=new File(EXPORT_FILENAME);
+        					csvFile.delete();
+        				}
+        			})
+        			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+        				public void onClick(DialogInterface dialog, int whichButton) {
+        				}
+        			}) 
+        			.setMessage(deleteMsg)
+        			.create();
+        		about.show();
+
              		if ((importedEntries!=0) || (importDeletedDatabase))
              		{
              			fillData();
@@ -690,6 +711,14 @@ public class CategoryList extends ListActivity {
 	}
 		
 	public void importDatabase(){
+		File csvFile=new File(EXPORT_FILENAME);
+		if (!csvFile.exists()) {
+			String msg=getString(R.string.import_file_missing) + " " +
+				EXPORT_FILENAME;
+	        Toast.makeText(CategoryList.this, msg,
+	                Toast.LENGTH_LONG).show();
+			return;
+		}
 		Dialog about = new AlertDialog.Builder(this)
 			.setIcon(R.drawable.passicon)
 			.setTitle(R.string.dialog_import_title)
