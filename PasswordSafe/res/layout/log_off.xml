@@ -48,6 +48,24 @@
         android:layout_below="@id/logoff_table"
 		android:layout_height="wrap_content" />
 
+	<LinearLayout android:layout_below="@id/logoff_explanation"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+		<Button android:id="@+id/logoff_button" 
+		  	android:text="Lock"
+			android:layout_width="0dip"
+			android:layout_weight="1"
+			android:layout_height="wrap_content" />
+			
+	    <Button android:id="@+id/goto_pws" 
+		  	android:text="Open Password Safe"
+			android:layout_width="0dip"
+			android:layout_weight="1"
+			android:layout_height="wrap_content" />	
+	</LinearLayout>
+	
+	<!-- 
 	<Button android:id="@+id/logoff_button" 
 	  	android:text="Lock"
         android:layout_below="@id/logoff_explanation"
@@ -60,4 +78,5 @@
         android:layout_toRightOf="@id/logoff_button"
         android:layout_alignTop="@id/logoff_button"
 		android:layout_height="wrap_content" />	
+	 -->
 </RelativeLayout>	

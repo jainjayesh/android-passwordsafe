@@ -33,11 +33,13 @@ public class LogOffActivity extends Activity {
 					serviceIntent.setClass(LogOffActivity.this, ServiceDispatchImpl.class );
 					stopService(serviceIntent);
 					
+					/*
 					Intent intent = new Intent(LogOffActivity.this, FrontDoor.class);
 	    			//intent.setClass (LogOffActivity.this, FrontDoor.class );
 	    			intent.addCategory(Intent.CATEGORY_LAUNCHER);
 	    			intent.setAction(Intent.ACTION_MAIN);
 	    			startActivity(intent);
+	    			*/
 					finish();
 				}});	        
 	        
@@ -48,6 +50,7 @@ public class LogOffActivity extends Activity {
 	    			intent.addCategory(Intent.CATEGORY_LAUNCHER);
 	    			intent.setAction(Intent.ACTION_MAIN);
 	    			startActivity(intent);
+	    			finish();
 	    		}});
 	   }
 }
