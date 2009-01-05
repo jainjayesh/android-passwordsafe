@@ -82,22 +82,12 @@ public class CryptoIntents {
 	
 	/**
 	 * Required input parameter to GET_PASSWORD and SET_PASSWORD. Corresponds to the "description"
-	 * field in passwordsafe. Should be a descriptive name for the password you're using,
-	 * and will already be specific to your application.
+	 * field in passwordsafe. Should be a unique name for the password you're using,
+	 * and will already be specific to your application, ie "org.syntaxpolice.opensocial"
 	 * 
-	 * <p>Constant Value: "org.openintents.extra.DESCRIPTION"</p>
+	 * <p>Constant Value: "org.openintents.extra.UNIQUE_NAME"</p>
 	 */
-	public static final String EXTRA_DESCRIPTION = "org.openintents.extra.DESCRIPTION";
-	
-	/**
-	 * Optional input parameter to GET_PASSWORD and SET_PASSWORD. Corresponds to the "category"
-	 * field in passwordsafe. If null, will be assumed to be the fully-qualified package
-	 * name of your application. If non-null (and not == the package name) the user should
-	 * be asked whether it's permissable to get or set this password.
-	 * 
-	 * <p>Constant Value: "org.openintents.extra.CATEGORY"</p>
-	 */
-	public static final String EXTRA_CATEGORY = "org.openintents.extra.CATEGORY";
+	public static final String EXTRA_UNIQUE_NAME = "org.openintents.extra.UNIQUE_NAME";
 
 	/**
 	 * Output parameter from GET_PASSWORD and optional input parameter to SET_PASSWORD.

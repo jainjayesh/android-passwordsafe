@@ -77,15 +77,15 @@ public class ServiceTest extends Activity {
     	} else if (request == DECRYPT_REQUEST) {
             i.setAction(CryptoIntents.ACTION_DECRYPT);
     	} else if (request == GET_PASSWORD_REQUEST) {
-    		i.putExtra(CryptoIntents.EXTRA_DESCRIPTION, inputStr);
+    		i.putExtra(CryptoIntents.EXTRA_UNIQUE_NAME, inputStr);
     		i.setAction (CryptoIntents.ACTION_GET_PASSWORD);
     	} else if (request == SET_PASSWORD_REQUEST) {
-    		String descriptionStr = ((EditText) findViewById(R.id.description_entry)).getText().toString();
+    		String uniqueNameStr = ((EditText) findViewById(R.id.unique_name_entry)).getText().toString();
     		String passwordStr = ((EditText) findViewById(R.id.password_entry)).getText().toString();
     		String usernameStr = ((EditText) findViewById(R.id.username_entry)).getText().toString();
 
 
-    		i.putExtra(CryptoIntents.EXTRA_DESCRIPTION, descriptionStr);
+    		i.putExtra(CryptoIntents.EXTRA_UNIQUE_NAME, uniqueNameStr);
     		i.putExtra(CryptoIntents.EXTRA_PASSWORD, passwordStr);
     		i.putExtra(CryptoIntents.EXTRA_USERNAME, usernameStr);
 

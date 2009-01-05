@@ -186,6 +186,9 @@ public class PassEdit extends Activity {
 		if (RowId == null || RowId == -1) {
 			dbHelper.addPassword(entry);
 		} else {
+			PassEntry storedEntry = dbHelper.fetchPassword (RowId);
+			//update fields that aren't set in the UI:
+			entry.uniqueName = storedEntry.uniqueName;
 			dbHelper.updatePassword(RowId, entry);
 		}
 	}

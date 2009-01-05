@@ -17,6 +17,7 @@
 package com.bitsetters.android.passwordsafe;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
@@ -42,7 +43,8 @@ public class DBHelper {
     private static final String TABLE_CATEGORIES = "categories";
     private static final String TABLE_VERIFY = "verify_crypto";
     private static final String TABLE_MASTER_KEY = "master_key";
-    private static final int DATABASE_VERSION = 3;
+    private static final String TABLE_PACKAGE_ACCESS = "package_access";
+    private static final int DATABASE_VERSION = 4;
     private static String TAG = "DBHelper";
     Context myCtx;
 
@@ -59,10 +61,19 @@ public class DBHelper {
             + "username text, "
             + "website text, "
             + "note text, "
+            + "unique_name text, " //might be null
             + "lastdatetimeedit text);";
-
+    
     private static final String PASSWORDS_DROP =
     	"drop table " + TABLE_PASSWORDS + ";";
+
+    private static final String PACKAGE_ACCESS_CREATE =
+        "create table " + TABLE_PACKAGE_ACCESS + " ("
+    	    + "id integer not null, "
+            + "package text not null);";
+
+    private static final String PACKAGE_ACCESS_DROP =
+    	"drop table " + TABLE_PACKAGE_ACCESS + ";";
 
     private static final String CATEGORIES_CREATE =
         "create table " + TABLE_CATEGORIES + " ("
@@ -134,6 +145,7 @@ public class DBHelper {
 			needsPrePopulation=true;
 			
 			db.execSQL(PASSWORDS_CREATE);
+			db.execSQL(PACKAGE_ACCESS_CREATE);
 			db.execSQL(MASTER_KEY_CREATE);
 		} catch (SQLException e)
 		{
@@ -149,6 +161,9 @@ public class DBHelper {
 
 			db.execSQL(CATEGORIES_DROP);
 			db.execSQL(CATEGORIES_CREATE);
+			
+			db.execSQL(PACKAGE_ACCESS_DROP);
+			db.execSQL(PACKAGE_ACCESS_CREATE);
         } catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
@@ -406,11 +421,11 @@ public class DBHelper {
 	        if (CategoryId==0)
 	        {
 		        c = db.query(TABLE_PASSWORDS, new String[] {
-	                "id", "password", "description", "username", "website", "note", "category"},
+	                "id", "password", "description", "username", "website", "note", "category", "unique_name"},
 	                null, null, null, null, null);
 	        } else {
 		        c = db.query(TABLE_PASSWORDS, new String[] {
-		                "id", "password", "description", "username", "website", "note", "category"},
+		                "id", "password", "description", "username", "website", "note", "category", "unique_name"},
 		                "category="+CategoryId, null, null, null, null);
 	        }
 	        int numRows = c.getCount();
@@ -426,6 +441,7 @@ public class DBHelper {
 	            row.note = c.getString(5);
 	            
 	            row.category = c.getLong(6);
+	            row.uniqueName = c.getString(7);
 	            
 	            ret.add(row);
 	            c.moveToNext();
@@ -449,7 +465,7 @@ public class DBHelper {
 	        Cursor c =
 	            db.query(true, TABLE_PASSWORDS, new String[] {
 	                "id", "password", "description", "username", "website",
-	                "note", "category"}, "id=" + Id, null, null, null, null, null);
+	                "note", "category, unique_name"}, "id=" + Id, null, null, null, null, null);
 	        if (c.getCount() > 0) {
 	            c.moveToFirst();
 	            row.id = c.getLong(0);
@@ -461,6 +477,7 @@ public class DBHelper {
 	            row.note = c.getString(5);
 	            
 	            row.category = c.getLong(6);
+	            row.uniqueName = c.getString(7);
 	        } else {
 	            row.id = -1;
 	            row.description = row.password = null;
@@ -473,41 +490,72 @@ public class DBHelper {
 	    return row;
 	}
 	
-	public PassEntry fetchPassword(String category, String description) {
+	public PassEntry fetchPassword(String uniqueName) {
 	    PassEntry row = new PassEntry();
 		row.id = -1;
 		row.description = row.password = null;
-	    try {
+		try {
 	        Cursor c =
-	            db.query(true, TABLE_CATEGORIES, new String[] {
-	                "id", "name"}, "name='" + category + "'" , null, null, null, null, null);
-	        if (c.getCount() > 0) {
-	        	c.moveToFirst();
-	        	long categoryId = c.getLong(0);
-	        	c.close();
-	        	c = db.query(true, TABLE_PASSWORDS, new String[] {
-	        				"id", "password", "description", "username", "website",
-	        				"note", "category"}, "category=" + categoryId + " and description='" + description + "'",
-	        				null, null, null, null, null);
-	        	if (c.getCount() > 0) {
-	        		c.moveToFirst();
-	        		row.id = c.getLong(0);
+	        	db.query(true, TABLE_PASSWORDS, new String[] {
+					"id", "password", "description", "username", "website",
+					"note", "category", "unique_name"}, "unique_name='" + uniqueName + "'",
+					null, null, null, null, null);
+			if (c.getCount() > 0) {
+				c.moveToFirst();
+				row.id = c.getLong(0);
 
-	        		row.password = c.getString(1);
-	        		row.description = c.getString(2);
-	        		row.username = c.getString(3);
-	        		row.website = c.getString(4);
-	        		row.note = c.getString(5);
+				row.password = c.getString(1);
+				row.description = c.getString(2);
+				row.username = c.getString(3);
+				row.website = c.getString(4);
+				row.note = c.getString(5);
 
-	        		row.category = c.getLong(6);
-	        	}
-	        	c.close();
-	        }
-	    } catch (SQLException e)
+				row.category = c.getLong(6);
+	            row.uniqueName = c.getString(7);
+			}
+			c.close();
+		} catch (SQLException e)
 	    {
 	    	Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
 	    }
 	    return row;
+	}
+	
+	
+	public ArrayList<String> fetchPackageAccess (long passwordID) {
+		ArrayList <String> pkgs = new ArrayList<String>();
+		Cursor c = null;
+		try {
+			c =
+				db.query(true, TABLE_PACKAGE_ACCESS, new String[] {
+				"package"}, "id=" + passwordID,
+				null, null, null, null, null);
+			if (c.getCount() > 0) {
+				c.moveToFirst();
+				while (! c.isAfterLast()) {
+					pkgs.add(c.getString(0));
+					c.moveToNext();
+				}
+			}
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		} finally {
+			if (c != null) c.close();
+		}
+
+		return pkgs;
+	}
+	
+	public void addPackageAccess (long passwordID, String packageToAdd) {
+		ContentValues packageAccessValues = new ContentValues ();
+		packageAccessValues.put("id", passwordID);
+		packageAccessValues.put("package", packageToAdd);
+		try {
+			db.insert(TABLE_PACKAGE_ACCESS, null, packageAccessValues);
+		} catch (SQLException e) {
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
 	}
 	
 	/**
@@ -516,13 +564,13 @@ public class DBHelper {
 	 * @param entry
 	 */
 	public void updatePassword(long Id, PassEntry entry) {
-	    ContentValues args = new ContentValues();
+	    ContentValues args = new ContentValues();	    
 	    args.put("description", entry.description);
 	    args.put("username", entry.username);
 	    args.put("password", entry.password);
 	    args.put("website", entry.website);
 	    args.put("note", entry.note);
-	    
+	    args.put("unique_name", entry.uniqueName);
 	    try {
 			db.update(TABLE_PASSWORDS, args, "id=" + Id, null);
 		} catch (SQLException e)
@@ -535,7 +583,8 @@ public class DBHelper {
 	 * 
 	 * @param entry
 	 */
-	public void addPassword(PassEntry entry) {
+	public long addPassword(PassEntry entry) {
+		long id = -1;
 	    ContentValues initialValues = new ContentValues();
 		initialValues.put("category", entry.category);
 		initialValues.put("password", entry.password);
@@ -543,13 +592,15 @@ public class DBHelper {
 	    initialValues.put("username",entry.username);
 	    initialValues.put("website", entry.website);
 	    initialValues.put("note", entry.note);
-	
+	    initialValues.put("unique_name", entry.uniqueName);
+
 	    try {
-	        db.insert(TABLE_PASSWORDS, null, initialValues);
+	        id = db.insert(TABLE_PASSWORDS, null, initialValues);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
 		}
+		return (id);
 	}
 	
 	/**
@@ -559,6 +610,7 @@ public class DBHelper {
 	public void deletePassword(long Id) {
 	    try {
 			db.delete(TABLE_PASSWORDS, "id=" + Id, null);
+			db.delete(TABLE_PACKAGE_ACCESS, "id=" + Id, null);
 		} catch (SQLException e)
 		{
 			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());

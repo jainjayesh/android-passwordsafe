@@ -16,6 +16,8 @@
  */
 package com.bitsetters.android.passwordsafe;
 
+import java.util.ArrayList;
+
 /**
  * 
  * @author Steven Osborn - http://steven.bitsetters.com
@@ -28,10 +30,16 @@ public class PassEntry extends Object {
     public String description;
     public String username;
     public String website;
+    public String uniqueName;
+   // public ArrayList<String> packageAccess;
     public String note;
     public String plainPassword;
     public String plainDescription;
     public String plainUsername;
     public String plainWebsite;
     public String plainNote;
+    
+    public static boolean checkPackageAccess (ArrayList<String> packageAccess, String packageName) {
+    	return (packageAccess.contains(packageName));
+    }
 }
