@@ -20,6 +20,8 @@ package com.bitsetters.android.passwordsafe.service;
 // TODO: Currently the timer MIGHT not actually de-activate the service
 // if there are still clients attached.  Should be fixed.
 
+import org.openintents.intents.CryptoIntents;
+
 import com.bitsetters.android.passwordsafe.CryptoHelper;
 import com.bitsetters.android.passwordsafe.CryptoHelperException;
 
@@ -56,6 +58,10 @@ public class ServiceDispatchImpl extends Service {
 	  masterKey = null;
 	  ch = null;
 	  ServiceNotification.clearNotification(ServiceDispatchImpl.this);
+	  
+	  Intent intent = new Intent(CryptoIntents.ACTION_CRYPTO_LOGGED_OUT);
+	  sendBroadcast(intent);
+	  
 	  Log.d( "ADDERSERVICEIMPL","onDestroy" );
     }
     

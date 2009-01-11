@@ -101,7 +101,9 @@ public class AskPassword extends Activity {
 			confirmPass.setVisibility(View.VISIBLE);
 		}
 		if (! isLocal) {
-			remoteAsk.setVisibility(View.VISIBLE);
+			if (remoteAsk != null) {
+				remoteAsk.setVisibility(View.VISIBLE);
+			}
 		}
 		Button continueButton = (Button) findViewById(R.id.continue_button);
 

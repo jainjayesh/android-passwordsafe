@@ -15,12 +15,9 @@
  */
 package org.openintents.intents;
 
-// Keeping version information in this file is important, because it has to be
-// copied between various projects and repositories manually.
-//
-// Version: 2009 Jan 2: added EXTRA_TEXT_ARRAY
-
 /**
+ * @version Jan 10, 2008
+ * 
  * @author Isaac Potoczny-Jones
  *
  */
@@ -64,6 +61,19 @@ public class CryptoIntents {
 	 * <p>Constant Value: "org.openintents.action.SET_PASSWORD"</p>
 	 */
 	public static final String ACTION_SET_PASSWORD = "org.openintents.action.SET_PASSWORD";
+
+	/**
+	 * Broadcast Action: Sent when the user got logged out of the
+	 * crypto session.
+	 * 
+	 * This can happen after the user logs out actively, 
+	 * or through a time-out.
+	 * 
+	 * Activities that show decrypted content should hide that content again.
+	 * 
+	 * <p>Constant Value: "org.openintents.action.CRYPTO_LOGGED_OUT"</p>
+	 */
+	public static final String ACTION_CRYPTO_LOGGED_OUT = "org.openintents.action.CRYPTO_LOGGED_OUT";
 	
 	/**
 	 * The text to encrypt or decrypt, or the location for the return result.
@@ -75,6 +85,9 @@ public class CryptoIntents {
 	/**
 	 * An array of text to encrypt or decrypt, or the location for the return result.
 	 * Use this to encrypt several strings at once.
+	 * 
+	 * Entries of the array that are null will be simply ignored and not
+	 * encrypted or decrypted.
 	 * 
 	 * <p>Constant Value: "org.openintents.extra.TEXT_ARRAY"</p>
 	 */
@@ -104,4 +117,14 @@ public class CryptoIntents {
 	 * <p>Constant Value: "org.openintents.extra.PASSWORD"</p>
 	 */
 	public static final String EXTRA_PASSWORD = "org.openintents.extra.PASSWORD";
+
+	/**
+	 * Whether to prompt for the password if the service is not running yet.
+	 * 
+	 * Default value is 'true'. Set to 'false' if you want to suppress prompting for
+	 * a password.
+	 * 
+	 * <p>Constant Value: "org.openintents.extra.PROMPT"</p>
+	 */
+	public static final String EXTRA_PROMPT = "org.openintents.extra.PROMPT";
 }

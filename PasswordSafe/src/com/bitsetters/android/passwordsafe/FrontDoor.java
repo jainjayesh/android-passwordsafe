@@ -155,7 +155,9 @@ public class FrontDoor extends Activity {
 				String[] in = thisIntent.getStringArrayExtra(CryptoIntents.EXTRA_TEXT_ARRAY);
 				String[] out = new String[in.length];
 				for (int i = 0; i < in.length; i++) {
-					out[i] = ch.encrypt(in[i]);
+					if (in[i] != null) {
+						out[i] = ch.encrypt(in[i]);
+					}
 				}
 				callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT_ARRAY, out);
 			}
@@ -193,7 +195,9 @@ public class FrontDoor extends Activity {
 				String[] in = thisIntent.getStringArrayExtra(CryptoIntents.EXTRA_TEXT_ARRAY);
 				String[] out = new String[in.length];
 				for (int i = 0; i < in.length; i++) {
-					out[i] = ch.decrypt(in[i]);
+					if (in[i] != null) {
+						out[i] = ch.decrypt(in[i]);
+					}
 				}
 				callbackIntent.putExtra(CryptoIntents.EXTRA_TEXT_ARRAY, out);
 			}
@@ -345,19 +349,28 @@ public class FrontDoor extends Activity {
 				IBinder boundService )
 		{
 			service = ServiceDispatch.Stub.asInterface((IBinder)boundService);
+			
+			boolean promptforpassword = getIntent().getBooleanExtra(CryptoIntents.EXTRA_PROMPT, true);
+			
 			try {
 				if (service.getPassword() == null) {
-					// the service isn't running
-					Intent askPass = new Intent(getApplicationContext(),
-							AskPassword.class);
-
-					final Intent thisIntent = getIntent();
-					String inputBody = thisIntent.getStringExtra (CryptoIntents.EXTRA_TEXT);
-
-					askPass.putExtra (CryptoIntents.EXTRA_TEXT, inputBody);
-					askPass.putExtra (AskPassword.EXTRA_IS_LOCAL, askPassIsLocal);
-					//TODO: Is there a way to make sure all the extras are set?	
-					startActivityForResult (askPass, 0);
+					if (promptforpassword) {
+						// the service isn't running
+						Intent askPass = new Intent(getApplicationContext(),
+								AskPassword.class);
+	
+						final Intent thisIntent = getIntent();
+						String inputBody = thisIntent.getStringExtra (CryptoIntents.EXTRA_TEXT);
+	
+						askPass.putExtra (CryptoIntents.EXTRA_TEXT, inputBody);
+						askPass.putExtra (AskPassword.EXTRA_IS_LOCAL, askPassIsLocal);
+						//TODO: Is there a way to make sure all the extras are set?	
+						startActivityForResult (askPass, 0);
+					} else {
+						// Don't prompt but cancel
+						setResult(RESULT_CANCELED);
+				        finish();
+					}
 
 				} else {
 					//service already started, so don't need to ask pw.
