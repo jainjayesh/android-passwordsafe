@@ -16,9 +16,10 @@
 package org.openintents.intents;
 
 /**
- * @version Jan 10, 2008
+ * @version Jan 11, 2008, 11:50 UTC
  * 
  * @author Isaac Potoczny-Jones
+ * @author Peli
  *
  */
 public class CryptoIntents {
