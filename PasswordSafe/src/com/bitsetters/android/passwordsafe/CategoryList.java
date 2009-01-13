@@ -16,6 +16,7 @@
  */
 package com.bitsetters.android.passwordsafe;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -135,6 +136,25 @@ public class CategoryList extends ListActivity {
              			Toast.makeText(CategoryList.this, importMessage,
              				Toast.LENGTH_LONG).show();
              		}
+             		String deleteMsg=getString(R.string.import_delete_csv) +
+             			" " + EXPORT_FILENAME + "?";
+	         		Dialog about = new AlertDialog.Builder(CategoryList.this)
+		    			.setIcon(R.drawable.passicon)
+		    			.setTitle(R.string.import_complete)
+		    			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+		    				public void onClick(DialogInterface dialog, int whichButton) {
+		    					File csvFile=new File(EXPORT_FILENAME);
+		    					csvFile.delete();
+		    				}
+		    			})
+		    			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+		    				public void onClick(DialogInterface dialog, int whichButton) {
+		    				}
+		    			}) 
+		    			.setMessage(deleteMsg)
+		    			.create();
+	         		about.show();
+	         		
              		if ((importedEntries!=0) || (importDeletedDatabase))
              		{
              			fillData();
@@ -445,9 +465,7 @@ public class CategoryList extends ListActivity {
 		    finish();
 			break;
 		case OPEN_CATEGORY_INDEX:
-			Intent passList = new Intent(this, PassList.class);
-			passList.putExtra(KEY_ID, rows.get(info.position).id);
-			startActivityForResult(passList,REQUEST_OPEN_CATEGORY);
+			launchPassList(rows.get(info.position).id);
 			break;
 		case EDIT_CATEGORY_INDEX:
 			Intent i = new Intent(this, CategoryEdit.class);
@@ -497,6 +515,12 @@ public class CategoryList extends ListActivity {
 		return super.onOptionsItemSelected(item);
     }
 
+    private void launchPassList(long id) {
+		Intent passList = new Intent(this, PassList.class);
+		passList.putExtra(KEY_ID, id);
+		startActivityForResult(passList,REQUEST_OPEN_CATEGORY);
+    }
+    
     private String backupDatabase() {
     	Backup backup=new Backup(this);
     	
@@ -539,10 +563,8 @@ public class CategoryList extends ListActivity {
     
     protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-	
-		Intent i = new Intent(this, PassList.class);
-		i.putExtra(KEY_ID, rows.get(position).id);
-	    startActivityForResult(i,REQUEST_OPEN_CATEGORY);
+		
+		launchPassList(rows.get(position).id);
     }
 
     @Override
@@ -695,6 +717,14 @@ public class CategoryList extends ListActivity {
 	}
 		
 	public void importDatabase(){
+		File csvFile=new File(EXPORT_FILENAME);
+		if (!csvFile.exists()) {
+			String msg=getString(R.string.import_file_missing) + " " +
+				EXPORT_FILENAME;
+	        Toast.makeText(CategoryList.this, msg,
+	                Toast.LENGTH_LONG).show();
+			return;
+		}
 		Dialog about = new AlertDialog.Builder(this)
 			.setIcon(R.drawable.passicon)
 			.setTitle(R.string.dialog_import_title)
@@ -769,7 +799,7 @@ public class CategoryList extends ListActivity {
 		    }
 //		    Log.i(TAG,"first line is valid");
 		    
-		    HashMap<String, Long> categoryToId=getCategoryToId();
+		    HashMap<String, Long> categoryToId=getCategoryToId(dbHelper);
 		    //
 		    // take a pass through the CSV and collect any new Categories
 		    //
@@ -814,7 +844,7 @@ public class CategoryList extends ListActivity {
 		    }
 		    reader.close();
 
-		    categoryToId=getCategoryToId();	// re-read the categories to get id's of new categories
+		    categoryToId=getCategoryToId(dbHelper);	// re-read the categories to get id's of new categories
 		    //
 		    // read the whole file again to import the actual fields
 		    //
@@ -909,17 +939,16 @@ public class CategoryList extends ListActivity {
 		}
 	}
 
-	public HashMap<String, Long> getCategoryToId()
+	public static HashMap<String, Long> getCategoryToId(DBHelper dbHelper)
 	{
-		if (ch == null){
-			ch = new CryptoHelper();
-		}
+		CryptoHelper ch = new CryptoHelper();
 		if(masterKey == null) {
 		    masterKey = "";
 		}
 		ch.setPassword(masterKey);
 	
 		HashMap<String,Long> categories = new HashMap<String,Long>();
+		List<CategoryEntry> rows;
 		rows = dbHelper.fetchAllCategoryRows();
 
 		for (CategoryEntry row : rows) {

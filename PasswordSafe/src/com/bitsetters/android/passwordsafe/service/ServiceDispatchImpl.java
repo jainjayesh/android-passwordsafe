@@ -122,7 +122,6 @@ public class ServiceDispatchImpl extends Service {
 			ServiceNotification.setNotification(ServiceDispatchImpl.this);
     	}
 
-		@Override
 		public String getPassword() {
     		restartTimer();
 			return masterKey;

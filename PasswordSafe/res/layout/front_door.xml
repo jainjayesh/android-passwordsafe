@@ -53,7 +53,7 @@
 	<TextView android:id="@+id/pass_lbl"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="@string/password" />
+		android:text="@string/master_password" />
 	<EditText android:id="@+id/password" 
 		android:password="true"
 		android:autoText="false"

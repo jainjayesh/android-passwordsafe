@@ -51,7 +51,7 @@
 		android:paddingRight="10sp"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="@string/password" />
+		android:text="@string/master_password" />
 	<EditText android:id="@+id/password" 
 		android:layout_below="@id/first_time"
 		android:layout_toRightOf="@id/pass_lbl"

@@ -30,6 +30,7 @@
     <string name="password_delete">Delete</string>
     <string name="password">Password</string>
     <string name="passwords">Passwords</string>
+    <string name="master_password">Master Password</string>
     <string name="username">Username</string>
     <string name="website">Website</string>
     <string name="description">Description</string>
@@ -55,6 +56,7 @@
 	<string name="export_success">Export to 'passwordsafe.csv' successful.   Warning!   The file is not encrypted.</string>
 	<string name="export_file_error">Unable to create export file 'passwordsafe.csv' on SDCARD.  You might try disconnecting USB from computer.</string>
 	<string name="import_database">Import Database</string>
+	<string name="import_file_missing">Import file is missing:</string>
 	<string name="import_file_error">Unable to import file 'passwordsafe.csv' from SDCARD.  You might try disconnecting USB from computer.</string>
 	<string name="import_error_first_line">First line is missing fields.</string>
 	<string name="dialog_import_title">Import</string>
@@ -72,6 +74,8 @@
 	<string name="dialog_delete_database_msg">Are you really sure you want to delete the database?  This cannot be undone.</string>
 	<string name="added">Added</string>
 	<string name="entries">entries</string>
+	<string name="import_complete">Import complete</string>
+	<string name="import_delete_csv">Since it is not secure to keep passwords in clear text CSV files, would you like to delete</string>
 	<string name="edit_entry">Edit Entry</string>
 	<string name="help">Help</string>
 	<string name="close">Close</string>
@@ -113,5 +117,7 @@
     <string name="database_version_error_msg">Sorry, but the version of the database is not supported.   You must install the version associated with this database.</string>
 	<string name="permlab_service">access stored password</string>
     <string name="permdesc_service">Allows the application to encrypt and decrypt text, and access the passwords stored by Android Passwordsafe.</string>	
-
+	<string name="move">Move</string>
+	<string name="move_select">Select Category</string>
+	<string name="moved_to">Moved to</string>
 </resources>

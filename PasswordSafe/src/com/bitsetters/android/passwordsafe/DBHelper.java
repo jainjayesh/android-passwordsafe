@@ -17,7 +17,6 @@
 package com.bitsetters.android.passwordsafe;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
@@ -571,6 +570,28 @@ public class DBHelper {
 	    args.put("website", entry.website);
 	    args.put("note", entry.note);
 	    args.put("unique_name", entry.uniqueName);
+	    try {
+			db.update(TABLE_PASSWORDS, args, "id=" + Id, null);
+		} catch (SQLException e)
+		{
+			Log.d(TAG,"SQLite exception: " + e.getLocalizedMessage());
+		}
+	}
+	
+	/**
+	 * Only update the category field of the password entry.
+	 * 
+	 * @param Id the id of the password entry
+	 * @param newCategoryId the updated category id
+	 */
+	public void updatePasswordCategory(long Id, long newCategoryId) {
+		if (Id<0 || newCategoryId<0) {
+			//make sure values appear valid
+			return;
+		}
+	    ContentValues args = new ContentValues();
+	    args.put("category", newCategoryId);
+	    
 	    try {
 			db.update(TABLE_PASSWORDS, args, "id=" + Id, null);
 		} catch (SQLException e)

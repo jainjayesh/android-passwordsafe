@@ -17,9 +17,12 @@
 package com.bitsetters.android.passwordsafe;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -36,6 +39,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 /**
@@ -56,10 +60,12 @@ public class PassList extends ListActivity {
     public static final int EDIT_PASSWORD_INDEX = Menu.FIRST;
     public static final int ADD_PASSWORD_INDEX = Menu.FIRST + 1;
     public static final int DEL_PASSWORD_INDEX = Menu.FIRST + 2;   
-
+    public static final int MOVE_PASSWORD_INDEX = Menu.FIRST + 3;
+    
     public static final int REQUEST_EDIT_PASSWORD = 1;
     public static final int REQUEST_ADD_PASSWORD = 2;
-
+    public static final int REQUEST_MOVE_PASSWORD = 3;
+    
     public static final String KEY_ID = "id";  // Intent keys
     public static final String KEY_CATEGORY_ID = "categoryId";  // Intent keys
 
@@ -81,11 +87,6 @@ public class PassList extends ListActivity {
 		if (debug) Log.d(TAG,"onCreate()");
 		setContentView(R.layout.pass_list);
 		
-		String title = getResources().getString(R.string.app_name) + " - " +
-		getResources().getString(R.string.passwords);
-		setTitle(title);
-
-		
 		if (dbHelper==null) {
 			dbHelper = new DBHelper(this);
 		}
@@ -97,6 +98,13 @@ public class PassList extends ListActivity {
 		if (CategoryId<1) {
 			finish();	// no valid category less than one
 		}
+		
+		String categoryName=getCategoryName(CategoryId);
+		String title = getResources().getString(R.string.app_name) + " - " +
+			getResources().getString(R.string.passwords) + " -" +
+			categoryName;
+		setTitle(title);
+
 		fillData();
 
 		final ListView list = getListView();
@@ -166,6 +174,9 @@ public class PassList extends ListActivity {
 		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete)  
 			.setIcon(android.R.drawable.ic_menu_delete)
 			.setAlphabeticShortcut('d');
+		menu.add(0, MOVE_PASSWORD_INDEX, 0, R.string.move)  
+			.setIcon(android.R.drawable.ic_menu_more)
+			.setAlphabeticShortcut('m');
     }
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
@@ -213,11 +224,14 @@ public class PassList extends ListActivity {
 
     @Override
     public boolean onMenuOpened(int featureId, Menu menu) {
-		MenuItem mi = menu.findItem(DEL_PASSWORD_INDEX);
+		MenuItem miDel  = menu.findItem(DEL_PASSWORD_INDEX);
+		MenuItem miMove = menu.findItem(MOVE_PASSWORD_INDEX);
     	if (getSelectedItemPosition() > -1) {
-    		mi.setEnabled(true);
+    		miDel.setEnabled(true);
+    		miMove.setEnabled(true);
     	} else {
-    		mi.setEnabled(false);
+    		miDel.setEnabled(false);
+    		miMove.setEnabled(false);
     	}
     	return super.onMenuOpened(featureId, menu);
     }
@@ -227,12 +241,15 @@ public class PassList extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
-		menu.add(0,ADD_PASSWORD_INDEX, 0, R.string.password_add)
+		menu.add(0, ADD_PASSWORD_INDEX, 0, R.string.password_add)
 			.setIcon(android.R.drawable.ic_menu_add)
 			.setShortcut('2', 'a');
 		menu.add(0, DEL_PASSWORD_INDEX, 0, R.string.password_delete)
 			.setIcon(android.R.drawable.ic_menu_delete)
 			.setShortcut('3', 'd');
+		menu.add(0, MOVE_PASSWORD_INDEX, 0, R.string.move)
+			.setIcon(android.R.drawable.ic_menu_more)
+			.setShortcut('4', 'm');
 	
 		return super.onCreateOptionsMenu(menu);
     }
@@ -294,7 +311,37 @@ public class PassList extends ListActivity {
 		dbHelper.deletePassword(Id);
 		fillData();
     }
+    
+    /**
+     * Prompt the user with Categories to move the specified 
+     * password to and then update the password entry accordingly.
+     * 
+     * @param passwordId
+     */
+    private void movePassword(final long passwordId) {
+        final HashMap<String, Long> categoryToId=CategoryList.getCategoryToId(dbHelper);
+        String categoryName=getCategoryName(CategoryId);
+        categoryToId.remove(categoryName);
+        Set<String> categories=categoryToId.keySet();
+        final String[] items=(String[])categories.toArray(new String[categories.size()]);
+        Arrays.sort(items, String.CASE_INSENSITIVE_ORDER);
 
+		new AlertDialog.Builder(PassList.this)
+		.setTitle(R.string.move_select)
+		.setItems(items, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+
+				long newCategoryId=categoryToId.get(items[which]);
+				dbHelper.updatePasswordCategory(passwordId, newCategoryId);
+				String result=getString(R.string.moved_to) + " " + items[which];
+     			Toast.makeText(PassList.this, result,
+         				Toast.LENGTH_LONG).show();
+				fillData();
+			}
+		})
+		.show();
+    }
+    
     public boolean onOptionsItemSelected(MenuItem item) {
     	
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
@@ -319,6 +366,9 @@ public class PassList extends ListActivity {
 		case DEL_PASSWORD_INDEX:
 			deletePassword(position);
 		    break;
+		case MOVE_PASSWORD_INDEX:
+			movePassword(rows.get(position).id);
+			break;
 		}
 		return super.onOptionsItemSelected(item);
     }
@@ -343,6 +393,25 @@ public class PassList extends ListActivity {
     		fillData();
     	}
     }
-
-
+    
+    /**
+     * Retreive the decrypted category name based on the provided id.
+     *  
+     * @param Id category id
+     * @return decrypted category name
+     */
+    private String getCategoryName(long Id) {
+		CategoryEntry category=dbHelper.fetchCategory(Id);
+		category.plainName="";
+		if (ch==null) {
+			ch=new CryptoHelper();
+		}
+		ch.setPassword(masterKey);
+	    try {
+			category.plainName = ch.decrypt(category.name);
+	    } catch (CryptoHelperException e) {
+			Log.e(TAG,e.toString());
+	    }
+	    return category.plainName;
+    }
 }
