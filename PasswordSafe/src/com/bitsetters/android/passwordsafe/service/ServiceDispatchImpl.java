@@ -29,14 +29,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 import android.os.CountDownTimer;
 
 public class ServiceDispatchImpl extends Service {
 	private CryptoHelper ch;
 	private String masterKey;
     private CountDownTimer t;
-	private static long timeoutUntilStop = 5 * 60000; //5 min TODO: Make configurable?
+    private int timeoutMinutes = 5;
+	private long timeoutUntilStop = timeoutMinutes * 60000;
     
     @Override
     public IBinder onBind(Intent intent) {
@@ -49,6 +49,7 @@ public class ServiceDispatchImpl extends Service {
     @Override
     public void onCreate() {
       super.onCreate();
+      
 	  Log.d( "ServieDispatchImpl","onCreate" );
     }
     
@@ -125,6 +126,11 @@ public class ServiceDispatchImpl extends Service {
 		public String getPassword() {
     		restartTimer();
 			return masterKey;
+		}
+		
+		public void setTimeoutMinutes (int timeoutMinutesIn){
+			timeoutMinutes = timeoutMinutesIn;
+			Log.d(TAG,"set timeout to "+timeoutMinutes);
 		}
     };
 

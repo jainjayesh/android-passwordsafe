@@ -120,4 +120,10 @@
 	<string name="move">Move</string>
 	<string name="move_select">Select Category</string>
 	<string name="moved_to">Moved to</string>
+	<string name="preferences">Preferences</string>
+	<string name="pref_title_external_access">Allow external access</string>
+	<string name="pref_summary_external_access">Allow other applications to access safe.</string>
+	<string name="pref_title_lock_timeout">Lock timeout</string>
+	<string name="pref_summary_lock_timeout">Minutes before timeout occurs and safe is locked.</string>
+	<string name="pref_dialog_title_lock_timeout">Lock timeout</string>
 </resources>

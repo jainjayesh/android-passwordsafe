@@ -77,6 +77,7 @@ public class CategoryList extends ListActivity {
     public static final int CHANGE_PASS_INDEX = Menu.FIRST + 8;
     public static final int BACKUP_INDEX = Menu.FIRST + 9;
     public static final int RESTORE_INDEX = Menu.FIRST + 10;
+    public static final int PREFERENCES_INDEX = Menu.FIRST + 11;
     
     public static final int REQUEST_ONCREATE = 0;
     public static final int REQUEST_EDIT_CATEGORY = 1;
@@ -417,6 +418,8 @@ public class CategoryList extends ListActivity {
 		menu.add(0, BACKUP_INDEX, 0, R.string.backup);
 		menu.add(0, RESTORE_INDEX, 0, R.string.restore);
 
+		menu.add(0, PREFERENCES_INDEX, 0, R.string.preferences);
+
 		return super.onCreateOptionsMenu(menu);
     }
 
@@ -507,6 +510,10 @@ public class CategoryList extends ListActivity {
 			break;
 		case RESTORE_INDEX:
 			restoreDatabase();
+			break;
+		case PREFERENCES_INDEX:
+			Intent preferences = new Intent(this, Preferences.class);
+			startActivity(preferences);
 			break;
 		default:
 			Log.e(TAG,"Unknown itemId");

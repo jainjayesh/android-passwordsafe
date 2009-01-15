@@ -20,4 +20,5 @@ interface ServiceDispatch {
   String getPassword ();
   String encrypt (String clearText);
   String decrypt (String cryptoText);
+  void setTimeoutMinutes(int timeoutMinutesIn);
 }

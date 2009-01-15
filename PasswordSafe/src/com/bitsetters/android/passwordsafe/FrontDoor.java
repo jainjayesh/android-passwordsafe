@@ -26,9 +26,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -56,12 +58,14 @@ public class FrontDoor extends Activity {
     private ServiceDispatch service;
     private ServiceDispatchConnection conn;
 
+    SharedPreferences mPreferences;
 	//public static String SERVICE_NAME = "com.bitsetters.android.passwordsafe.ServiceDispatchImpl";
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		initService(); // start up the PWS service so other applications can query.
 	}
 
@@ -70,7 +74,15 @@ public class FrontDoor extends Activity {
 		switch (resultCode) {
 		case RESULT_OK:
 			masterKey = data.getStringExtra("masterKey");
+			String timeout = mPreferences.getString("lock_timeout", "5"); 
+			int timeoutMinutes=5; // default to 5
 			try {
+				timeoutMinutes = Integer.valueOf(timeout);
+			} catch (NumberFormatException e) {
+				Log.d(TAG,"why is lock_timeout busted?");
+			}
+			try {
+				service.setTimeoutMinutes(timeoutMinutes);
 				service.setPassword(masterKey); // should already be connected.
 			} catch (RemoteException e1) {
 				// TODO Auto-generated catch block
@@ -97,12 +109,15 @@ public class FrontDoor extends Activity {
     		ch.setPassword(masterKey);
         }
 
+        boolean externalAccess = mPreferences.getBoolean("external_access", false);
+
         if (action == null || action.equals(Intent.ACTION_MAIN)){
         	//TODO: When launched from debugger, action is null. Other such cases?
         	Intent i = new Intent(getApplicationContext(),
         			CategoryList.class);
         	startActivity(i);
-        } else {
+        } else if (externalAccess){
+
         	// which action?
         	if (action.equals (CryptoIntents.ACTION_ENCRYPT)) {
         		callbackResult = encryptIntent(thisIntent, callbackIntent);
