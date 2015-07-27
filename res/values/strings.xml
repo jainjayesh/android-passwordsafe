@@ -19,9 +19,9 @@
 -->
 
 <resources>
-    <string name="app_name">Password Safe</string>
-    <string name="authors">Steven Osborn, Randy McEoin</string>
-    <string name="version">0.6.0</string>
+    <string name="app_name">Safe Vault</string>
+    <string name="authors">Jayesh Jain</string>
+    <string name="version">1.1.0</string>
     <string name="empty_safe">No Passwords present for this category.</string>
     <string name="empty_category">No categories present.  Please add one via Menu->Add</string>
     <string name="password_lock">Lock</string>
