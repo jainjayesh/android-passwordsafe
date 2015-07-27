@@ -1,7 +1,7 @@
 /* $Id$
  */
 
-package com.bitsetters.android.passwordsafe;
+package com.jayesh.android.safevault;
 
 /**
  Copyright 2005 Bytecode Pty Ltd.

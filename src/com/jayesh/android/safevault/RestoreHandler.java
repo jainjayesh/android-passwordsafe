@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.bitsetters.android.passwordsafe;
+package com.jayesh.android.safevault;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

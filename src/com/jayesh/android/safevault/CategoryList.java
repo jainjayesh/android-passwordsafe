@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.bitsetters.android.passwordsafe;
+package com.jayesh.android.safevault;
 
 import java.io.File;
 import java.io.FileReader;
@@ -320,7 +320,7 @@ public class CategoryList extends ListActivity {
     /**
      * Sets signedIn status to false.
      * 
-     * @see com.bitsetters.android.passwordsafe.CategoryList#isSignedIn
+     * @see com.jayesh.android.safevault.CategoryList#isSignedIn
      */
     public static void setSignedOut() {
     	if (debug) Log.d(TAG,"setSignedOut()");
